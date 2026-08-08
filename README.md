@@ -30,9 +30,11 @@ claude-harness/
 │   ├── agents/*.md                   4개
 │   ├── skills/<name>/SKILL.md        41개
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
-├── workflow.html                     사람이 보는 워크플로우 요약
-├── workflow-spec.md                  ↑의 전문 — 미래 모델에게 재검토시킬 때 통째로 준다
-├── home/                             CLAUDE.md · HARNESS-LOG.md · RTK.md
+├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
+├── docs/workflow.html                사람이 보는 워크플로우 요약
+├── docs/workflow-spec.md             ↑의 전문 — 미래 모델에게 재검토시킬 때 통째로 준다
+├── home/                             전역 ~/.claude/ 사본 — CLAUDE.md · HARNESS-LOG.md · RTK.md
+│                                     (home/CLAUDE.md ≠ 위의 CLAUDE.md. 스코프가 다르다)
 ├── statusline/ctx-warn-statusline.sh
 ├── agents-skill-lock.json            ~/.agents/.skill-lock.json 사본
 └── bootstrap.sh                      플러그인이 못 나르는 것만 처리
@@ -85,6 +87,5 @@ mv ~/.claude/hooks/.pre-plugin-260808/plan-exec-modes.md ~/.claude/
 
 ## 갱신
 
-훅·에이전트·스킬을 고칠 땐 **플러그인 쪽을 고치는 게 정본**이다. `~/.claude/`에 사본이 남아 있으면 어느 쪽이 발화하는지 헷갈린다.
-
-`plugin.json`의 `version`을 올려야 다른 머신이 업데이트를 받는다. 고친 뒤 `claude plugin validate ./woobin-harness` 를 돌려라 — YAML frontmatter 파싱 실패 같은 건 이 명령만 잡는다.
+**`CLAUDE.md`를 봐라.** 정본 위치, 무엇을 고치면 무엇을 같이 고쳐야 하는지, 검증 명령이 거기 있다.
+같은 규약을 여기에 복제하면 두 곳이 소유하게 되므로 옮겨뒀다.
