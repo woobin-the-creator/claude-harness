@@ -28,8 +28,10 @@ claude-harness/
 │   ├── hooks/hooks.json              settings.json의 hooks 객체를 옮긴 것
 │   ├── hooks/*.sh                    9개 (wire된 것만)
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        43개
+│   ├── skills/<name>/SKILL.md        41개
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
+├── workflow.html                     사람이 보는 워크플로우 요약
+├── workflow-spec.md                  ↑의 전문 — 미래 모델에게 재검토시킬 때 통째로 준다
 ├── home/                             CLAUDE.md · HARNESS-LOG.md · RTK.md
 ├── statusline/ctx-warn-statusline.sh
 ├── agents-skill-lock.json            ~/.agents/.skill-lock.json 사본
