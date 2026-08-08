@@ -61,8 +61,28 @@ DRY_RUN=1 ./bootstrap.sh    # 먼저 뭘 하는지 본다
 | `skills/_backup-mattpocock-260804` | 백업 사본 |
 | 외부 훅 3종 | `claude-buddy`(별도 레포) · `orca`(설치물) · `gptaku-update-check.cjs`(플러그인 부산물). `bootstrap.sh`가 체크리스트로 안내한다 |
 
+## 원본 머신 — 2026-08-08 전환 완료
+
+이 레포를 만든 머신은 이미 `~/.claude`에 같은 것들을 갖고 있었다. 중복을 아래처럼 정리했다.
+**새 머신에서는 이 절을 따라 하지 마라** — `bootstrap.sh`만 돌리면 된다.
+
+| 대상 | 처리 | 왜 |
+|---|---|---|
+| 훅 9개 | `settings.json` 엔트리 제거 + 스크립트를 `~/.claude/hooks/.pre-plugin-260808/`로 이동 | 안 지우면 **이중 발화**한다 |
+| `plan-exec-modes.md` | 같은 백업 디렉터리로 이동 | 훅이 `${CLAUDE_PLUGIN_ROOT}` 동봉본을 쓴다. 두 곳이 소유하면 드리프트 난다 |
+| 에이전트 4개 | `~/.claude/agents/`에 **그대로 둠** | 사용자 정의가 동명 플러그인 에이전트를 **override**한다 → 중복 비용 없음 |
+| 스킬 41개 | `skillOverrides`에 `"woobin-harness:<name>": "off"` 41건 | 플러그인 스킬은 `/woobin-harness:name`으로 **네임스페이스**돼서 `~/.claude/skills`의 것과 **둘 다 살아난다.** 그대로 두면 always-on ~6.9k tok을 매 세션 이중으로 문다. off로 끄면 슬래시 이름(`/grill-me`)이 그대로 유지된다 |
+
+되돌리기:
+
+```bash
+cp ~/.claude/settings.json.pre-plugin-260808 ~/.claude/settings.json
+mv ~/.claude/hooks/.pre-plugin-260808/*.sh ~/.claude/hooks/
+mv ~/.claude/hooks/.pre-plugin-260808/plan-exec-modes.md ~/.claude/
+```
+
 ## 갱신
 
-훅·에이전트·스킬을 고칠 땐 **플러그인 쪽을 고치는 게 정본**이다. `~/.claude/hooks/`에 사본이 남아 있으면 둘 중 어느 쪽이 발화하는지 헷갈린다 — 플러그인으로 전환한 뒤에는 `~/.claude/hooks/`의 9개와 `settings.json`의 해당 hooks 엔트리를 지운다.
+훅·에이전트·스킬을 고칠 땐 **플러그인 쪽을 고치는 게 정본**이다. `~/.claude/`에 사본이 남아 있으면 어느 쪽이 발화하는지 헷갈린다.
 
-`plugin.json`의 `version`을 올려야 다른 머신이 업데이트를 받는다.
+`plugin.json`의 `version`을 올려야 다른 머신이 업데이트를 받는다. 고친 뒤 `claude plugin validate ./woobin-harness` 를 돌려라 — YAML frontmatter 파싱 실패 같은 건 이 명령만 잡는다.
