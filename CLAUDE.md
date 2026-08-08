@@ -33,7 +33,16 @@
 - **스킬·에이전트·훅 개수가 변함** → `plugin.json`·`.claude-plugin/marketplace.json`·README의 개수 문구
 - **채점 루브릭의 밴드·가중치를 변경** → `rubric-v2.md`를 **새로 만들고** v1은 남긴다.
   덮어쓰면 과거 점수의 근거가 사라져 이력 전체가 해석 불가가 된다
-- **무엇이든 수정한 뒤** → `plugin.json`의 `version`을 올려야 다른 머신이 업데이트를 받는다
+- **무엇이든 수정한 뒤** → `plugin.json`의 `version`을 올린다. **이 머신도 예외가 아니다** —
+  설치본은 `~/.claude/plugins/cache/<mp>/<plugin>/<version>/`에 **버전별로 굳은 복사본**이라,
+  버전을 안 올리면 레포를 고쳐도 설치본은 옛날 그대로다(2026-08-08에 스킬을 추가하고 이걸 놓쳤다)
+
+```bash
+# 레포 수정 → 반영까지. 이 순서가 아니면 조용히 옛 버전이 돈다.
+claude plugin marketplace update woobin-harness
+claude plugin update woobin-harness@woobin-harness   # ⚠️ 짧은 이름은 "not found"로 실패한다
+# 그리고 Claude Code 재시작 (update가 "Restart to apply"라고 알려준다)
+```
 
 ## 검증
 
