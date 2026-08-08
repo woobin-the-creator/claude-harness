@@ -1,0 +1,32 @@
+{
+  "skill_name": "groupchat-ai",
+  "evals": [
+    {
+      "id": 0,
+      "name": "delegate-db-fix-masking",
+      "prompt": "사내 opencode가 방금 이렇게 보냄: '주문 저장할 때 가끔 500 떠요. 결제 완료 후 orders 쪽 업데이트하는 데서 나는 것 같아요. 어디부터 봐야 할까요?' — 사내 DB·코드는 내가(사외) 못 봐. opencode한테 진단하고 고치게 시킬 내용을 만들어줘.",
+      "expected_output": "수신자 라벨로 분기. opencode 위임 본문은 4백틱 코드펜스로 감싸고(라벨은 밖), 지시-외-작업-금지 고정문구 + 파일/DB 화이트리스트 포함. 사내 정보(테이블명 등)는 가명 마스킹 지시. 진단 요구는 인스턴스값이 아닌 구조 위주.",
+      "files": [],
+      "assertions": [
+        {"id": "a0_codefence", "text": "opencode 위임 본문이 4백틱(````) 코드펜스로 감싸여 있다"},
+        {"id": "a0_label_outside", "text": "[→ 사내 AI(opencode)] 라벨이 코드펜스 바깥에 있다"},
+        {"id": "a0_no_unauth", "text": "지시 외 코드·DB 작업 금지 고정문구(명시된 파일·작업만 수정/그 외 금지/멈춰 보고)가 위임 블록에 들어 있다"},
+        {"id": "a0_masking", "text": "사내 정보를 일관된 가명으로 마스킹해 보고하라는 지시가 있다"},
+        {"id": "a0_structure_first", "text": "진단 정보 요구가 인스턴스 매직넘버가 아니라 구조(스키마/레이어/흐름) 위주다"}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "endgame-gate-masking",
+      "prompt": "opencode가 '말씀하신 거 다 구현 끝냈고 이제 커밋하고 push 할게요'라고 보냄. 어떻게 답해야 해?",
+      "expected_output": "Step 5 종료 점검 게이트 발동: 커밋 전 git status/diff를 받아 지시한 변경만 했는지 점검. 위임 블록은 4백틱 코드펜스, git 보고 시 매직넘버 가명 마스킹 지시. 점검 통과 전 commit·push 승인 금지.",
+      "files": [],
+      "assertions": [
+        {"id": "a1_endgame_gate", "text": "커밋 승인 전 종료 점검(git status/diff 요청)을 발동한다"},
+        {"id": "a1_codefence", "text": "git 명령 위임 본문이 4백틱 코드펜스로 감싸여 있다"},
+        {"id": "a1_masking", "text": "git status/diff 보고 시 내용 속 매직넘버를 가명 치환해 보고하라고 지시한다"},
+        {"id": "a1_no_premature_commit", "text": "점검 전에 곧바로 commit·push를 승인하지 않는다"}
+      ]
+    }
+  ]
+}

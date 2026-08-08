@@ -1,0 +1,874 @@
+{
+  "version": 3,
+  "skills": {
+    "blue-ribbon-nearby": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "blue-ribbon-nearby/SKILL.md",
+      "skillFolderHash": "3ecd92b5cd3c89c2430dd474b3ff20f1fc91d34c",
+      "installedAt": "2026-05-10T14:59:06.676Z",
+      "updatedAt": "2026-05-10T14:59:06.676Z"
+    },
+    "bunjang-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "bunjang-search/SKILL.md",
+      "skillFolderHash": "b0edcc4466079da1f67eb1592f6e13448a542516",
+      "installedAt": "2026-05-10T14:59:06.677Z",
+      "updatedAt": "2026-05-10T14:59:06.677Z"
+    },
+    "catchtable-sniper": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "catchtable-sniper/SKILL.md",
+      "skillFolderHash": "e910082a96c9fcbbaa7dc4cf0eb6762f4e9c7d61",
+      "installedAt": "2026-05-10T14:59:06.677Z",
+      "updatedAt": "2026-05-10T14:59:06.677Z"
+    },
+    "cheap-gas-nearby": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "cheap-gas-nearby/SKILL.md",
+      "skillFolderHash": "7ea53b21e8acd177b4b59a2dc8b701514c84108d",
+      "installedAt": "2026-05-10T14:59:06.677Z",
+      "updatedAt": "2026-05-10T14:59:06.677Z"
+    },
+    "corporate-registration-consulting": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "corporate-registration-consulting/SKILL.md",
+      "skillFolderHash": "e2b2952882ec5977760a9a757587f51bf2d65537",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "coupang-product-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "coupang-product-search/SKILL.md",
+      "skillFolderHash": "823340bd40b7aa4ca0a700746d3bf2bf85bbadb2",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "court-auction-notice-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "court-auction-notice-search/SKILL.md",
+      "skillFolderHash": "3f90d767f318ee200faef67452dca21510425c6f",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "daiso-product-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "daiso-product-search/SKILL.md",
+      "skillFolderHash": "8cae8ddeb3371e114326acbb4aebb63447a17034",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "delivery-tracking": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "delivery-tracking/SKILL.md",
+      "skillFolderHash": "2ec7ee82eb7b4d9b95fbfd06dcf3592ecff01509",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "fine-dust-location": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "fine-dust-location/SKILL.md",
+      "skillFolderHash": "ed3526b9df32c1868b5969d8ad4d43c0f2111434",
+      "installedAt": "2026-05-10T14:59:06.678Z",
+      "updatedAt": "2026-05-10T14:59:06.678Z"
+    },
+    "foresttrip-vacancy": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "foresttrip-vacancy/SKILL.md",
+      "skillFolderHash": "6f8dc3e391b6a5a94775ed03fa388a374a62d0cd",
+      "installedAt": "2026-05-10T14:59:06.679Z",
+      "updatedAt": "2026-05-10T14:59:06.679Z"
+    },
+    "geeknews-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "geeknews-search/SKILL.md",
+      "skillFolderHash": "713534279c3adb2db454d53ae04bea6fffbab78f",
+      "installedAt": "2026-05-10T14:59:06.679Z",
+      "updatedAt": "2026-05-10T14:59:06.679Z"
+    },
+    "han-river-water-level": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "han-river-water-level/SKILL.md",
+      "skillFolderHash": "36c91e1f5fb3f2596ec0d4be68e07bc8166dc2cc",
+      "installedAt": "2026-05-10T14:59:06.679Z",
+      "updatedAt": "2026-05-10T14:59:06.679Z"
+    },
+    "hipass-receipt": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "hipass-receipt/SKILL.md",
+      "skillFolderHash": "2b660d8591844970661bb7ece68c9d0a75be6289",
+      "installedAt": "2026-05-10T14:59:06.679Z",
+      "updatedAt": "2026-05-10T14:59:06.679Z"
+    },
+    "hola-poke-yeoksam": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "hola-poke-yeoksam/SKILL.md",
+      "skillFolderHash": "65ee30e945795d7065eb6792d72beeac18e797fa",
+      "installedAt": "2026-05-10T14:59:06.680Z",
+      "updatedAt": "2026-05-10T14:59:06.680Z"
+    },
+    "household-waste-info": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "household-waste-info/SKILL.md",
+      "skillFolderHash": "3ecd4507b93fd2a5515b0af8610e031b7dafbc5a",
+      "installedAt": "2026-05-10T14:59:06.680Z",
+      "updatedAt": "2026-05-10T14:59:06.680Z"
+    },
+    "hwp": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "hwp/SKILL.md",
+      "skillFolderHash": "8244bdaf27d58bf2b6e7d8f5550b92b725c1ad69",
+      "installedAt": "2026-05-10T14:59:06.680Z",
+      "updatedAt": "2026-05-10T14:59:06.680Z"
+    },
+    "iros-registry-automation": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "iros-registry-automation/SKILL.md",
+      "skillFolderHash": "ec3e3a66198e4b5d685e30cc2a1dcb8e1ad50de2",
+      "installedAt": "2026-05-10T14:59:06.681Z",
+      "updatedAt": "2026-05-10T14:59:06.681Z"
+    },
+    "joseon-sillok-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "joseon-sillok-search/SKILL.md",
+      "skillFolderHash": "2fe0af8ce0a44cc2407676b072583460bb36ba3b",
+      "installedAt": "2026-05-10T14:59:06.681Z",
+      "updatedAt": "2026-05-10T14:59:06.681Z"
+    },
+    "k-dart": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "k-dart/SKILL.md",
+      "skillFolderHash": "7abfd037076ab3be8a767317f92db93a4436bc7b",
+      "installedAt": "2026-05-10T14:59:06.681Z",
+      "updatedAt": "2026-05-10T14:59:06.681Z"
+    },
+    "k-schoollunch-menu": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "k-schoollunch-menu/SKILL.md",
+      "skillFolderHash": "735868008c60abab13f32561c93ec31b731e139c",
+      "installedAt": "2026-05-10T14:59:06.682Z",
+      "updatedAt": "2026-05-10T14:59:06.682Z"
+    },
+    "k-skill-cleaner": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "k-skill-cleaner/SKILL.md",
+      "skillFolderHash": "268d23828e4f38def38f1d40e4fd838375a88271",
+      "installedAt": "2026-05-10T14:59:06.682Z",
+      "updatedAt": "2026-05-10T14:59:06.682Z"
+    },
+    "k-skill-setup": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "k-skill-setup/SKILL.md",
+      "skillFolderHash": "4c425519d273919ba700d01f61719d0e10255c36",
+      "installedAt": "2026-05-10T14:59:06.683Z",
+      "updatedAt": "2026-05-10T14:59:06.683Z"
+    },
+    "kakao-bar-nearby": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "kakao-bar-nearby/SKILL.md",
+      "skillFolderHash": "6c753edb3aad808227502003e3f8a38ebc16b852",
+      "installedAt": "2026-05-10T14:59:06.683Z",
+      "updatedAt": "2026-05-10T14:59:06.683Z"
+    },
+    "kakaotalk-mac": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "kakaotalk-mac/SKILL.md",
+      "skillFolderHash": "b9dc15a954c98259edd2e9f711645d281962561b",
+      "installedAt": "2026-05-10T14:59:06.683Z",
+      "updatedAt": "2026-05-10T14:59:06.683Z"
+    },
+    "kbl-results": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "kbl-results/SKILL.md",
+      "skillFolderHash": "1d6714188ebe87cf872ce30a4bb8ae1c60c11155",
+      "installedAt": "2026-05-10T14:59:06.684Z",
+      "updatedAt": "2026-05-10T14:59:06.684Z"
+    },
+    "kbo-results": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "kbo-results/SKILL.md",
+      "skillFolderHash": "1499013c199c706aa8bcb224df0f91bda4045337",
+      "installedAt": "2026-05-10T14:59:06.684Z",
+      "updatedAt": "2026-05-10T14:59:06.684Z"
+    },
+    "kleague-results": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "kleague-results/SKILL.md",
+      "skillFolderHash": "7917ca5606bbd7f1e10ce85766ef1af063880fc9",
+      "installedAt": "2026-05-10T14:59:06.684Z",
+      "updatedAt": "2026-05-10T14:59:06.684Z"
+    },
+    "korea-weather": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korea-weather/SKILL.md",
+      "skillFolderHash": "92d7ebf64a9e9861b652324edc1cd30d1a0e2f36",
+      "installedAt": "2026-05-10T14:59:06.685Z",
+      "updatedAt": "2026-05-10T14:59:06.685Z"
+    },
+    "korean-character-count": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-character-count/SKILL.md",
+      "skillFolderHash": "4441fc1343230a92b23ece213b9f30f344f3fba3",
+      "installedAt": "2026-05-10T14:59:06.685Z",
+      "updatedAt": "2026-05-10T14:59:06.685Z"
+    },
+    "korean-jangbu-for": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-jangbu-for/SKILL.md",
+      "skillFolderHash": "64a8cf69cc0b3589d92e095691732d6a44cbd589",
+      "installedAt": "2026-05-10T14:59:06.685Z",
+      "updatedAt": "2026-05-10T14:59:06.685Z"
+    },
+    "korean-law-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-law-search/SKILL.md",
+      "skillFolderHash": "6848b8c76fcbd1841cde8396d89ae7d80c1f42c9",
+      "installedAt": "2026-05-10T14:59:06.686Z",
+      "updatedAt": "2026-05-10T14:59:06.686Z"
+    },
+    "korean-patent-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-patent-search/SKILL.md",
+      "skillFolderHash": "0a2a96f2b3b556501ed1e1f0b78e41f8aea4e57f",
+      "installedAt": "2026-05-10T14:59:06.686Z",
+      "updatedAt": "2026-05-10T14:59:06.686Z"
+    },
+    "korean-privacy-terms": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-privacy-terms/SKILL.md",
+      "skillFolderHash": "243aac7c747009a8754c4b45f711847074cce867",
+      "installedAt": "2026-05-10T14:59:06.686Z",
+      "updatedAt": "2026-05-10T14:59:06.686Z"
+    },
+    "korean-scholarship-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-scholarship-search/SKILL.md",
+      "skillFolderHash": "830c8c405f32f778f2d1ddd4e917dc5390a7fa35",
+      "installedAt": "2026-05-10T14:59:06.687Z",
+      "updatedAt": "2026-05-10T14:59:06.687Z"
+    },
+    "korean-slang-writing": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-slang-writing/SKILL.md",
+      "skillFolderHash": "f19ffa5df7ced113c61cf07dc66331f2dab9f5b0",
+      "installedAt": "2026-05-10T14:59:06.687Z",
+      "updatedAt": "2026-05-10T14:59:06.687Z"
+    },
+    "korean-spell-check": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-spell-check/SKILL.md",
+      "skillFolderHash": "10b6187b0b2f39910dc443d00c8ab0cbf34c58ac",
+      "installedAt": "2026-05-10T14:59:06.687Z",
+      "updatedAt": "2026-05-10T14:59:06.687Z"
+    },
+    "korean-stock-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "korean-stock-search/SKILL.md",
+      "skillFolderHash": "2669024dec8c6f7fcf9fb79f2d93a297dfa8765f",
+      "installedAt": "2026-05-10T14:59:06.688Z",
+      "updatedAt": "2026-05-10T14:59:06.688Z"
+    },
+    "ktx-booking": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "ktx-booking/SKILL.md",
+      "skillFolderHash": "6f5dbf80effa8acb8386c0b00f8df87358de6203",
+      "installedAt": "2026-05-10T14:59:06.688Z",
+      "updatedAt": "2026-05-10T14:59:06.688Z"
+    },
+    "lck-analytics": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "lck-analytics/SKILL.md",
+      "skillFolderHash": "526673276f75af9e9cf503f5bcb15cddfa18f225",
+      "installedAt": "2026-05-10T14:59:06.688Z",
+      "updatedAt": "2026-05-10T14:59:06.688Z"
+    },
+    "lh-notice-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "lh-notice-search/SKILL.md",
+      "skillFolderHash": "4e67c8ea631b25fdc4a734781293b98e5ccf96fb",
+      "installedAt": "2026-05-10T14:59:06.689Z",
+      "updatedAt": "2026-05-10T14:59:06.689Z"
+    },
+    "library-book-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "library-book-search/SKILL.md",
+      "skillFolderHash": "109fa5f695ee437c0875d1fbbec0bd398e0c54c2",
+      "installedAt": "2026-05-10T14:59:06.689Z",
+      "updatedAt": "2026-05-10T14:59:06.689Z"
+    },
+    "lotto-results": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "lotto-results/SKILL.md",
+      "skillFolderHash": "9f9fe8a63459539a53d5c0d9dd497e272eaee168",
+      "installedAt": "2026-05-10T14:59:06.690Z",
+      "updatedAt": "2026-05-10T14:59:06.690Z"
+    },
+    "market-kurly-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "market-kurly-search/SKILL.md",
+      "skillFolderHash": "f8fda479945e9ce6f32e7b6e7c2899d80e506b3e",
+      "installedAt": "2026-05-10T14:59:06.690Z",
+      "updatedAt": "2026-05-10T14:59:06.690Z"
+    },
+    "mfds-drug-safety": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "mfds-drug-safety/SKILL.md",
+      "skillFolderHash": "daea328da1129532944dcdeb4a8ca332b0e7950c",
+      "installedAt": "2026-05-10T14:59:06.691Z",
+      "updatedAt": "2026-05-10T14:59:06.691Z"
+    },
+    "mfds-food-safety": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "mfds-food-safety/SKILL.md",
+      "skillFolderHash": "e77a69504bb2f09ff55efdb1f346cb5581749be5",
+      "installedAt": "2026-05-10T14:59:06.691Z",
+      "updatedAt": "2026-05-10T14:59:06.691Z"
+    },
+    "naver-blog-research": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "naver-blog-research/SKILL.md",
+      "skillFolderHash": "7f87acd86881c53b6ba9c248363a4bec170bcaab",
+      "installedAt": "2026-05-10T14:59:06.691Z",
+      "updatedAt": "2026-05-10T14:59:06.691Z"
+    },
+    "naver-news-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "naver-news-search/SKILL.md",
+      "skillFolderHash": "d0609540c95009c35aa699de682c8022eff017b6",
+      "installedAt": "2026-05-10T14:59:06.691Z",
+      "updatedAt": "2026-05-10T14:59:06.691Z"
+    },
+    "naver-shopping-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "naver-shopping-search/SKILL.md",
+      "skillFolderHash": "f83230bfddd2c2120a570057e3f5aaa2bebee28e",
+      "installedAt": "2026-05-10T14:59:06.691Z",
+      "updatedAt": "2026-05-10T14:59:06.691Z"
+    },
+    "olive-young-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "olive-young-search/SKILL.md",
+      "skillFolderHash": "0273ca1ad8762885795c4701f4823f5a96b6bfe2",
+      "installedAt": "2026-05-10T14:59:06.692Z",
+      "updatedAt": "2026-05-10T14:59:06.692Z"
+    },
+    "parking-lot-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "parking-lot-search/SKILL.md",
+      "skillFolderHash": "df7c6b6a8c713c7e4ff0afee8714b25fa88abd84",
+      "installedAt": "2026-05-10T14:59:06.692Z",
+      "updatedAt": "2026-05-10T14:59:06.692Z"
+    },
+    "public-restroom-nearby": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "public-restroom-nearby/SKILL.md",
+      "skillFolderHash": "25fca844ac2a92144b74bc9f9c39c920b50c6eb7",
+      "installedAt": "2026-05-10T14:59:06.692Z",
+      "updatedAt": "2026-05-10T14:59:06.692Z"
+    },
+    "real-estate-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "real-estate-search/SKILL.md",
+      "skillFolderHash": "4163c029129b1f6af3f93bcad5fc537f1e8c2529",
+      "installedAt": "2026-05-10T14:59:06.692Z",
+      "updatedAt": "2026-05-10T14:59:06.692Z"
+    },
+    "rhwp-advanced": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "rhwp-advanced/SKILL.md",
+      "skillFolderHash": "f177e6c726d3c7b7d7b9ec9f0ce226820656ba7f",
+      "installedAt": "2026-05-10T14:59:06.692Z",
+      "updatedAt": "2026-05-10T14:59:06.692Z"
+    },
+    "rhwp-edit": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "rhwp-edit/SKILL.md",
+      "skillFolderHash": "d81be0f77058bce10c5064873591aa62fa6626f8",
+      "installedAt": "2026-05-10T14:59:06.693Z",
+      "updatedAt": "2026-05-10T14:59:06.693Z"
+    },
+    "seoul-subway-arrival": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "seoul-subway-arrival/SKILL.md",
+      "skillFolderHash": "1565f91e24edd82d3f63420a84eb187e08ba6a36",
+      "installedAt": "2026-05-10T14:59:06.693Z",
+      "updatedAt": "2026-05-10T14:59:06.693Z"
+    },
+    "srt-booking": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "srt-booking/SKILL.md",
+      "skillFolderHash": "a21215132e24853183fe857c4c4415bc6af6fa01",
+      "installedAt": "2026-05-10T14:59:06.693Z",
+      "updatedAt": "2026-05-10T14:59:06.693Z"
+    },
+    "subway-lost-property": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "subway-lost-property/SKILL.md",
+      "skillFolderHash": "f29ac3115b98ee6fdd2992b20d616b1991a732d9",
+      "installedAt": "2026-05-10T14:59:06.693Z",
+      "updatedAt": "2026-05-10T14:59:06.693Z"
+    },
+    "toss-securities": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "toss-securities/SKILL.md",
+      "skillFolderHash": "597a5058dad56f26529e85ab9e0fc13ca9f31dab",
+      "installedAt": "2026-05-10T14:59:06.693Z",
+      "updatedAt": "2026-05-10T14:59:06.693Z"
+    },
+    "used-car-price-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "used-car-price-search/SKILL.md",
+      "skillFolderHash": "0224a5178847551dc20eb8f9a3b2221e7edc5a7c",
+      "installedAt": "2026-05-10T14:59:06.694Z",
+      "updatedAt": "2026-05-10T14:59:06.694Z"
+    },
+    "zipcode-search": {
+      "source": "NomaDamas/k-skill",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/NomaDamas/k-skill.git",
+      "skillPath": "zipcode-search/SKILL.md",
+      "skillFolderHash": "e579b5684f9dd8aaa60a1e1a10e22e84912d8a79",
+      "installedAt": "2026-05-10T14:59:06.694Z",
+      "updatedAt": "2026-05-10T14:59:06.694Z"
+    },
+    "design-an-interface": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/deprecated/design-an-interface/SKILL.md",
+      "skillFolderHash": "59d5eca0fd23930d3d3821aa9da507f1bdb8a348",
+      "installedAt": "2026-06-06T05:06:26.373Z",
+      "updatedAt": "2026-06-06T05:06:26.373Z"
+    },
+    "qa": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/deprecated/qa/SKILL.md",
+      "skillFolderHash": "3eed5beeb18e77776349782ed087ee4560fd69c5",
+      "installedAt": "2026-06-06T05:06:26.377Z",
+      "updatedAt": "2026-06-06T05:06:26.377Z"
+    },
+    "request-refactor-plan": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/deprecated/request-refactor-plan/SKILL.md",
+      "skillFolderHash": "b0617c9cf69ac1e73a6b30f78c82ff81372079fd",
+      "installedAt": "2026-06-06T05:06:26.378Z",
+      "updatedAt": "2026-06-06T05:06:26.378Z"
+    },
+    "ubiquitous-language": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/deprecated/ubiquitous-language/SKILL.md",
+      "skillFolderHash": "483fe10b01bed81b7eba7ee26df3f1bef9540c88",
+      "installedAt": "2026-06-06T05:06:26.378Z",
+      "updatedAt": "2026-06-06T05:06:26.378Z"
+    },
+    "diagnose": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/diagnose/SKILL.md",
+      "skillFolderHash": "43d464d0e9d1049b9d525975c0f7367ab7e01a5f",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.379Z",
+      "updatedAt": "2026-06-06T05:06:26.379Z"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
+      "skillFolderHash": "2c3a4e48571bfe42203ed7b49cae85f31ef4b6f2",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.380Z",
+      "updatedAt": "2026-06-06T05:06:26.380Z"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "skillFolderHash": "688c17ec27fe9309d84987716aca37b5ce7f3a88",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.380Z",
+      "updatedAt": "2026-06-06T05:06:26.380Z"
+    },
+    "prototype": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/prototype/SKILL.md",
+      "skillFolderHash": "c91bdc5d02d42ed88a3082a8fa83338895b55bd4",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.381Z",
+      "updatedAt": "2026-06-06T05:06:26.381Z"
+    },
+    "setup-matt-pocock-skills": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
+      "skillFolderHash": "77638955bebe492948244f1338e54ca1a9445c29",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.382Z",
+      "updatedAt": "2026-06-06T05:06:26.382Z"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/tdd/SKILL.md",
+      "skillFolderHash": "75beb3030b4c979205dd771ff85ac600baeb68f4",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.382Z",
+      "updatedAt": "2026-06-06T05:06:26.382Z"
+    },
+    "to-issues": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/to-issues/SKILL.md",
+      "skillFolderHash": "b38c5aa6ae5d6903e60d3f74a7aafd32d02f2c06",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.383Z",
+      "updatedAt": "2026-06-06T05:06:26.383Z"
+    },
+    "to-prd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/to-prd/SKILL.md",
+      "skillFolderHash": "fb4503f54bc618da08df2fd74109fbe57e4d8150",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.384Z",
+      "updatedAt": "2026-06-06T05:06:26.384Z"
+    },
+    "triage": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/triage/SKILL.md",
+      "skillFolderHash": "de4f182c30876a2460ca307e2f601b9b892527e5",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.385Z",
+      "updatedAt": "2026-06-06T05:06:26.385Z"
+    },
+    "zoom-out": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/engineering/zoom-out/SKILL.md",
+      "skillFolderHash": "6ecebabdea814d12888f56a611da7bf182b5fb26",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.387Z",
+      "updatedAt": "2026-06-06T05:06:26.387Z"
+    },
+    "review": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/review/SKILL.md",
+      "skillFolderHash": "756c8dd5c0f097682b45ff10d64ca23087b19159",
+      "installedAt": "2026-06-06T05:06:26.390Z",
+      "updatedAt": "2026-06-06T05:06:26.390Z"
+    },
+    "teach": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/teach/SKILL.md",
+      "skillFolderHash": "16a8b3b855e52e64a2151bc1248d6c330a79a5e8",
+      "installedAt": "2026-06-06T05:06:26.391Z",
+      "updatedAt": "2026-06-06T05:06:26.391Z"
+    },
+    "writing-beats": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/writing-beats/SKILL.md",
+      "skillFolderHash": "5e947c333ec8502246992f3e7ad340545796ac67",
+      "installedAt": "2026-06-06T05:06:26.391Z",
+      "updatedAt": "2026-06-06T05:06:26.391Z"
+    },
+    "writing-fragments": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/writing-fragments/SKILL.md",
+      "skillFolderHash": "d12fe507a3226039cfb74894ff67411051aef974",
+      "installedAt": "2026-06-06T05:06:26.392Z",
+      "updatedAt": "2026-06-06T05:06:26.392Z"
+    },
+    "writing-shape": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/in-progress/writing-shape/SKILL.md",
+      "skillFolderHash": "3da82ab342a9fef004368cd48a9aa80ac1dd7b29",
+      "installedAt": "2026-06-06T05:06:26.392Z",
+      "updatedAt": "2026-06-06T05:06:26.392Z"
+    },
+    "git-guardrails-claude-code": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/misc/git-guardrails-claude-code/SKILL.md",
+      "skillFolderHash": "f02ae7c2de75270e93a200e11a7e466ece897353",
+      "installedAt": "2026-06-06T05:06:26.392Z",
+      "updatedAt": "2026-06-06T05:06:26.392Z"
+    },
+    "migrate-to-shoehorn": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/misc/migrate-to-shoehorn/SKILL.md",
+      "skillFolderHash": "ad722b79beb1c1fb998678d498ba11760d53714b",
+      "installedAt": "2026-06-06T05:06:26.393Z",
+      "updatedAt": "2026-06-06T05:06:26.393Z"
+    },
+    "scaffold-exercises": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/misc/scaffold-exercises/SKILL.md",
+      "skillFolderHash": "ef19ca90ec6645b23dc7e68601552ab795e3e6ee",
+      "installedAt": "2026-06-06T05:06:26.393Z",
+      "updatedAt": "2026-06-06T05:06:26.393Z"
+    },
+    "setup-pre-commit": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/misc/setup-pre-commit/SKILL.md",
+      "skillFolderHash": "5e6e9301b4826bd820401ea4114a797adb169f47",
+      "installedAt": "2026-06-06T05:06:26.393Z",
+      "updatedAt": "2026-06-06T05:06:26.393Z"
+    },
+    "edit-article": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/personal/edit-article/SKILL.md",
+      "skillFolderHash": "d86427caec7ecdccd963eb5dabc300e2c2e243a4",
+      "installedAt": "2026-06-06T05:06:26.394Z",
+      "updatedAt": "2026-06-06T05:06:26.394Z"
+    },
+    "obsidian-vault": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/personal/obsidian-vault/SKILL.md",
+      "skillFolderHash": "1e814d168a215762391895aee58f4de06c8e3b7f",
+      "installedAt": "2026-06-06T05:06:26.394Z",
+      "updatedAt": "2026-06-06T05:06:26.394Z"
+    },
+    "caveman": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/caveman/SKILL.md",
+      "skillFolderHash": "17972a1bdbf5909b9dbdc435ad348f0bf45f8664",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.395Z",
+      "updatedAt": "2026-06-06T05:06:26.395Z"
+    },
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "skillFolderHash": "2a1ad17028306ebe45f0e49703fa28b9b2e7f499",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.395Z",
+      "updatedAt": "2026-06-06T05:06:26.395Z"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "skillFolderHash": "7bbb60d64c911617cee7f71b2ba9e24364faa14e",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.396Z",
+      "updatedAt": "2026-06-06T05:06:26.396Z"
+    },
+    "write-a-skill": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/mattpocock/skills.git",
+      "skillPath": "skills/productivity/write-a-skill/SKILL.md",
+      "skillFolderHash": "2f252b35aa238879afc5a230ac30343708dee0b3",
+      "pluginName": "mattpocock-skills",
+      "installedAt": "2026-06-06T05:06:26.396Z",
+      "updatedAt": "2026-06-06T05:06:26.396Z"
+    },
+    "orca-cli": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/stablyai/orca.git",
+      "skillPath": "skills/orca-cli/SKILL.md",
+      "skillFolderHash": "97f6596bb43a56c6e81246f077c35144c9025343",
+      "installedAt": "2026-07-31T13:11:54.857Z",
+      "updatedAt": "2026-07-31T13:11:54.857Z"
+    },
+    "orchestration": {
+      "source": "stablyai/orca",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/stablyai/orca.git",
+      "skillPath": "skills/orchestration/SKILL.md",
+      "skillFolderHash": "9aa26fde93c0592e5983cdca1ccd33b402802255",
+      "installedAt": "2026-07-31T13:11:54.862Z",
+      "updatedAt": "2026-07-31T13:11:54.862Z"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
+      "installedAt": "2026-07-31T13:12:04.097Z",
+      "updatedAt": "2026-07-31T13:12:04.097Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "antigravity",
+    "antigravity-cli",
+    "cline",
+    "codex",
+    "cursor",
+    "deepagents",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-code-cli",
+    "opencode",
+    "warp",
+    "zed"
+  ]
+}
