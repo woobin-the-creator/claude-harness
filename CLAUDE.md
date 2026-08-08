@@ -18,6 +18,8 @@
 | 플랜 구현 모드 3종 | `woobin-harness/plan-exec-modes.md` |
 | 개별 훅이 왜 있는지 (사고 이력 포함) | 해당 `woobin-harness/hooks/*.sh` 헤더 주석 |
 | 개선 16건의 전체 서사 — 문제·근거·수단·재측정 | `home/HARNESS-LOG.md` |
+| 역량 채점 이력·추세 | `docs/scores/SCORES.md` |
+| 채점 루브릭·절차 | `woobin-harness/skills/capability-audit/` |
 
 ## 고칠 때 같이 고쳐야 하는 것
 
@@ -29,6 +31,8 @@
 - **환경 전제(§1 E1~E10)가 바뀐 걸 발견** → 규칙보다 §1을 먼저 고친다. 규칙 절반이 거기 매달려 있다
 - **훅 트리거 경로·용어를 변경** → `HARNESS-LOG.md` 끝의 의존 관계 표. 경로가 바뀌면 훅이 **조용히 죽는다**
 - **스킬·에이전트·훅 개수가 변함** → `plugin.json`·`.claude-plugin/marketplace.json`·README의 개수 문구
+- **채점 루브릭의 밴드·가중치를 변경** → `rubric-v2.md`를 **새로 만들고** v1은 남긴다.
+  덮어쓰면 과거 점수의 근거가 사라져 이력 전체가 해석 불가가 된다
 - **무엇이든 수정한 뒤** → `plugin.json`의 `version`을 올려야 다른 머신이 업데이트를 받는다
 
 ## 검증

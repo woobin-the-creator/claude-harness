@@ -28,7 +28,7 @@ claude-harness/
 │   ├── hooks/hooks.json              settings.json의 hooks 객체를 옮긴 것
 │   ├── hooks/*.sh                    9개 (wire된 것만)
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        41개
+│   ├── skills/<name>/SKILL.md        42개
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── docs/workflow.html                사람이 보는 워크플로우 요약
@@ -76,6 +76,10 @@ DRY_RUN=1 ./bootstrap.sh    # 먼저 뭘 하는지 본다
 | `plan-exec-modes.md` | 같은 백업 디렉터리로 이동 | 훅이 `${CLAUDE_PLUGIN_ROOT}` 동봉본을 쓴다. 두 곳이 소유하면 드리프트 난다 |
 | 에이전트 4개 | `~/.claude/agents/`에 **그대로 둠** | 사용자 정의가 동명 플러그인 에이전트를 **override**한다 → 중복 비용 없음 |
 | 스킬 41개 | `skillOverrides`에 `"woobin-harness:<name>": "off"` 41건 | 플러그인 스킬은 `/woobin-harness:name`으로 **네임스페이스**돼서 `~/.claude/skills`의 것과 **둘 다 살아난다.** 그대로 두면 always-on ~6.9k tok을 매 세션 이중으로 문다. off로 끄면 슬래시 이름(`/grill-me`)이 그대로 유지된다 |
+
+> 전환 **이후에 추가한 스킬**은 이 표의 41건에 포함되지 않는다. `~/.claude/skills/`에 사본이 없으므로
+> `skillOverrides`도 필요 없고, 이 머신에서 **`/woobin-harness:<name>`으로 호출**한다.
+> 사본을 만들어 짧은 이름을 얻으려 하지 마라 — 소유자가 둘이 된다. 첫 사례: `capability-audit`.
 
 되돌리기:
 
