@@ -337,6 +337,41 @@ ctx 138k로 임계(120k)는 넘긴 상태였다. **"문서" 두 글자가 훅을
 태우는지 — `hooks.md` 전문 grep 0건, 안 태우면 훅 3개 우회) · O11(transcript mtime 갱신으로 R6 타이머
 리셋되는지) · O12(핸드오프 창이 실제로 싸게 먹히는지). **푸는 것이 곧 이 셋을 측정할 이유다.**
 
+## 19. 미사용 스킬 18개 삭제 — 다운로드 출처만 (2026-08-10)
+
+**발단**: 사용자가 "claude-harness 스킬 목록에 예전에 다른 사람이 배포한 스킬을 받아놓고 한 번도 안
+쓴 게 섞여 있다"며 정리를 요청했다. workflow-spec §8 O4("스킬 43개 개별 사용 빈도 미측정")가 정확히
+이 자리다.
+
+**근거**: `~/.claude/projects/*/*.jsonl` 1개월치(2026-07-10~08-10, 세션 1,524개)를 `jq`로 전수 스캔해
+`Skill` 툴 호출 288건을 뽑았다(다른 tool_use 타입 — SlashCommand 등 — 은 로그에 없어 `Skill`이 유일한
+호출 경로임을 확인). woobin-harness 43개 중 18개가 0회였다.
+
+**출처 판정**: git 히스토리는 무의미했다 — 43개 전부 2026-08-08 패키징 커밋(d6c6a5b) 한 건에 새 파일로
+잡혀서 rename 감지가 안 되고, 그 이전 출처가 레포에 안 남는다. 대신 본문 내용으로 추정했다 —
+① 이 레포·사용자 고유 맥락(사내 SSO, 이 하네스의 훅 구현 세부사항, "StudyVault" 등 비공개 명칭)
+언급 여부, ② 이미 별도 설치된 `mattpocock-skills:` 플러그인과의 설명 중복(`diagnose`↔`diagnosing-bugs`,
+`ubiquitous-language`↔`domain-modeling` 등 "ubiquitous language" 문구까지 겹침), ③ 명시적 의존성
+문구(`to-prd`가 본문에 `/setup-matt-pocock-skills` 실행을 전제한다고 직접 씀), ④ 별도 제품을 감싸기만
+하는 라우팅 스킬(`buddy`는 로직 없이 `claude-buddy` MCP 서버 커맨드 라우팅뿐).
+
+**수단**: 미사용 18개 중 다운로드로 확인·추정된 것만 삭제 —
+`to-prd`·`diagnose`·`ubiquitous-language`·`design-an-interface`·`scaffold-exercises`·
+`migrate-to-shoehorn`·`write-a-skill`·`writing-beats`·`writing-fragments`·`writing-shape`·
+`edit-article`·`request-refactor-plan`·`qa`·`setup-pre-commit`·`git-guardrails-claude-code`·
+`zoom-out`·`caveman`·`buddy`. 레포(`woobin-harness/skills/`)와 이 머신의 설치본(`~/.claude/skills/`,
+심링크가 아니라 실파일이었다 — 이 머신이 README "원본 머신 전환" 절의 그 원본이라) 둘 다에서 지웠다.
+자작으로 추정된 미사용 5개(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·
+`tutor-setup`)는 안 쓰였어도 남겼다 — 미사용 ≠ 무가치, 이번 삭제 기준은 "출처가 남이고 안 씀"이었지
+"안 씀" 단독이 아니다.
+
+CLAUDE.md의 "고칠 때 같이 고쳐야 하는 것"에 따라 `plugin.json`(스킬 43→25, version 1.2.0→1.3.0),
+`marketplace.json`, `README.md`, `docs/workflow-spec.md`(§4 카운트 + O4 해소 기록)를 같이 고쳤다.
+`scripts/check-harness-docs.sh`로 개수 일치를 기계로 재확인했다.
+
+**남긴 것**: 미사용이지만 자작 추정 5개는 §8에 새 항목으로 남겨 다음 audit에서 "진짜 안 쓰는지 재확인"
+대상으로 삼는다 — 이번 판정(다운로드 여부)과 그 판정(가치 있는지)은 다른 질문이다.
+
 ## 규율 (이 이력에서 반복 확인된 것)
 
 1. **소프트 개입 우선** — 차단은 세션 1회 + 재시도 통과. 오탐이 영구 장애가 되면 안 된다(#7, #10, #11 전부 이 형태).

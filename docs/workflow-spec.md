@@ -458,11 +458,18 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-### 스킬 43개
+### 스킬 25개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
 `design-variants-to-pr` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
-나머지는 상황별(글쓰기, 사내, 진단, 세팅 등). **개별 사용 빈도는 미측정** → §8
+나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).
+
+2026-08-10, 1개월치 세션 로그(`Skill` 툴 호출 288건)를 전수 스캔해 개별 사용 빈도를 측정했다(O4 해소).
+43개 중 18개가 지난 한 달간 0회 호출됐고, 그중 다운로드 출처로 확인·추정된 것(내용에 자기 맥락이
+없고 타 스킬팩과 설명이 겹치거나 그 스킬팩의 setup 커맨드를 전제하는 것)만 골라 지웠다 — 자작으로
+추정된 미사용 스킬(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·`tutor-setup`)은
+안 쓰였어도 남겼다. 출처 판정은 git 히스토리(단일 패키징 커밋이라 무의미)가 아니라 본문 내용 기반
+추정이라 확실하지 않다.
 
 상시 컨텍스트 비용은 스킬 **description만** 실린다(본문은 호출 시 로드). 이전 측정에서 유사 플러그인
 14엔트리가 ~500 tok이었다 — 세션 floor 43~46k의 1% 수준이라 **비용은 스킬 제거 사유가 아니다.**
@@ -566,7 +573,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. `plan-implementer`의 `memory: local` 트레이드오프도 미측정 |
 | O2 | `maxTurns` 60/30 값의 근거 | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
 | O3 | 모드 3종의 **실사용 후 재측정** | 도입 2026-08-07, 아직 안 함. 기준선은 $2.57~2.82/태스크 |
-| O4 | 스킬 43개 개별 사용 빈도 | 미측정. 안 쓰는 스킬의 description이 상시 비용이다 |
+| O4 | ~~스킬 43개 개별 사용 빈도~~ | **해소(2026-08-10)**. 1개월 로그 스캔 → 미사용 18개 중 다운로드 출처만 삭제. §4 참조 |
 | O5 | 편집 가드 [A] | SDD 스킬을 안 쓰므로 원장이 안 생겨 **사실상 비활성**. 폐기 후보 1순위 |
 | O6 | `PLAN_DOCS_DIRS` 이중 값 | 전환기. 전 브랜치가 `woobin_plan`으로 넘어가면 좁힌다 |
 | O7 | R12의 **응답 검사 게이트 패턴**을 다른 훅에 확대 | 지금은 stale-branch에만. additionalContext 드롭은 모든 훅에 해당하는데 다른 훅은 검사가 없다 |
@@ -575,6 +582,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O10 | 인바운드 피어 메시지가 여는 턴이 **`UserPromptSubmit`을 태우는지** | **미문서화.** `hooks.md` 전문에 cross-session·SendMessage·peer 언급 0건(2026-08-10 grep). 태우면 `idle-return-guard`가 부분 커버, 안 태우면 UserPromptSubmit 훅 **3개가 통째로 우회**된다. `refuse`가 걸려 있는 동안은 무해하므로 **풀 때 먼저 측정해라** |
 | O11 | 인바운드 턴이 transcript mtime을 갱신해 **R6 idle 타이머를 리셋하는지** | 미검증. 리셋되면 자리비움 핸드오프가 무한 연기된다 |
 | O12 | R13 핸드오프 창 패턴 | 미검증 아이디어 — 옛 세션을 `/clear` 대신 살려둔 채 새 세션을 띄우고, 핸드오프 문서에 구멍이 나면 질의 1회로 때운 뒤 닫는다. TTL 1시간 안이면 cache **read**지 creation이 아니다. 발신 방향이라 `refuse`와 무관하게 지금도 가능 |
+| O13 | 자작 추정 미사용 스킬 5개(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·`tutor-setup`) | O4 삭제에서 남겼다(HARNESS-LOG.md #19). 안 쓴다는 사실만으론 안 지운다 — 다음 audit에서도 0회면 "자작이라도 진짜 안 쓰면 지운다"를 다시 판단해라 |
 
 - ⚠️ **`refuse`는 발신자에게 아무 통지도 하지 않는다** — 문서 원문: "A message refused on arrival
   produces no sender-side notice." 즉 **다른 세션에서 이 머신의 세션에 메시지를 보냈는데 답이 없으면,
