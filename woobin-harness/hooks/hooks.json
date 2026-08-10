@@ -66,6 +66,17 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/harness-doc-sync-guard.sh",
+            "timeout": 15,
+            "statusMessage": "하네스 문서 동기화 확인 중..."
+          }
+        ]
       }
     ],
     "Stop": [
