@@ -144,7 +144,7 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 존중: 호출에 model이 이미 있음 / 에이전트 정의에 model frontmatter 있음 / 플러그인 네임스페이스 타입(`codex:…`).
 
 **근거** 2026-07-30. 메인이 opus인 상태에서 model 없이 스폰된 general-purpose 에이전트들이 opus로 돌아
-하루 **$25.30**. 재측정 8/3 서브에이전트 13개 전량 sonnet, opus 서브 **0건** ✅. [#8]
+하루 **$25.30**. 재측정 8/3 서브에이전트가 13개 전량 sonnet, opus 서브 **0건** ✅. [#8]
 
 **기각한 대안** `CLAUDE_CODE_SUBAGENT_MODEL` 환경변수. 우선순위가 최상위라 Agent 호출의 명시적 `model`
 인자와 에이전트 정의 frontmatter까지 **덮어쓴다**(2.1.220 바이너리 확인 — env가 있으면 tool/frontmatter
@@ -345,15 +345,72 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 
 ---
 
+### R13 — 300k 초과 세션 자동 핸드오프
+
+**기전** `ctx-handoff-stop.sh` (Stop) — 턴이 `CTX_HANDOFF_THRESHOLD`(기본 300k) 이상에서 끝나면
+`exit 2`로 모델을 깨워 `handoff` 스킬로 핸드오프 문서를 `~/.claude/idle-handoffs/<sid>.md`에 쓰게 하고
+`/clear`를 안내한다. 세션 1회(마커) + `stop_hook_active` 가드.
+
+**근거** 2026-08-10, 7일 전수(412세션 / $852.97). 300k를 넘긴 뒤에도 요청이 이어진 세션 **10건**,
+그 구간이 45k floor 대비 초과로 낸 cache read가 **$88.47 = 주간 총지출의 10.4%**.
+상위: `ba72fbd2` $17.32(max 430k) · `1a0a81a5` $13.61 · `c1d660bd` $12.62(max 472k).
+`ctx-warn-statusline.sh`가 같은 임계를 이미 **표시**하고 있었다 — #3의 결론("인지 수단만으로는 못 막는다")이
+5주 뒤에도 그대로 참인 것을 재확인한 셈이다.
+
+**설계 핵심** 알리지 않고 **대체 경로를 만들어 준다**. 이 하네스에서 ✅로 재측정된 개입(#1·#2)은
+전부 이 형태였고, 경고만 넣은 #3은 △였다. 문서 계약은 훅이 아니라 `handoff` 스킬이 단일 소유한다 —
+훅이 2개(`idle-handoff-stop.sh`·`ctx-handoff-stop.sh`)라 계약을 인라인하면 한쪽만 고쳐져 갈라진다(#16).
+
+**대가** 깨우는 턴 1회가 300k 컨텍스트에서 돌아 약 $0.15~0.30. 그리고 핸드오프 문서가
+자기완결적이지 않으면 새 세션이 되묻느라 절약분이 날아간다(R1과 같은 실패 모드).
+
+**무효화 조건**
+- E1이 거짓(캐시 리드 재청구가 없거나 무료)
+- **compaction이 무손실이 됨** — R1과 같은 이유로, 이 규칙의 정체도 "compaction이 할 일을 미리 하는 것"이다
+- 하네스가 세션 재시작 없이 컨텍스트를 선택적으로 리셋하는 수단을 제공
+- 재측정에서 핸드오프 문서가 만들어졌는데도 사용자가 `/clear`하지 않는 비율이 높음
+  → 그때는 개입 형태를 block(토큰 0 강제 정지)으로 바꾸는 게 맞다
+
+---
+
+### R14 — 하네스 문서 동기화를 기계가 센다
+
+**기전** `scripts/check-harness-docs.sh` — 훅·에이전트·스킬의 **실제 개수**를 세어 README·
+`plugin.json`·`marketplace.json`·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
+등재됐는지 확인하고, `woobin-harness/` 변경 시 문서 동반 수정 여부를 git diff로 판정한다.
+짝: `harness-doc-sync-guard.sh` (PostToolUse:Edit|Write|MultiEdit) — 이 레포에서 `woobin-harness/`를
+고치면 검사기를 돌려 결과를 additionalContext로 주입한다. 세션 1회, 차단하지 않는다.
+
+**근거** 2026-08-10. `CLAUDE.md`의 "고칠 때 같이 고쳐야 하는 것"은 문서 4종을 **이미 명시하고 있었는데**,
+R13 플랜을 쓰는 과정에서 `docs/workflow.html`이 빠졌고 사용자가 물어봐서 발견됐다. 같은 시점에
+이 문서의 스킬 개수가 41개(실제 42개)로 이미 갈라져 있었다 — **산문 체크리스트가 이미 두 번 실패한 상태**였다.
+R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이 아니라 실제로 검사하는 결정론적 게이트" —
+를 문서 동기화에 적용한 것이다(R12 무효화 조건의 "이 패턴은 다른 훅에도 적용 가능한데 안 쓰고 있다"가 이걸로 해소된다).
+
+**설계 핵심** 실패(✗)와 경고(⚠)를 나눈다. 훅을 **추가**하면 사람용 요약의 서술이 바뀌므로
+`workflow.html` 누락은 실패, 훅 **내용만** 수정하면 경고다. 모든 수정에 `workflow.html`을 요구하면
+오탐이 쌓여 무시당하고, 그게 산문 규칙이 죽은 것과 같은 경로다.
+
+**대가** 서식이 바뀌면 검사기의 정규식도 같이 고쳐야 한다(문구를 못 찾으면 ⚠로 알린다).
+그리고 검사기 자체가 새로운 소유자다 — 개수 문구의 서식을 바꿀 때 여기도 봐야 한다.
+
+**무효화 조건**
+- 개수·인벤토리 문구가 문서에서 사라짐(자동 생성으로 바뀜) → 검사기의 해당 검사만 제거
+- CI가 같은 검사를 돌리게 됨 → PostToolUse 짝은 중복이므로 제거하고 스크립트만 남긴다
+- 재측정에서 ⚠ 오탐이 잦아 사용자가 무시하기 시작함 → 경고 항목을 줄이거나 실패로 올린다
+
+---
+
 ## 4. 구성요소 인벤토리
 
 전부 `woobin-harness` 플러그인이 나른다. `~/.claude`에 사본을 두지 않는다(이중 발화·드리프트 방지).
 
-### 훅 9개
+### 훅 11개
 
 | 파일 | 이벤트 | 발화 조건 | 개입 형태 | 규칙 |
 |------|--------|-----------|-----------|------|
 | `idle-handoff-stop.sh` | Stop | 50분 무활동(asyncRewake) | `exit 2` 재기동 | R6 |
+| `ctx-handoff-stop.sh` | Stop | 턴 종료 시 ctx ≥300k | `exit 2` 재기동, 세션 1회 | R13 |
 | `idle-return-guard.sh` | UserPromptSubmit | 65분 경과 / `/close-session` | block 1회 | R6 |
 | `plan-saved-session-boundary.sh` | PostToolUse:Write | 플랜 경로 저장 | additionalContext | R1·R2 |
 | `plan-session-boundary-guard.sh` | UserPromptSubmit | 플랜 진입 프롬프트 + ctx ≥120k | additionalContext, 세션 1회 | R1 |
@@ -362,12 +419,14 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 | `subagent-model-default.sh` | PreToolUse:Agent\|Task | model 미지정 | `updatedInput` 주입 | R3 |
 | `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커 | R12 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
+| `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
 ```
 IDLE_HANDOFF_DELAY=3000   IDLE_HANDOFF_MAXGAP=3540   IDLE_GUARD_THRESHOLD=3900
 IDLE_HANDOFF_POLL=60      IDLE_HANDOFF_FRESH=300
+CTX_HANDOFF_THRESHOLD=300000
 PLAN_BOUNDARY_CTX_THRESHOLD=120000   PLAN_SPLIT_MIN_LINES=500
 BULK_EDIT_CTX_THRESHOLD=150000       BULK_EDIT_COUNT_THRESHOLD=15
 SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
@@ -393,10 +452,10 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-### 스킬 41개
+### 스킬 43개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
-`design-variants-to-pr` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit`.
+`design-variants-to-pr` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등). **개별 사용 빈도는 미측정** → §8
 
 상시 컨텍스트 비용은 스킬 **description만** 실린다(본문은 호출 시 로드). 이전 측정에서 유사 플러그인
@@ -497,12 +556,19 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. `plan-implementer`의 `memory: local` 트레이드오프도 미측정 |
 | O2 | `maxTurns` 60/30 값의 근거 | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
 | O3 | 모드 3종의 **실사용 후 재측정** | 도입 2026-08-07, 아직 안 함. 기준선은 $2.57~2.82/태스크 |
-| O4 | 스킬 41개 개별 사용 빈도 | 미측정. 안 쓰는 스킬의 description이 상시 비용이다 |
+| O4 | 스킬 43개 개별 사용 빈도 | 미측정. 안 쓰는 스킬의 description이 상시 비용이다 |
 | O5 | 편집 가드 [A] | SDD 스킬을 안 쓰므로 원장이 안 생겨 **사실상 비활성**. 폐기 후보 1순위 |
 | O6 | `PLAN_DOCS_DIRS` 이중 값 | 전환기. 전 브랜치가 `woobin_plan`으로 넘어가면 좁힌다 |
 | O7 | R12의 **응답 검사 게이트 패턴**을 다른 훅에 확대 | 지금은 stale-branch에만. additionalContext 드롭은 모든 훅에 해당하는데 다른 훅은 검사가 없다 |
 | O8 | design-variants S1/S2/S3 경계 효과 | 2026-08-03 도입, 재측정 안 함. 목표는 메인 peak <150k |
 | O9 | 플러그인 전환 후 훅이 **실제로 발화하는지** | 플러그인 캐시본 직접 호출로만 스모크 테스트했다. 라이브 세션 확인 필요 |
+
+- **`sdd-orchestrator-edit-guard.sh` [B]는 플랜 문서 비중이 큰 세션에서 발화하지 않는다 — 미수정.**
+  카운터 증가가 플랜 경로 제외(`exit 0`) 뒤에 있어 플랜 쓰기가 카운트되지 않는다.
+  2026-08-10 7일 전수: ctx ≥150k 세션 41건 중 현행 카운터로 발화 가능 21건, 플랜 문서를 포함시켜야
+  발화하는 건 **2건**. 2/41을 위해 카운터를 넓히면 정당한 플랜 세션마다 deny가 뜨는 오탐 비용이 더 크다고
+  판단해 그대로 뒀다. 해당 2건 중 하나가 그 주 2위 세션(`c1d660bd` $42.89, max 472k)이지만,
+  그 세션의 원가 동인은 편집이 아니라 컨텍스트 자체라 **R13이 겨눈다.**
 
 ---
 

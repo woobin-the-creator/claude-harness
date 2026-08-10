@@ -26,9 +26,9 @@ claude-harness/
 ├── woobin-harness/                   ← 플러그인 본체
 │   ├── .claude-plugin/plugin.json
 │   ├── hooks/hooks.json              settings.json의 hooks 객체를 옮긴 것
-│   ├── hooks/*.sh                    9개 (wire된 것만)
+│   ├── hooks/*.sh                    11개 (wire된 것만)
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        42개
+│   ├── skills/<name>/SKILL.md        43개
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── docs/workflow.html                사람이 보는 워크플로우 요약

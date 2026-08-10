@@ -183,7 +183,7 @@
 
   <li class="boundary">
     <div class="boundary-card">
-      <h3>◆ 유일한 세션 경계</h3>
+      <h3>◆ 필수 세션 경계</h3>
       <p>이 세션을 <b>종료</b>하고 모드에 맞는 플래그로 다시 띄운다. <code>/effort</code>는 쓰지 않는다 — settings.json에 영구 저장돼서 되돌리기를 사람이 기억해야 한다.</p>
 <pre><code>claude --effort medium --model sonnet
 <span class="cmt"># 첫 프롬프트 (한 줄)</span>
@@ -204,6 +204,17 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
       <h3>리뷰 <span class="tag">plan-reviewer</span></h3>
       <p>구현이 <b>다 끝난 뒤</b> 레이어별 배치 1회. 같은 세션에서 띄워도 된다 — 서브에이전트는 부모 대화 컨텍스트를 물려받지 않는다.</p>
       <p class="why">diff 본문을 넘기지 않는다. <code>task-N.md</code> 경로 + <code>main..HEAD</code> 범위만 주면 자기가 뜬다. finding마다 심각도·확신도가 달려 나온다.</p>
+    </div>
+  </li>
+
+  <li class="boundary">
+    <div class="boundary-card">
+      <h3>◆ 자동 세션 경계 (300k)</h3>
+      <p>턴이 <strong>300k 컨텍스트</strong>를 넘겨 끝나면 <code>ctx-handoff-stop.sh</code>가 모델을 깨워
+<code>handoff</code> 스킬로 핸드오프 문서를 <code>~/.claude/idle-handoffs/&lt;sid&gt;.md</code>에 쓰게 한다.
+그 뒤 <code>/clear</code>하고 그 문서를 읽고 이어가면 된다. 세션당 1회만 발화한다.</p>
+      <p class="why">계획된 경계는 위의 <em>필수</em> 하나뿐이지만, 이건 <em>넘겼을 때 자동으로</em> 생기는 경계다.
+2026-08-10 7일 전수에서 300k를 넘긴 뒤에도 계속 돈 세션이 10건이었고 그 초과분만 $88.47이었다.</p>
     </div>
   </li>
 
