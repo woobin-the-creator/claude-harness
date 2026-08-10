@@ -57,10 +57,25 @@ gh pr create --draft --label plan-wip --title "<plan-name>" --body "플랜: \`do
 4. `git push` + PR 코멘트 **5행 이내**: 이 레이어에서 발견한 것(플랜에 없던 환경 사실, 고친 완료 판정 등).
    **커밋 message body에 쓰지 마라** — squash가 날린다.
 
+**마지막 레이어를 push한 직후 — 라벨을 떼고 ready로 전환한다**
+
+```bash
+gh pr edit --remove-label plan-wip
+gh pr ready
+```
+
+- `plan-wip`은 **"구현 중"** 표시지 "머지 전" 표시가 아니다. 마지막 레이어가 원격에 올라간 순간
+  draft를 벗기고 라벨도 같이 뗀다 — 둘을 한 몸으로 묶어두면 **draft = 라벨 있음 = 구현 중**이
+  유일한 상태가 되어, `gh pr list`의 목록만 보고 판정할 수 있다.
+- 머지까지 미루면 안 되는 이유: 라벨의 소비처 둘(Layer 0 킥오프의 "이미 진행 중인 플랜이 있나" 검사,
+  `stale-branch-guard.sh`의 하향 판단)이 **모두 `--state open` 필터**라 머지 시점엔 자연히 빠지지만,
+  **ready인 채로 승인·CI를 기다리는 창은 안 덮인다.** 그 창에서 다른 세션이 이 PR을 "아직 진행 중"으로
+  오판하면 워크트리당 1개 불변식에 막혀 새 플랜을 시작하지 못한다.
+
 **머지**
 
 ```bash
-gh pr ready && gh pr merge --squash
+gh pr merge --squash
 ```
 
 - `--squash`는 **규칙**이다. 레이어 커밋은 개별로 테스트를 통과하지 않을 수 있어, merge commit으로
