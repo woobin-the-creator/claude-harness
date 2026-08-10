@@ -54,8 +54,12 @@ else
         | .enabledPlugins = ((.enabledPlugins // {}) + {
           \"woobin-harness@woobin-harness\": true })
         | .statusLine = { type: \"command\", command: \"\$HOME/.claude/statusline/ctx-warn-statusline.sh\" }
+        | .crossSessionInbound = \"refuse\"
        ' '$S' > '$S.tmp' && mv '$S.tmp' '$S'"
-  say "  extraKnownMarketplaces·enabledPlugins·statusLine 갱신"
+  say "  extraKnownMarketplaces·enabledPlugins·statusLine·crossSessionInbound 갱신"
+  # crossSessionInbound: 머신 고유 키가 아니라 하네스 정책이라 statusLine 과 같이 무조건 덮는다.
+  # 근거·기각안은 docs/workflow-spec.md §7-A, home/HARNESS-LOG.md #18.
+  # 이 값을 지우면 기본값이 "사람이 없어도 피어가 내 세션을 깨움"으로 돌아간다.
 fi
 
 say
