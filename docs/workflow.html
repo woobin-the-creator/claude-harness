@@ -193,6 +193,14 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
 
   <li class="step">
     <div class="step-card">
+      <h3>구현 시작 = 브랜치 + draft PR <span class="tag">R15</span></h3>
+      <p>첫 턴에 <code>plan/&lt;name&gt;</code> 브랜치를 만들고 <b>플랜 문서를 첫 커밋</b>으로 올려 <b>draft PR</b>을 연다. 레이어가 끝날 때마다 <b>커밋 → 리뷰 → push</b>. 마지막 레이어를 push하면 <code>gh pr ready</code>로 <b>draft를 벗긴다</b> — draft는 "구현 중"이지 "머지 전"이 아니다. 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다).</p>
+      <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이고 레이어 해상도로 충분하다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --state open --draft</code>로 찾힌다.</p>
+    </div>
+  </li>
+
+  <li class="step">
+    <div class="step-card">
       <h3>구현 <span class="tag">모드대로</span></h3>
       <p>킥오프 가드가 <b>"<code>00-overview.md</code>만 읽어라"</b>를 자동 주입한다. <code>task-N.md</code>는 구현 직전에 하나씩, 또는 서브에이전트에 경로로만 넘긴다.</p>
       <p class="why">effort는 세션 내내 고정. 얕은 추론이 보이면 프롬프트로 우회하지 말고 <b>다음 세션에서</b> 올린다.</p>
@@ -287,6 +295,10 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   <div class="rule yes">
     <h4>✓ 오케스트레이터는 overview만</h4>
     <p><code>task-N.md</code> 본문이 메인에 올라가면 그 토큰을 <b>이후 모든 요청</b>이 캐시 리드로 다시 낸다.</p>
+  </div>
+  <div class="rule yes">
+    <h4>✓ 커밋은 리뷰 전, push는 리뷰 후</h4>
+    <p>레이어 끝의 리뷰가 그 세션에서 <b>토큰을 가장 많이 쓰는 단계</b>라 하드 컷 확률이 가장 높다. 커밋을 리뷰 뒤로 미루면 레이어 전체가 가장 위험한 순간에 무기록으로 노출된다. 머지는 <b><code>--squash</code></b> — 레이어 커밋은 개별로 테스트를 통과하지 않을 수 있어 merge commit이면 <code>git bisect</code>가 못 믿을 것이 된다.</p>
   </div>
   <div class="rule info">
     <h4>ℹ 확인이 필요하면 서브에이전트는 못 묻는다</h4>
