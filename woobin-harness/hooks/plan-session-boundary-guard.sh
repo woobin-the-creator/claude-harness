@@ -12,6 +12,10 @@
 #
 # 소프트: 차단하지 않고 additionalContext만 주입한다. 세션당 1회.
 # 플랜 구현 킥오프 프롬프트는 sdd-kickoff-guard.sh 담당이라 여기서는 제외한다.
+#
+# 2026-08-10: `플랜 작성`은 붙어 있어야만 매치돼 "플랜 문서 작성하자"가 새어나갔다(7일 전수, 진입 3건 중 1건).
+# 어구 목록은 유지하되 `플랜`/`계획`과 `작성` 사이 8자(≈24바이트, 이 환경의 grep -E `.`는 바이트 단위)까지 허용한다.
+# 넓은 의미 탐지는 오탐 2/5라 채택하지 않았다.
 
 set -u
 
@@ -30,7 +34,7 @@ echo "$prompt" | grep -qE "docs/(${PLAN_DOCS_DIRS})/plans/" && exit 0
 echo "$prompt" | grep -qiE 'subagent-driven-development|\bsdd\b' && exit 0
 
 # 플랜 작성 진입 신호.
-echo "$prompt" | grep -qiE 'writing-plans|플랜 작성|플랜 짜|플랜 가자|플랜으로 가|계획 작성|계획 세워|구현 계획|implementation plan' || exit 0
+echo "$prompt" | grep -qiE 'writing-plans|플랜.{0,24}작성|플랜 짜|플랜 가자|플랜으로 가|계획.{0,24}작성|계획 세워|구현 계획|implementation plan' || exit 0
 
 # 현재 컨텍스트 크기 = transcript의 마지막 assistant usage (ctx-warn-statusline.sh와 동일 방식).
 ctx=0
