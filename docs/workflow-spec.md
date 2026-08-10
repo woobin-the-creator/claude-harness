@@ -338,6 +338,8 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 
 **기전** `stale-branch-guard.sh` (SessionStart) — 격리된 워크트리가 아니면서 원격 기본 브랜치보다
 뒤처졌으면 경고 + 최신 기반 워크트리 제안. 읽기 전용(git 상태를 바꾸는 건 fetch뿐).
+열린 `plan-wip` PR + 앞선 커밋이 있는 플랜 브랜치는 이 문구를 rebase 확인용으로 **하향**한다(면제
+아님, R15 소관 — 하향 조건·문구는 §3 R15와 훅 헤더 주석이 소유하고 여기서 복제하지 않는다).
 짝: `stop-warning-ack-guard.sh` (Stop) — 응답에 경고 원문이 실제로 포함됐는지 **검사**해서 안 됐으면 반려.
 
 **설계 핵심** additionalContext가 모델에게 전달됐는지와 **무관하게** 마커 파일은 항상 남는다
