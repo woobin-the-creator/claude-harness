@@ -54,20 +54,26 @@ plan_wip=0
 if [ "$ahead" -gt 0 ] && command -v gh >/dev/null 2>&1; then
   # 현재 브랜치의 열린 plan-wip PR만 본다. 미인증·원격 없음·오프라인이면 빈 문자열 -> 0으로 남는다.
   # SessionStart는 응답 지연에 민감하므로 gh 호출에 ~2초 상한을 둔다(이 머신엔 timeout(1)이 없어
-  # 백그라운드 + 폴링으로 구현). 상한을 넘기면 죽이고 plan_wip=0(더 강한 경고 쪽)으로 fail-safe.
-  gh_out="${marker_dir}/.gh-plan-wip-check.$$"
-  mkdir -p "$marker_dir" 2>/dev/null
+  # 백그라운드 + 폴링으로 구현). 상한을 넘기면 죽이고 부분 출력 여부와 무관하게 plan_wip=0
+  # (더 강한 경고 쪽)으로 fail-safe — 세션 마커 디렉터리($marker_dir)는 session_id 전용이라
+  # 임시 파일은 별도 경로에 둔다.
+  gh_out="${TMPDIR:-/tmp}/stale-branch-guard-gh.$$"
   gh pr list --head "$branch" --state open --label plan-wip \
     --json number --jq '.[].number' >"$gh_out" 2>/dev/null &
   gh_pid=$!
   gh_waited=0
-  while kill -0 "$gh_pid" 2>/dev/null && [ "$gh_waited" -lt 20 ]; do
+  gh_timed_out=0
+  while kill -0 "$gh_pid" 2>/dev/null; do
+    if [ "$gh_waited" -ge 20 ]; then
+      gh_timed_out=1
+      kill "$gh_pid" 2>/dev/null
+      break
+    fi
     sleep 0.1
     gh_waited=$((gh_waited + 1))
   done
-  kill "$gh_pid" 2>/dev/null
   wait "$gh_pid" 2>/dev/null
-  [ -s "$gh_out" ] && plan_wip=1
+  [ "$gh_timed_out" -eq 0 ] && [ -s "$gh_out" ] && plan_wip=1
   rm -f "$gh_out"
 fi
 
