@@ -9,6 +9,10 @@
 # 재주입 방지는 삭제 가능한 마커가 아니라 "파일 mtime 신선도"로 판정한다.
 # (마커 방식은 rewake 주입 자체가 UserPromptSubmit 훅을 태워 복귀 가드가 마커를
 #  지우는 레이스로 50분 주기 무한 루프가 실제 발생 — 2026-07-24)
+#
+# 2026-08-10: 이 훅이 부르는 `handoff` 스킬이 그동안 존재하지 않았다(#16 과 같은 드리프트).
+# woobin-harness/skills/handoff/SKILL.md 로 실체를 만들었고, 문서 계약은 그쪽이 단일 소유한다.
+# 여기(80·85행)와 ctx-handoff-stop.sh 는 스킬 이름과 저장 경로만 넘긴다 — 계약을 복제하지 마라.
 
 input=$(cat)
 sid=$(echo "$input" | jq -r '.session_id // empty')

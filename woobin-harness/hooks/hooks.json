@@ -89,6 +89,16 @@
             "statusMessage": "stale-branch 경고 전달 확인 중..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ctx-handoff-stop.sh",
+            "timeout": 10,
+            "statusMessage": "컨텍스트 크기 확인 중..."
+          }
+        ]
       }
     ],
     "SessionStart": [
