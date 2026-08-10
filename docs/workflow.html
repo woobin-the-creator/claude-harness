@@ -194,8 +194,8 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   <li class="step">
     <div class="step-card">
       <h3>구현 시작 = 브랜치 + draft PR <span class="tag">R15</span></h3>
-      <p>첫 턴에 <code>plan/&lt;name&gt;</code> 브랜치를 만들고 <b>플랜 문서를 첫 커밋</b>으로 올려 <code>plan-wip</code> 라벨이 붙은 <b>draft PR</b>을 연다. 레이어가 끝날 때마다 <b>커밋 → 리뷰 → push</b>. 마지막 레이어를 push하면 <b>라벨을 떼고 ready로 전환</b>한다 — 라벨은 "구현 중"이지 "머지 전"이 아니다.</p>
-      <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이고 레이어 해상도로 충분하다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --label plan-wip</code>로 찾힌다.</p>
+      <p>첫 턴에 <code>plan/&lt;name&gt;</code> 브랜치를 만들고 <b>플랜 문서를 첫 커밋</b>으로 올려 <b>draft PR</b>을 연다. 레이어가 끝날 때마다 <b>커밋 → 리뷰 → push</b>. 마지막 레이어를 push하면 <code>gh pr ready</code>로 <b>draft를 벗긴다</b> — draft는 "구현 중"이지 "머지 전"이 아니다. 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다).</p>
+      <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이고 레이어 해상도로 충분하다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --state open --draft</code>로 찾힌다.</p>
     </div>
   </li>
 

@@ -243,7 +243,7 @@ superpowers를 끄면 아래 훅의 트리거가 영향을 받는다. **경로·
 | `sdd-orchestrator-edit-guard.sh` [A] | `<repo>/.superpowers/sdd/*/progress.md` 원장 | SDD 스킬을 안 쓰면 원장이 안 생겨 **[A]는 사실상 비활성**. [B]는 무관하게 동작 |
 | `plan-session-boundary-guard.sh` | 프롬프트 정규식 | 무관, 유지 |
 | `subagent-model-default.sh` / `ctx-warn-statusline.sh` / idle 2종 / stale-branch 2종 | 무관 | 유지 |
-| `stale-branch-guard.sh` (R15 하향 분기) | **`gh` CLI + `plan-wip` 라벨 이름** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다 — 라벨 이름을 바꾸면 하향이 영구히 안 걸린다. 라벨은 draft 동안만 붙어 있으므로 ready~머지 창에서도 하향이 풀린다(의도) |
+| `stale-branch-guard.sh` (R15 하향 분기) | **`gh` CLI + PR의 draft 상태** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다. 라벨 의존은 issue #3에서 제거했다 — 이제 신호가 draft 하나라 이름 취약점이 없고, ready 전환과 동시에 하향이 풀린다(의도) |
 
 ## 17. 300k 자동 핸드오프 + 플랜 진입 정규식 + handoff 스킬 실체화 (2026-08-10)
 
@@ -387,9 +387,10 @@ R13은 Stop 훅이라 **턴이 끝날 때만** 발화하고, 하드 컷은 턴 �
 저장한다. 하드 컷당한 세션의 id를 새 세션은 모르므로 **컷 뒤엔 그 문서에 도달할 수 없다.**
 회복 진입점이 사전지식 없이 찾히는 곳에 있어야 한다는 요구가 여기서 나왔다.
 
-**수단**: R15 신설. `plan/<name>` 브랜치 + 플랜 문서 첫 커밋 + `plan-wip` draft PR을 구현 첫 턴에
-만들고, 레이어마다 **커밋 → 리뷰 → push**. 마지막 레이어를 push하면 라벨을 떼고 ready로 전환한다
-(issue #3 — 라벨 수명을 draft에 묶어, ready~머지 창에서 다른 세션이 "진행 중"으로 오판하는 걸 막는다).
+**수단**: R15 신설. `plan/<name>` 브랜치 + 플랜 문서 첫 커밋 + **draft PR**을 구현 첫 턴에
+만들고, 레이어마다 **커밋 → 리뷰 → push**. 마지막 레이어를 push하면 `gh pr ready`로 draft를 벗긴다
+(issue #3 — ready~머지 창에서 다른 세션이 "진행 중"으로 오판하는 걸 막는다. 처음엔 `plan-wip`
+라벨을 뒀다가, 라벨이 나르던 정보가 전부 draft + `plan/` 접두어에서 파생 가능해 **라벨을 없앴다**).
 훅은 **하나도 추가하지 않았다** — 전달 경로가 이미 있다
 (모드 파일은 킥오프 훅이 읽게 만든다). 기존 훅 수정 1건: `stale-branch-guard.sh`가 플랜 브랜치에서
 문구를 하향한다(면제가 아니라 등급 하향 — 경고·마커·ack 게이트 유지).

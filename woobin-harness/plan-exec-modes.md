@@ -34,7 +34,7 @@ git switch -c plan/<plan-name>
 git add docs/woobin_plan/plans/<plan-name>/
 git commit -m "docs(plan): <plan-name> 구현 시작"
 git push -u origin plan/<plan-name>
-gh pr create --draft --label plan-wip --title "<plan-name>" --body "플랜: \`docs/woobin_plan/plans/<plan-name>/\`
+gh pr create --draft --title "<plan-name>" --body "플랜: \`docs/woobin_plan/plans/<plan-name>/\`
 진행 상태: \`git log --oneline\`
 
 - [ ] L1 …
@@ -42,9 +42,11 @@ gh pr create --draft --label plan-wip --title "<plan-name>" --body "플랜: \`do
 - [ ] 머지 전 플랜 디렉터리 삭제(권장)"
 ```
 
-- 라벨이 없으면 먼저 만든다: `gh label create plan-wip --description "구현 중인 플랜 브랜치" --color FBCA04`
+- **라벨을 붙이지 마라.** "구현 중"은 **draft 상태 하나**가 나른다. `plan/` 브랜치 접두어가
+  "플랜 PR임"을 이미 나르므로 라벨은 파생 가능한 중복 상태다 — 손으로 동기화할 것을 만들지 않는다.
 - **PR 본문은 포인터만.** 플랜 내용을 옮겨 적으면 소유자가 둘이 되고 갈라진다(§6-6).
-- **열린 `plan-wip` PR은 워크트리당 1개.** 이미 있으면 그것을 먼저 처리한다 —
+- **열린 draft 플랜 PR은 워크트리당 1개.** 시작 전에 확인한다 — `gh pr list --state open --draft`
+  (`plan/`로 시작하는 head 브랜치가 그것이다). 이미 있으면 그것을 먼저 처리한다 —
   목록만 보고 어느 게 살아있는지 판정할 수 없어지면 진입점의 값이 사라진다.
 - 플랜 문서를 **커밋한다.** untracked로 두면 새 워크트리에 따라오지 않는다.
 
@@ -57,20 +59,18 @@ gh pr create --draft --label plan-wip --title "<plan-name>" --body "플랜: \`do
 4. `git push` + PR 코멘트 **5행 이내**: 이 레이어에서 발견한 것(플랜에 없던 환경 사실, 고친 완료 판정 등).
    **커밋 message body에 쓰지 마라** — squash가 날린다.
 
-**마지막 레이어를 push한 직후 — 라벨을 떼고 ready로 전환한다**
+**마지막 레이어를 push한 직후 — ready로 전환한다**
 
 ```bash
-gh pr edit --remove-label plan-wip
 gh pr ready
 ```
 
-- `plan-wip`은 **"구현 중"** 표시지 "머지 전" 표시가 아니다. 마지막 레이어가 원격에 올라간 순간
-  draft를 벗기고 라벨도 같이 뗀다 — 둘을 한 몸으로 묶어두면 **draft = 라벨 있음 = 구현 중**이
-  유일한 상태가 되어, `gh pr list`의 목록만 보고 판정할 수 있다.
-- 머지까지 미루면 안 되는 이유: 라벨의 소비처 둘(Layer 0 킥오프의 "이미 진행 중인 플랜이 있나" 검사,
-  `stale-branch-guard.sh`의 하향 판단)이 **모두 `--state open` 필터**라 머지 시점엔 자연히 빠지지만,
+- draft는 **"구현 중"** 표시지 "머지 전" 표시가 아니다. 마지막 레이어가 원격에 올라간 순간 벗긴다.
+- 머지까지 미루면 안 되는 이유: 두 소비처(Layer 0 킥오프의 "이미 진행 중인 플랜이 있나" 검사,
+  `stale-branch-guard.sh`의 하향 판단)가 `--state open`만 보면 머지 시점엔 자연히 빠지지만,
   **ready인 채로 승인·CI를 기다리는 창은 안 덮인다.** 그 창에서 다른 세션이 이 PR을 "아직 진행 중"으로
-  오판하면 워크트리당 1개 불변식에 막혀 새 플랜을 시작하지 못한다.
+  오판하면 워크트리당 1개 불변식에 막혀 새 플랜을 시작하지 못한다. 그래서 두 검사 모두
+  `--state open` 위에 **`--draft`를 얹는다** — 이 한 줄이 창을 닫는다.
 
 **머지**
 

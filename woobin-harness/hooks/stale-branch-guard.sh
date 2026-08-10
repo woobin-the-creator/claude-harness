@@ -11,10 +11,13 @@
 #
 # R15(레이어 경계 커밋 + draft PR) 이후: 의도적으로 오래 사는 플랜 브랜치는 등급을 **하향**한다.
 # 면제가 아니다 — 경고·마커·ack 게이트를 그대로 유지하고 문구만 "워크트리를 만들어라"에서
-# "rebase가 필요한지만 확인해라"로 바꾼다. 조건을 "열린 plan-wip PR이 있다"로만 두면 방치된
+# "rebase가 필요한지만 확인해라"로 바꾼다. 조건을 "열린 PR이 있다"로만 두면 방치된
 # 브랜치도 빠져나가므로, "앞선 커밋이 있다"(= 실제 작업 중)를 함께 요구한다.
-# plan-wip 라벨은 **draft인 동안만** 붙어 있다(마지막 레이어 push 시 ready 전환과 함께 뗀다).
-# 즉 ready~머지 사이 창에서는 하향이 풀려 강한 문구로 돌아온다 — fail-safe 방향이라 의도한 것이다.
+#
+# 판정 신호는 **draft 상태 하나**다. 라벨은 쓰지 않는다 — "구현 중"을 draft와 라벨 두 곳에
+# 표현하면 손으로 동기화해야 하고, 한쪽을 잊는 순간 조용히 갈라진다(issue #3).
+# 마지막 레이어 push 시 `gh pr ready`로 draft가 벗겨지므로, ready~머지 사이 창에서는
+# 하향이 풀려 강한 문구로 돌아온다 — fail-safe 방향이라 의도한 것이다.
 # 절차 원문은 woobin-harness/plan-exec-modes.md 가 소유한다 — 여기 복제하지 말 것(§6-6, 사고 #16).
 
 input=$(cat)
@@ -54,13 +57,13 @@ case "$ahead" in ''|*[!0-9]*) ahead=0 ;; esac
 
 plan_wip=0
 if [ "$ahead" -gt 0 ] && command -v gh >/dev/null 2>&1; then
-  # 현재 브랜치의 열린 plan-wip PR만 본다. 미인증·원격 없음·오프라인이면 빈 문자열 -> 0으로 남는다.
+  # 현재 브랜치의 열린 **draft** PR만 본다. 미인증·원격 없음·오프라인이면 빈 문자열 -> 0으로 남는다.
   # SessionStart는 응답 지연에 민감하므로 gh 호출에 ~2초 상한을 둔다(이 머신엔 timeout(1)이 없어
   # 백그라운드 + 폴링으로 구현). 상한을 넘기면 죽이고 부분 출력 여부와 무관하게 plan_wip=0
   # (더 강한 경고 쪽)으로 fail-safe — 세션 마커 디렉터리($marker_dir)는 session_id 전용이라
   # 임시 파일은 별도 경로에 둔다.
   gh_out="${TMPDIR:-/tmp}/stale-branch-guard-gh.$$"
-  gh pr list --head "$branch" --state open --label plan-wip \
+  gh pr list --head "$branch" --state open --draft \
     --json number --jq '.[].number' >"$gh_out" 2>/dev/null &
   gh_pid=$!
   gh_waited=0
@@ -80,7 +83,7 @@ if [ "$ahead" -gt 0 ] && command -v gh >/dev/null 2>&1; then
 fi
 
 if [ "$plan_wip" -eq 1 ]; then
-  ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}'는 열린 plan-wip PR이 있는 **플랜 브랜치**이고, origin/${default}보다 ${behind} 커밋 뒤처져 있습니다(앞선 커밋 ${ahead}개).
+  ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}'는 열린 draft PR이 있는 **구현 중인 플랜 브랜치**이고, origin/${default}보다 ${behind} 커밋 뒤처져 있습니다(앞선 커밋 ${ahead}개).
 
 이 경고는 사용자의 첫 메시지 내용과 무관하게 예외 없이 최우선입니다. 사용자가 완전히 다른 질문이나 작업을 요청했더라도, 조사나 답변을 먼저 진행하지 말고 이번 턴 응답의 맨 첫 문장으로 위 경고 문구를 사용자에게 그대로 전달한 뒤에 사용자의 실제 요청을 처리하세요. 경고를 생략하거나 뒤로 미루면 안 됩니다.
 
