@@ -151,7 +151,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 Do not start executing in this session. Report where the plan was saved and hand the turn back so the user can `/clear`.
 
-Then present the three execution modes defined in `~/.claude/plan-exec-modes.md` — read that file and follow it. Recommend exactly one and state the evidence for it, because the only basis for the choice is the dependency graph you just wrote into `00-overview.md`, and no later session can reconstruct it as cheaply:
+Then present the three execution modes defined in this plugin's `$CLAUDE_PLUGIN_ROOT/plan-exec-modes.md` (fall back to ~/.claude/plan-exec-modes.md if installed outside a plugin) — read that file and follow it. Recommend exactly one and state the evidence for it, because the only basis for the choice is the dependency graph you just wrote into `00-overview.md`, and no later session can reconstruct it as cheaply:
 
 - ① Speed (`xhigh` + sonnet) — only when two or more tracks share no files.
 - ② Thrift (`medium` + sonnet) — dependency chain or shared files. Most plans land here. Ask the layer-boundary sub-choice too: ②a manual `/clear` (cheapest, needs the user present) or ②b one `plan-implementer` per layer, serially (runs unattended).
