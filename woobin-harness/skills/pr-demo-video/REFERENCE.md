@@ -64,6 +64,13 @@ rm -rf /tmp/demo-video && node __demo_record.mjs
 - `routeWebSocket` handler with no `connectToServer()` makes you the server: handle `ws.onMessage` for client→server, call `ws.send()` for server→client. Resolve the route object out to an outer variable to send on a timeline.
 - Register all routes **before** `page.goto` so the first connections are intercepted.
 
+## Timing traps that cost a re-record
+
+Two failure modes that only show up *after* you have recorded, converted, and looked at the frames. Bake both in before the first take.
+
+- **Make any animated transition ≥400ms.** At a 10fps capture a 320ms transition lands as a single-frame jump — the viewer sees the end state teleport in, not the motion you are trying to demo. If the app's real transition is shorter, override it for the recording rather than re-recording at a higher frame rate.
+- **`await page.evaluate(() => document.fonts.ready)` before the first capture.** If an icon font has not loaded yet, its ligatures render as literal words (`unfold_more` instead of the caret glyph) and the whole take is unusable. This is separate from trimming the lead-in: the fonts can still be pending after the page is otherwise interactive.
+
 ## Show the mouse cursor + click ripples (do this by default)
 
 `recordVideo` does **not** capture a mouse cursor — headless Chromium has none, so raw recordings look like elements activate by themselves. Inject a synthetic cursor + a click ripple so viewers can follow *where* the pointer goes and *what* gets clicked. This should be the default for any click-driven demo.
