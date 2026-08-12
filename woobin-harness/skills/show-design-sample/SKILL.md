@@ -78,6 +78,7 @@ N개 시안이 **구조·상호작용**으로 어떻게 다를지 먼저 제안�
 | 프로젝트 | 프리뷰 레포 | URL |
 |---|---|---|
 | Pholex | `woobin-the-creator/pholex-preview` | https://woobin-the-creator.github.io/pholex-preview/ |
+| claude-harness | `woobin-the-creator/claude-harness-preview` | https://woobin-the-creator.github.io/claude-harness-preview/ |
 
 목록에 없으면 `<project>-preview`로 만들고 **이 표에 한 줄 추가한다.** 이슈 번호를 레포 이름에 박지 마라 — 재사용하면서 이름과 내용이 어긋난다.
 
