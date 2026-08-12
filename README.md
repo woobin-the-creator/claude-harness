@@ -28,7 +28,7 @@ claude-harness/
 │   ├── hooks/hooks.json              settings.json의 hooks 객체를 옮긴 것
 │   ├── hooks/*.sh                    11개 (wire된 것만)
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        25개
+│   ├── skills/<name>/SKILL.md        27개
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── docs/workflow.html                사람이 보는 워크플로우 요약
@@ -41,6 +41,8 @@ claude-harness/
 ```
 
 **플러그인이 못 나르는 것** — 플러그인의 `settings.json`은 `agent`·`subagentStatusLine` 두 키만 지원한다. 그래서 `~/.claude/CLAUDE.md`(글로벌 지침), `statusLine`, `permissions`는 `bootstrap.sh`가 처리한다.
+
+제품 UI 작업은 `design-workflow`가 신규 방향·기존 시스템 증분 변경·리뷰·반복 실패를 먼저 분류하고, 필요한 디자인 모듈만 읽는다. `DESIGN.md`는 선택적이다.
 
 ## 새 머신에 올리기
 

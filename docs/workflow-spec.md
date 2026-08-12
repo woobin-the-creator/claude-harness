@@ -80,7 +80,8 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │     plan-reviewer (레이어별 배치 1회, 같은 세션에서 스폰 가능)
    │     PR → pr-demo-video 스킬
    │
-   ├─(B) UI·디자인 ─── show-design-sample 스킬 (샘플 URL 전달까지, PR은 범위 밖)
+   ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, 선택적 DESIGN.md, 조건부 모듈)
+   │                       └─ 복수 시안 격리 프리뷰·공유가 필요할 때만 show-design-sample
    ├─(C) 디버깅 ────── systematic-debugging 스킬 (재현 절차를 산출물로)
    └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
 ```
@@ -484,6 +485,22 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 ---
 
+### R16 — 제품 UI 작업은 한 Router가 분류하고 필요한 디자인 모듈만 읽는다
+
+**문제.** 신규 방향 탐색, 기존 시스템 보존, 구현 계약, 렌더 리뷰, 반복 실패의 가드 승격은 서로 다른 비용과 권한을 가진다. 하나의 큰 규칙 문서나 넓은 자동 트리거로 합치면 작은 변경도 모든 컨텍스트를 읽고 `design-rules`와 후보 비교 스킬이 경쟁한다.
+
+**규칙.** 명시적 첫 도입·리디자인·리뷰·반복 실패와 managed `DESIGN.md`가 있는 프로젝트의 UI 작업은 `design-workflow`가 먼저 분류한다. 그린필드/대규모 리디자인에서만 direction을 읽고, review-only는 쓰지 않으며, `DESIGN.md` 부재·unmanaged 상태는 작업을 막지 않는다. 복수 시안 렌더가 필요할 때만 `show-design-sample`로 내려간다.
+
+**기전.** 짧은 Router가 route를 공개하고 progressive disclosure reference를 조건부로 읽는다. 구조화된 `DESIGN.md`는 선택적 durable state이고, validator는 managed block만 검사한다. 프로젝트별 가드는 기존 컴포넌트·린터·테스트 스택에 생성한다.
+
+**근거.** `interface-design`은 방향·craft review, 기존 `design-rules`는 프로젝트 근거·실데이터·실패 선례, `ibm-products@eeff1e98`는 컴포넌트/린트/브라우저 가드가 각각 강했다. 2026-08-12 설계 인터뷰에서 하나의 Router+모듈, 선택적 구조화 `DESIGN.md`, 공통 validator+현지 가드, 위험도별 승인을 확정했다.
+
+**대가.** Router 오분류와 문서/실행 경로 drift가 새 실패 모드다. managed document와 validator가 추가되며, 첫 도입 시 현재 작업 범위의 시스템 조사가 필요하다.
+
+**무효화 조건.** 실제 라우팅 eval에서 증분 변경이 direction을 반복 로드하거나 review-only가 파일을 쓰는 회귀가 지속되고, route contract를 좁혀도 단일 스킬보다 비용·정확도가 개선되지 않을 때 폐기한다. 또는 plugin runtime이 동일 정본을 공유하는 typed module composition과 deterministic trigger를 제공해 Router prose가 불필요해질 때 그 원시 기능으로 대체한다.
+
+---
+
 ## 4. 구성요소 인벤토리
 
 전부 `woobin-harness` 플러그인이 나른다. `~/.claude`에 사본을 두지 않는다(이중 발화·드리프트 방지).
@@ -535,10 +552,13 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-### 스킬 25개
+### 스킬 27개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
-`show-design-sample` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
+`design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
+`close-session` · `token-waste-audit` · `handoff`.
+`design-rules`는 `design-workflow`의 backward-compatible concrete-UI entry이고,
+`show-design-sample`은 복수 시안 격리 프리뷰·공유가 필요할 때만 쓰는 preview/delivery branch다.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).
 
 2026-08-10, 1개월치 세션 로그(`Skill` 툴 호출 288건)를 전수 스캔해 개별 사용 빈도를 측정했다(O4 해소).
