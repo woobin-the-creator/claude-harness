@@ -6,7 +6,12 @@ EVAL_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/../evals" && pwd -P)
 CASES_DIR="$EVAL_DIR/cases"
 ASSERT="$EVAL_DIR/assert-routing.mjs"
 RUNNER="$EVAL_DIR/run-routing.sh"
+TIMEOUT_RUNNER="$EVAL_DIR/run-with-timeout.mjs"
 TMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/design-workflow-eval-contract.XXXXXX")
+cleanup() {
+  rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT HUP INT TERM
 
 assert_prompt_contract() {
   case_name="$1"
@@ -48,12 +53,32 @@ assert_output_contract incremental 'system-evidence → implementation-contracts
 assert_output_contract review-only 'system-evidence → review' validate forbidden forbidden
 assert_output_contract guard-promotion 'system-evidence → implementation-contracts → evolution → review' absent allowed approval-required
 
+grep -F 'ROUTING_TIMEOUT_SECONDS="${ROUTING_TIMEOUT_SECONDS:-120}"' "$RUNNER" >/dev/null
+grep -F 'CLAUDE_MAX_BUDGET_USD="${CLAUDE_MAX_BUDGET_USD:-0.05}"' "$RUNNER" >/dev/null
+grep -F -- '--max-budget-usd "$CLAUDE_MAX_BUDGET_USD"' "$RUNNER" >/dev/null
+grep -F -- '--no-session-persistence' "$RUNNER" >/dev/null
+grep -F -- '--permission-mode plan' "$RUNNER" >/dev/null
+grep -F -- '--tools ""' "$RUNNER" >/dev/null
+grep -F 'trap cleanup EXIT HUP INT TERM' "$RUNNER" >/dev/null
+grep -F 'run-with-timeout.mjs' "$RUNNER" >/dev/null
+
 if sh "$RUNNER" ../review-only >/dev/null 2>&1; then
   echo "expected invalid eval case to fail" >&2
   exit 1
 else
   status="$?"
   test "$status" -eq 2
+fi
+
+timeout_output="$TMP_DIR/timeout.out"
+timeout_error="$TMP_DIR/timeout.err"
+if node "$TIMEOUT_RUNNER" 1 "$timeout_output" 'EVAL_TIMEOUT case=fake seconds=1' -- node -e 'setTimeout(() => {}, 5000)' 2>"$timeout_error"; then
+  echo "expected timeout wrapper to fail with timeout" >&2
+  exit 1
+else
+  status="$?"
+  test "$status" -eq 124
+  grep -F 'EVAL_TIMEOUT case=fake seconds=1' "$timeout_error" >/dev/null
 fi
 
 echo ALL-OK
