@@ -26,7 +26,11 @@ case "$prompt" in
     rm -f "$warn" "$dir/$sid.notified"
     # 워크트리·브랜치 정리도 여기서 끝낸다 — block 으로 끊으니 모델이 못 도는데,
     # 스킬에만 넣으면 정상 경로에서는 영영 실행되지 않는다. 규칙은 스크립트가 단일 정본.
-    cleanup=$(bash "$HOME/.claude/hooks/close-session-cleanup.sh" \
+    # 동봉본이 정본이다. 2026-08-12 이전엔 이 줄이 ~/.claude/hooks/ 를 절대경로로 가리켰고
+    # 그 스크립트는 레포에 없었다 — 즉 정리 규칙 전체가 원본 머신에만 있었고, 다른 머신에서는
+    # 훅이 조용히 아무것도 안 하고 지나갔다. 나머지 훅과 같은 방식(동봉본)으로 되돌린다.
+    cleanup_sh="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}/lib/close-session-cleanup.sh"
+    cleanup=$(bash "$cleanup_sh" \
       "$(echo "$input" | jq -r '.cwd // empty')" 2>/dev/null)
     msg="🔒 세션을 닫았습니다 — 자리비움 자동 핸드오프를 만들지 않아요. 이 세션에 다시 프롬프트를 보내면 자동으로 해제됩니다."
     [ -n "$cleanup" ] && msg="$msg
