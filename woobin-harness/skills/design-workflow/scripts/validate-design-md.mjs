@@ -40,9 +40,9 @@ function isExternalReference(value) {
   return typeof value === 'string' && (value.includes('@') || value.includes('://'))
 }
 
-function safeProjectPath(repoRoot, value) {
+function safeProjectPath(repoRoot, value, options = {}) {
   if (typeof value !== 'string' || value.trim() === '') return null
-  if (isExternalReference(value)) return null
+  if (options.allowExternal && isExternalReference(value)) return null
   const resolved = path.resolve(repoRoot, value)
   const rel = path.relative(repoRoot, resolved)
   if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) return resolved
@@ -50,7 +50,7 @@ function safeProjectPath(repoRoot, value) {
 }
 
 function addMissingPathErrors(errors, repoRoot, data) {
-  data.authorities?.forEach((authority, index) => {
+  if (Array.isArray(data.authorities)) data.authorities.forEach((authority, index) => {
     const candidate = safeProjectPath(repoRoot, authority?.path)
     if (candidate && !fs.existsSync(candidate)) {
       errors.push({ code: 'DESIGN_E_PATH_MISSING', path: `/authorities/${index}/path`, message: 'referenced project path does not exist' })
@@ -58,17 +58,18 @@ function addMissingPathErrors(errors, repoRoot, data) {
       errors.push({ code: 'DESIGN_E_PATH_OUTSIDE_REPO', path: `/authorities/${index}/path`, message: 'referenced path leaves repository root' })
     }
   })
-  data.decisions?.forEach((decision, index) => {
+  if (!Array.isArray(data.decisions)) return
+  data.decisions.forEach((decision, index) => {
     const base = `/decisions/${index}`
-    decision?.source?.references?.forEach((ref, refIndex) => {
-      const candidate = safeProjectPath(repoRoot, ref)
+    if (Array.isArray(decision?.source?.references)) decision.source.references.forEach((ref, refIndex) => {
+      const candidate = safeProjectPath(repoRoot, ref, { allowExternal: true })
       if (candidate && !fs.existsSync(candidate)) {
         errors.push({ code: 'DESIGN_E_PATH_MISSING', path: `${base}/source/references/${refIndex}`, message: 'referenced project path does not exist' })
       } else if (candidate === false) {
         errors.push({ code: 'DESIGN_E_PATH_OUTSIDE_REPO', path: `${base}/source/references/${refIndex}`, message: 'referenced path leaves repository root' })
       }
     })
-    decision?.localEvidence?.forEach((ref, refIndex) => {
+    if (Array.isArray(decision?.localEvidence)) decision.localEvidence.forEach((ref, refIndex) => {
       const candidate = safeProjectPath(repoRoot, ref)
       if (candidate && !fs.existsSync(candidate)) {
         errors.push({ code: 'DESIGN_E_PATH_MISSING', path: `${base}/localEvidence/${refIndex}`, message: 'referenced project path does not exist' })
@@ -76,7 +77,7 @@ function addMissingPathErrors(errors, repoRoot, data) {
         errors.push({ code: 'DESIGN_E_PATH_OUTSIDE_REPO', path: `${base}/localEvidence/${refIndex}`, message: 'referenced path leaves repository root' })
       }
     })
-    decision?.enforcement?.forEach((item, itemIndex) => {
+    if (Array.isArray(decision?.enforcement)) decision.enforcement.forEach((item, itemIndex) => {
       const candidate = safeProjectPath(repoRoot, item?.path)
       if (candidate && !fs.existsSync(candidate)) {
         errors.push({ code: 'DESIGN_E_PATH_MISSING', path: `${base}/enforcement/${itemIndex}/path`, message: 'referenced project path does not exist' })
@@ -109,6 +110,7 @@ if (!schemaMatch || Number(schemaMatch[1]) !== SCHEMA_VERSION) {
 }
 
 const errors = []
+let data
 if (countOccurrences(text, START) !== 1 || countOccurrences(text, END) !== 1 || text.indexOf(START) > text.indexOf(END)) {
   errors.push({ code: 'DESIGN_E_MARKERS', path: '/', message: 'managed file requires exactly one data marker pair' })
 } else {
@@ -118,11 +120,15 @@ if (countOccurrences(text, START) !== 1 || countOccurrences(text, END) !== 1 || 
     errors.push({ code: 'DESIGN_E_DATA_BLOCK', path: '/', message: 'managed data must be one fenced json block' })
   } else {
     try {
-      const data = JSON.parse(block[1])
-      errors.push(...validateDesignData(data))
-      addMissingPathErrors(errors, repoRoot, data)
+      data = JSON.parse(block[1])
     } catch (error) {
       errors.push({ code: 'DESIGN_E_JSON', path: '/', message: error.message })
+    }
+    if (!errors.some((error) => error.code === 'DESIGN_E_JSON')) {
+      errors.push(...validateDesignData(data))
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        addMissingPathErrors(errors, repoRoot, data)
+      }
     }
   }
 }
@@ -134,5 +140,4 @@ for (const error of errors) {
 if (errors.length) {
   process.exit(1)
 }
-const data = JSON.parse(text.slice(text.indexOf(START) + START.length, text.indexOf(END)).match(/^\s*```json\s*\n([\s\S]*?)\n```\s*$/)[1])
 console.log(`DESIGN_OK schema=${SCHEMA_VERSION} decisions=${data.decisions.length}`)

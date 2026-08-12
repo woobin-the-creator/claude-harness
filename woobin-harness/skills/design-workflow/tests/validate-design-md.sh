@@ -45,4 +45,33 @@ if node "$CLI" "$FIXTURES/design-invalid-enforcement" >"$TMP_ROOT/out" 2>"$TMP_R
 fi
 grep -F 'DESIGN_E_ENFORCEMENT_REQUIRED' "$TMP_ROOT/err"
 
+if node "$CLI" "$FIXTURES/design-invalid-local-evidence-external" >"$TMP_ROOT/out" 2>"$TMP_ROOT/err"; then
+  echo 'external-looking local evidence unexpectedly passed' >&2
+  exit 1
+fi
+grep -F 'DESIGN_E_PATH_MISSING path=/decisions/0/localEvidence/0' "$TMP_ROOT/err"
+
+if node "$CLI" "$FIXTURES/design-invalid-local-evidence-non-string" >"$TMP_ROOT/out" 2>"$TMP_ROOT/err"; then
+  echo 'non-string local evidence unexpectedly passed' >&2
+  exit 1
+fi
+grep -F 'DESIGN_E_LOCAL_EVIDENCE_ITEM path=/decisions/0/localEvidence/0' "$TMP_ROOT/err"
+
+if node "$CLI" "$FIXTURES/design-invalid-enforcement-external-path" >"$TMP_ROOT/out" 2>"$TMP_ROOT/err"; then
+  echo 'external-looking enforcement path unexpectedly passed' >&2
+  exit 1
+fi
+grep -F 'DESIGN_E_PATH_MISSING path=/decisions/0/enforcement/0/path' "$TMP_ROOT/err"
+
+if node "$CLI" "$FIXTURES/design-invalid-shape" >"$TMP_ROOT/out" 2>"$TMP_ROOT/err"; then
+  echo 'invalid schema shape unexpectedly passed' >&2
+  exit 1
+fi
+grep -F 'DESIGN_E_AUTHORITIES path=/authorities' "$TMP_ROOT/err"
+grep -F 'DESIGN_E_DECISIONS path=/decisions' "$TMP_ROOT/err"
+if grep -F 'DESIGN_E_JSON' "$TMP_ROOT/err"; then
+  echo 'schema shape error was misreported as JSON parse failure' >&2
+  exit 1
+fi
+
 echo ALL-OK

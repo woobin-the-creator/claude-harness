@@ -30,6 +30,10 @@ function isSafeRelativePath(value) {
   return normalized[0] !== '..' && !normalized.includes('..')
 }
 
+function isExternalReference(value) {
+  return typeof value === 'string' && (value.includes('@') || value.includes('://'))
+}
+
 export function validateDesignData(data) {
   const errors = []
   const add = (code, path, message) => errors.push({ code, path, message })
@@ -93,6 +97,17 @@ export function validateDesignData(data) {
     if (!Array.isArray(enforcement)) add('DESIGN_E_ENFORCEMENT', `${base}/enforcement`, 'enforcement must be an array')
     if (!Array.isArray(waivers)) add('DESIGN_E_WAIVERS', `${base}/waivers`, 'waivers must be an array')
 
+    if (Array.isArray(refs)) refs.forEach((ref, refIndex) => {
+      if (typeof ref !== 'string' || ref.trim() === '' || (!isExternalReference(ref) && !isSafeRelativePath(ref))) {
+        add('DESIGN_E_REFERENCE_ITEM', `${base}/source/references/${refIndex}`, 'reference must be external or a safe relative path')
+      }
+    })
+    if (Array.isArray(evidence)) evidence.forEach((ref, refIndex) => {
+      if (!isSafeRelativePath(ref)) {
+        add('DESIGN_E_LOCAL_EVIDENCE_ITEM', `${base}/localEvidence/${refIndex}`, 'local evidence requires a safe relative path')
+      }
+    })
+
     if (decision?.source?.type === 'local-incident' && (!refs?.length || !evidence?.length)) {
       add('DESIGN_E_INCIDENT_EVIDENCE', base, 'local incidents require source references and local evidence')
     }
@@ -102,12 +117,12 @@ export function validateDesignData(data) {
     if ((decision?.status === 'component-enforced' || decision?.status === 'ci-enforced') && !enforcement?.length) {
       add('DESIGN_E_ENFORCEMENT_REQUIRED', `${base}/enforcement`, 'enforced status requires an enforcement record')
     }
-    enforcement?.forEach((item, itemIndex) => {
+    if (Array.isArray(enforcement)) enforcement.forEach((item, itemIndex) => {
       if (!ENFORCEMENT_TYPES.has(item?.type) || !isSafeRelativePath(item?.path)) {
         add('DESIGN_E_ENFORCEMENT_ITEM', `${base}/enforcement/${itemIndex}`, 'enforcement requires a known type and safe relative path')
       }
     })
-    waivers?.forEach((item, itemIndex) => {
+    if (Array.isArray(waivers)) waivers.forEach((item, itemIndex) => {
       if (!item?.reason || !item?.owner || !ISO_DATE.test(item?.expires ?? '')) {
         add('DESIGN_E_WAIVER', `${base}/waivers/${itemIndex}`, 'waiver requires reason, owner, and YYYY-MM-DD expires')
       }

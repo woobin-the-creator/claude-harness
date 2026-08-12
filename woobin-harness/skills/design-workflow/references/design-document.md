@@ -64,7 +64,9 @@ Implemented diagnostics:
 - `DESIGN_E_SOURCE`: unknown source type.
 - `DESIGN_E_RULE`: rule is empty.
 - `DESIGN_E_REFERENCES`: source references is not an array.
+- `DESIGN_E_REFERENCE_ITEM`: source reference is neither external nor a safe relative path.
 - `DESIGN_E_LOCAL_EVIDENCE`: local evidence is not an array.
+- `DESIGN_E_LOCAL_EVIDENCE_ITEM`: local evidence item is not a safe relative path.
 - `DESIGN_E_ENFORCEMENT`: enforcement is not an array.
 - `DESIGN_E_WAIVERS`: waivers is not an array.
 - `DESIGN_E_INCIDENT_EVIDENCE`: local incidents lack source references or local evidence.
