@@ -5,7 +5,7 @@ description: "Route product UI work through conditional direction, project evide
 
 # Design workflow router
 
-`DESIGN.md`가 없어도 작업을 멈추지 않는다. DESIGN.md가 없어도 작업을 멈추지 않는다. 파일은 디자인 기억을 영속화하는 선택적 장치다.
+DESIGN.md가 없어도 작업을 멈추지 않는다. 파일은 디자인 기억을 영속화하는 선택적 장치다.
 
 ## Startup contract
 
@@ -13,8 +13,10 @@ description: "Route product UI work through conditional direction, project evide
 2. If `DESIGN.md` is absent, continue and use code, tokens, and adjacent UI as temporary authority.
 3. If it exists without the managed marker, treat it as `DESIGN_UNMANAGED`; do not overwrite it.
 4. If managed, run `scripts/validate-design-md.mjs` before trusting lifecycle data.
-5. Announce the route once in commentary using `작업 유형: <mode> · 사용 모듈: <ordered modules>`.
-6. Read only the references listed for that route.
+5. If the validator exits non-zero, report stable `DESIGN_E_*` diagnostics, do not trust lifecycle or design decisions, and ask the user to choose: fix the document, or ignore the managed document for this task and continue with code/tokens/adjacent UI as temporary authority.
+6. Do not treat an invalid managed document as unmanaged, and do not auto-fix it.
+7. Announce the route once in commentary using `작업 유형: <mode> · 사용 모듈: <ordered modules>`.
+8. Read only the references listed for that route.
 
 The router must not always run every module. If the user explicitly requests a module override, record why the route changed.
 In review-only mode, do not edit files.
