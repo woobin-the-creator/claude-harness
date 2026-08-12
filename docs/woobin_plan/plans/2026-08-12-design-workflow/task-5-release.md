@@ -10,7 +10,7 @@
 
 **Interfaces:**
 - Consumes: Task 3 route matrix and Task 4 aggregate test command.
-- Produces: public workflow routing, model-facing rule R16, plugin version `1.7.0`, and synchronized skill count `27`.
+- Produces: public workflow routing, model-facing rule R16, plugin version `1.6.0`, and synchronized skill count `27`.
 - Release gate: all commands in `00-overview.md` exit `0`.
 
 - [ ] **Step 1: Capture the pre-existing count drift before editing**
@@ -31,7 +31,7 @@ Expected at the current base:
 - filesystem: `26` skills before adding `design-workflow`, `27` after Tasks 1–4;
 - README, plugin description, and workflow spec still say `25`;
 - marketplace says `26`;
-- plugin version is already `1.6.0`.
+- plugin version is `1.5.0`.
 
 Record this as pre-existing metadata drift in the implementation handoff so the final `27` correction is not misattributed solely to the new skill.
 
@@ -112,7 +112,7 @@ Set `woobin-harness/.claude-plugin/plugin.json` to:
 
 ```json
 {
-  "version": "1.7.0"
+  "version": "1.6.0"
 }
 ```
 

@@ -26,7 +26,7 @@
 - Port the accepted #5/#6 behavior from `17994e0` into the new modules; do not cherry-pick that commit over the new file ownership.
 - Paraphrase external sources. Record repository, commit, path, and license; copy no substantial upstream prose or code.
 - Keep `home/HARNESS-LOG.md` unchanged until a real post-release measurement exists.
-- Every harness change bumps `woobin-harness/.claude-plugin/plugin.json` from the execution-time base version. At the current base `5f8776f`, `plugin.json` is already `1.6.0`; the planned release is `1.7.0` and the resulting skill count is `27`.
+- Every harness change bumps `woobin-harness/.claude-plugin/plugin.json` from the clean PR base version. At `origin/main` commit `36a8fe8`, `plugin.json` is `1.5.0`; the planned release is `1.6.0` and the resulting skill count is `27`.
 - All shell tests use POSIX `sh` with `set -eu`.
 
 ## File Map and Ownership
