@@ -1,7 +1,6 @@
 ---
 name: grill-me
-description: A relentless but focused interview to sharpen a plan or design — asks only the questions whose answers would change what gets built, within a fixed question budget. Use when the user wants to stress-test a plan or design, mentions "grill me", or asks to 계획을 검증/그릴/따져봐 달라고 할 때.
-argument-hint: "[question budget, default 5] — e.g. /grill-me 3"
+description: A relentless but focused interview to sharpen a plan or design — asks only the questions whose answers would change what gets built, within a fixed question budget (default 5). Use when the user wants to stress-test a plan or design, mentions "grill me", or asks to 계획을 검증/그릴/따져봐 달라고 할 때.
 ---
 
 Interview me about this plan until we reach a shared understanding. Then stop.
@@ -67,7 +66,7 @@ Once I confirm, **continue into writing-plans in this same session.** Do not tel
 
 Two conditions make that safe, and you must hold both:
 
-1. **Delegate every codebase survey to the `Explore` subagent.** The measured cost of planning-after-designing was not the interview sitting in context — it was 45 grep/sed calls run in the main loop (`~/.claude/HARNESS-LOG.md` #11, #15). Read directly only in the three cases `CLAUDE.md` allows: three files or fewer, verifying an edit you just made, or copying a style you must reproduce verbatim.
+1. **Delegate every codebase survey to the read-only explorer subagent** (Claude Code: `Explore`; Codex: `explorer`). The measured cost of planning-after-designing was not the interview sitting in context — it was 45 grep/sed calls run in the main loop (`home/HARNESS-LOG.md` #11, #15 in this harness repo). Read directly only in the three cases the active `CLAUDE.md`/`AGENTS.md` policy allows: three files or fewer, verifying an edit you just made, or copying a style you must reproduce verbatim.
 2. **Carry the grill's output forward in writing, not in memory.** Whatever I settled, the assumptions block, and — most importantly — **each option I rejected with the reason** must reach the plan document's rejected-alternatives section. If it only lives in this conversation, the implementation session proposes it again.
 
 Write a separate spec doc at `docs/woobin_plan/specs/YYYY-MM-DD-<topic>-design.md` only when the design is large enough to outlive this plan, or when I ask. For a three-or-four-decision feature the plan's own rejected-alternatives section is enough, and a spec doc is duplication.

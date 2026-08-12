@@ -22,9 +22,9 @@ description: 대화에서 논의한 개념·구조·결정·트레이드오프�
 
 1. **시각화 대상 확정** — 직전 대화에서 핵심 흐름/결정을 추린다. 노드(단계)와 화살표(데이터 이동), 분기/합류, 미구현 경로를 식별.
 2. **HTML 작성** — `history/<slug>.html`. 위 디자인 규칙대로 inline SVG. `width`/`viewBox` 고정.
-3. **PNG 렌더** — `node ~/.claude/skills/explain/scripts/render.cjs <html> <png> <width> <height>` (시스템 Chrome 채널, deviceScaleFactor 2).
-4. **눈으로 확인** — 렌더된 PNG를 Read로 열어 한글 깨짐·겹침·잘림 점검. 문제 있으면 좌표 고쳐 재렌더.
-5. **자산 커밋** — `docs/<slug>-viz` 브랜치 생성 → html·png 커밋(co-author trailer) → push. main은 건드리지 않는다.
+3. **PNG 렌더** — 로드된 스킬 디렉터리의 [scripts/render.cjs](scripts/render.cjs)를 절대 경로로 해석해 `node <render.cjs> <html> <png> <width> <height>`로 실행한다(시스템 Chrome 채널, deviceScaleFactor 2). `~/.claude/skills`를 가정하지 않는다.
+4. **눈으로 확인** — 렌더된 PNG를 호스트의 이미지 보기 기능으로 열어 한글 깨짐·겹침·잘림을 점검한다. 문제 있으면 좌표를 고쳐 재렌더한다.
+5. **자산 커밋** — `docs/<slug>-viz` 브랜치 생성 → html·png 커밋 → push. main은 건드리지 않는다. 레포의 co-author 규칙이 있을 때만 실제 작성 주체를 따른다.
 6. **raw URL 구성** — `git rev-parse HEAD`로 SHA. `https://raw.githubusercontent.com/<owner>/<repo>/<SHA>/history/<slug>.png` (SHA 고정 = 브랜치 지워도 영구).
 7. **public 확인** — `gh repo view --json visibility`. **private면 raw URL이 issue에서 안 보인다** → 사용자에게 알리고 멈춘다.
 8. **issue 생성** — `gh issue create --title ... --body-file`. 본문 = 이미지 임베드 + 핵심 결론/비교표 + HTML 원본 링크.
@@ -36,9 +36,7 @@ description: 대화에서 논의한 개념·구조·결정·트레이드오프�
 # 5~6
 git checkout -b docs/<slug>-viz
 git add history/<slug>.html history/<slug>.png
-git commit -q -m "docs(history): <제목> 시각화
-
-Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
+git commit -q -m "docs(history): <제목> 시각화"
 git push -q -u origin docs/<slug>-viz
 SHA=$(git rev-parse HEAD)
 # 7~8
@@ -53,3 +51,4 @@ gh issue create --title "<제목>" --body-file <(...)   # 또는 임시 .md 파�
 - 임베드 이미지는 **반드시 커밋 SHA URL** (브랜치명 URL은 브랜치 삭제 시 깨짐). 본문 내 HTML 소스 링크는 브랜치 경로라도 무방하되, main 머지를 권한다.
 - 렌더는 `channel: 'chrome'`으로 시스템 Chrome을 쓴다(브라우저 다운로드 불필요). 없으면 `npx playwright install chromium`.
 - gh issue는 raw HTML/CSS를 sanitize하므로 HTML을 본문에 직접 넣지 않는다 — 항상 이미지로 임베드한다.
+- 실제 실행 주체와 다른 모델/제품을 `Co-Authored-By`로 고정 기재하지 않는다.

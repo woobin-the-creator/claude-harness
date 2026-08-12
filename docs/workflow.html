@@ -372,9 +372,22 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   이름을 바꾸는 순간 훅은 에러 없이 침묵하고 CI는 빨개진다. 훅은 <code>PLAN_DOCS_DIRS</code> 같은 env var로, 테스트 제외는 <code>.no-doc-scan</code> 같은 마커 파일로 판정한다.</li>
 </ul>
 
+<h2><span class="num">07</span>Codex 호환 레이어</h2>
+<p class="sub">스킬은 하나, 런타임 계약만 분리한다.</p>
+<ul class="anti">
+  <li><b>공통 스킬 44개</b>
+  <code>woobin-harness/skills/</code>를 Claude Code와 Codex가 함께 읽는다.</li>
+  <li><b>Codex 훅 4개</b>
+  플랜 킥오프, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
+  <li><b>Codex 에이전트 4개</b>
+  플러그인 밖의 <code>codex/agents/*.toml</code>을 <code>bootstrap-codex.sh</code>가 설치한다.</li>
+  <li><b>호스트별 구현 모드</b>
+  Claude Code는 <code>plan-exec-modes.md</code>, Codex는 <code>plan-exec-modes-codex.md</code>가 모델·effort·에이전트 이름을 각각 소유한다.</li>
+</ul>
+
 <footer>
-  <p>이 문서의 정본은 <code>woobin-harness/plan-exec-modes.md</code>다 — 모드 정의가 바뀌면 거기를 먼저 고친다.
-  훅·에이전트·스킬은 <code>woobin-harness</code> 플러그인이 나른다. 새 머신 셋업은 <code>bootstrap.sh</code>.</p>
+  <p>모드 정본은 <code>woobin-harness/plan-exec-modes.md</code>(Claude Code)와 <code>plan-exec-modes-codex.md</code>(Codex)다 — 공통 선택 조건은 맞추되 호스트 고유 명령은 섞지 않는다.
+  공통 스킬과 훅 스크립트는 <code>woobin-harness</code> 플러그인이 나른다. 새 머신 셋업은 Claude Code가 <code>bootstrap.sh</code>, Codex가 <code>bootstrap-codex.sh</code>.</p>
 </footer>
 
 </div>

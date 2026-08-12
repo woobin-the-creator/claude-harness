@@ -1,0 +1,23 @@
+{
+  "name": "woobin-harness",
+  "version": "1.3.2",
+  "description": "Personal coding harness with reusable planning, review, debugging, writing, and safety workflows for Codex and Claude Code.",
+  "author": {
+    "name": "정우빈"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Woobin Harness",
+    "shortDescription": "Personal planning, review, and safety workflows",
+    "longDescription": "A cross-compatible personal coding harness that packages reusable skills and a safe subset of lifecycle hooks for Codex while preserving the full Claude Code workflow.",
+    "developerName": "정우빈",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Planning",
+      "Code review",
+      "Debugging",
+      "Lifecycle hooks"
+    ],
+    "defaultPrompt": "Show me the workflows available in Woobin Harness."
+  }
+}

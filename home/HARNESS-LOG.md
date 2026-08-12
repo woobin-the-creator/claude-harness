@@ -337,6 +337,46 @@ ctx 138k로 임계(120k)는 넘긴 상태였다. **"문서" 두 글자가 훅을
 태우는지 — `hooks.md` 전문 grep 0건, 안 태우면 훅 3개 우회) · O11(transcript mtime 갱신으로 R6 타이머
 리셋되는지) · O12(핸드오프 창이 실제로 싸게 먹히는지). **푸는 것이 곧 이 셋을 측정할 이유다.**
 
+## 19. Claude Code 플러그인을 Codex와 공용화 (2026-08-12)
+
+**발단**: 같은 개인 하네스를 Codex에서도 쓰고 싶다는 요청. 공식 계약을 대조하니 스킬은 양쪽 모두 `SKILL.md` 기반 open agent skills 표준을 읽고, Codex 플러그인도 `.codex-plugin/plugin.json` + `skills/` + `hooks/hooks.json` 구조를 쓴다. Codex는 플러그인 훅에 `CLAUDE_PLUGIN_ROOT`까지 호환 변수로 제공한다.
+
+**그대로 공유하지 못한 것**: Codex의 command hook은 비동기가 아직 미지원이라 `idle-handoff-stop.sh`의 50분 `asyncRewake`를 연결하면 턴 종료를 50분 막게 된다. Codex `apply_patch`는 Claude `Write/Edit`의 `tool_input.file_path` 대신 patch 문자열을 주고, transcript 포맷은 안정 계약이 아니다. Claude 모델명 `sonnet/opus/haiku`를 Codex subagent 입력에 주입하는 것도 잘못된 override다.
+
+**수단**:
+- 공통 `skills/`는 단일 소유 유지. Codex validator가 거부한 `argument-hint`·`disable-model-invocation`만 제거하고 의미는 description에 옮겼다. Codex 전용 안전 설치 스킬 `git-guardrails-codex`를 추가했다.
+- Claude 훅 정본을 `hooks/claude-hooks.json`으로 옮기고 Claude manifest가 명시적으로 가리키게 했다. Codex는 기본 발견 경로 `hooks/hooks.json`에서 안전한 4개만 연결한다.
+- `codex-apply-patch-adapter.sh`가 patch 헤더에서 경로를 뽑아 공유 훅 입력으로 정규화한다. stale-branch 짝은 Codex의 `last_assistant_message`와 플러그인 데이터 디렉터리를 지원한다.
+- Codex plugin/marketplace manifest, 전역 `AGENTS.md` 라우터, custom-agent TOML 4개, `bootstrap-codex.sh`, 결정론적 validator/fixture를 추가했다.
+
+**기각**:
+- 기존 훅 11개를 Codex에 전부 연결 — fail-open처럼 보여도 3900초 Stop block과 잘못된 모델 주입은 무해하지 않다.
+- Codex용 스킬 44개를 복사 — 즉시 소유자가 둘이 되고 다음 수정부터 드리프트한다.
+- 플러그인 디렉터리를 `plugins/woobin-harness`로 이동 — 현재 Claude marketplace와 문서 경로 전부를 흔드는 이득 없는 대수술이다. Codex marketplace는 공식 계약대로 repo root 상대 `./woobin-harness`를 가리킨다.
+
+**재측정**: Codex 설치 후 `/hooks` trust를 완료한 새 대화에서 ① stale 브랜치 경고와 Stop ack ② 플랜 경로 kickoff ③ 이 레포의 apply_patch 후 문서 동기화 경고를 각각 1회 확인한다. 비동기 훅 지원이 생기거나 transcript usage가 안정 schema로 공개되면 미연결 7개를 다시 평가한다.
+
+## 20. Codex 구성요소 전수 감사와 스킬 의미 패치 (2026-08-12)
+
+**발단**: #19의 구조 validator만으로는 "44개가 실제 Codex 프롬프트에 보이는가", "공유 훅 11개의 주요 분기가 살아 있는가", "스킬 본문에 Claude 툴 이름이 숨어 있지 않은가"를 증명하지 못했다. 사용자가 요구한 완료 기준도 구성요소 정상 작동 확인과 실패 목록이었다.
+
+**실제 발견한 드리프트**:
+- `review`·`design-an-interface`·`qa`가 `Agent`/`Task`/`Explore`를 호스트 구분 없이 지시했다.
+- `tutor`가 `AskUserQuestion` 전용이었고, Codex의 추천 라벨은 퀴즈 힌트가 될 수 있었다.
+- `writing-plans`의 핸드오프가 Claude 모델명·`/effort`·`EnterWorktree`를 바로 내보냈다.
+- `explain`·`design-variants-to-pr`·`pr-demo-video`가 `~/.claude/skills`·`Read`·Claude 공저자 같은 경로/표면을 가정했다.
+- `capability-audit` 수집기가 동봉 `token-waste-audit`를 두고도 Claude 홈 경로만 찾았다.
+
+**수단**:
+- 공유 스킬에 Claude/Codex 호스트 분기를 최소한으로 추가하고, 상대 경로로 번들 자산을 찾게 바꿔 단일 소유를 유지했다.
+- `plan-exec-modes-codex.md`를 추가해 Codex 모델·effort·agent kickoff을 Claude 문구와 분리했다.
+- `scripts/test-hooks.sh`로 공유 훅 11개 전체의 trigger/once/block/ack 분기를, `scripts/test-skills.sh`로 44개 자산 구문·상대 참조·네트워크 없는 runtime을 고정했다.
+- `validate-codex.sh`가 임시 `CODEX_HOME` 설치 후 `codex debug prompt-input`을 실행해 스킬 44개, 전역 정책, 프로젝트 라우터가 실제 모델 입력에 있는지 집합으로 비교한다.
+
+**결과**: 44/44 스킬 발견, 11/11 공유 훅 fixture, 4/4 Codex 훅 wiring, 4/4 Codex agent 설치, 번들 로컬 runtime fixture가 통과했다. Codex 오작동 방지를 위해 훅 7개는 계속 미연결이며, `buddy`·Claude git guardrail·`close-session`은 전용/대체/no-op 경계를 명시했다. 상세 판정은 `docs/codex-compatibility-audit-2026-08-12.md`.
+
+**재측정**: Codex가 async command hook을 지원하거나 transcript usage 안정 schema를 공개할 때 미연결 7개를 다시 평가한다. 그전에는 환경 고유 외부 의존(Playwright, `pdftotext`, GitHub 쓰기)을 호환 실패와 섞지 않는다.
+
 ## 규율 (이 이력에서 반복 확인된 것)
 
 1. **소프트 개입 우선** — 차단은 세션 1회 + 재시도 통과. 오탐이 영구 장애가 되면 안 된다(#7, #10, #11 전부 이 형태).

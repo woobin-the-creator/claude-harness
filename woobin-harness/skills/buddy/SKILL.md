@@ -1,7 +1,6 @@
 ---
 name: buddy
-description: "Show, pet, or manage your coding companion. Use when the user types /buddy or mentions their companion by name."
-argument-hint: "[show|pet|stats|help|off|on|rename <name>|personality <text>|achievements|summon [slot]|save [slot]|list|dismiss <slot>|pick|frequency [seconds]|style [classic|round]|position [top|left]|rarity [on|off]|statusline [on|off]|uninstall]"
+description: "Show, pet, or manage the Claude Buddy coding companion. Use only when Claude Buddy is installed and the user types /buddy or mentions their companion by name. This is a Claude Code-specific integration."
 allowed-tools: mcp__claude_buddy__*
 ---
 

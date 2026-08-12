@@ -11,7 +11,8 @@
 
 input=$(cat)
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
-marker_dir="$HOME/.claude/hooks/.stale-branch-pending"
+state_dir=${HARNESS_STATE_DIR:-$HOME/.claude}
+marker_dir="$state_dir/hooks/.stale-branch-pending"
 
 # git 저장소가 아니면 조용히 종료.
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
@@ -40,11 +41,17 @@ behind=$(git rev-list --count "HEAD..origin/${default}" 2>/dev/null)
 [ -n "$behind" ] || behind=0
 [ "$behind" -gt 0 ] || exit 0
 
+if [ "${HARNESS_HOST:-claude}" = "codex" ]; then
+  worktree_instruction="최신 origin/${default} 기반의 새 worktree를 만들지 사용자에게 물어보세요"
+else
+  worktree_instruction="EnterWorktree로 최신 ${default} 기반(baseRef=fresh) 워크트리를 만들지 사용자에게 물어보세요"
+fi
+
 ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}' 브랜치가 origin/${default}보다 ${behind} 커밋 뒤처져 있고, 격리된 워크트리가 아닙니다.
 
 이 경고는 사용자의 첫 메시지 내용과 무관하게 예외 없이 최우선입니다. 사용자가 완전히 다른 질문이나 작업을 요청했더라도, 조사나 답변을 먼저 진행하지 말고 이번 턴 응답의 맨 첫 문장으로 위 경고 문구를 사용자에게 그대로 전달한 뒤에 사용자의 실제 요청을 처리하세요. 경고를 생략하거나 뒤로 미루면 안 됩니다.
 
-알린 다음: 새 작업을 시작하는 맥락이면 EnterWorktree로 최신 ${default} 기반(baseRef=fresh) 워크트리를 만들지 사용자에게 물어보세요 — 자동으로 만들지 말고 확인을 받으세요. 사용자가 방금 만든 브랜치를 이어서 하려는 등 의도적으로 현재 브랜치에 머무는 경우라면 경고만 전하고 그대로 진행하세요."
+알린 다음: 새 작업을 시작하는 맥락이면 ${worktree_instruction} — 자동으로 만들지 말고 확인을 받으세요. 사용자가 방금 만든 브랜치를 이어서 하려는 등 의도적으로 현재 브랜치에 머무는 경우라면 경고만 전하고 그대로 진행하세요."
 
 if [ -n "$session_id" ]; then
   mkdir -p "$marker_dir" 2>/dev/null

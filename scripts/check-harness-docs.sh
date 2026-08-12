@@ -68,6 +68,7 @@ echo "[동반 수정]"
 changed() {
   { git diff --name-only 2>/dev/null
     git diff --cached --name-only 2>/dev/null
+    git ls-files --others --exclude-standard 2>/dev/null
     if git rev-parse --verify -q origin/main >/dev/null 2>&1; then
       b=$(git merge-base HEAD origin/main 2>/dev/null)
       [ -n "$b" ] && git diff --name-only "$b" HEAD 2>/dev/null
@@ -104,8 +105,17 @@ fi
 
 if has "$ch" '^woobin-harness/'; then
   has "$ch" '^woobin-harness/\.claude-plugin/plugin\.json$' \
-    || say "woobin-harness/ 가 바뀌었는데 plugin.json 의 version 을 안 올렸다 — 설치본은 옛날 그대로 돈다"
+    || say "woobin-harness/ 가 바뀌었는데 Claude plugin.json 의 version 을 안 올렸다 — 설치본은 옛날 그대로 돈다"
+  has "$ch" '^woobin-harness/\.codex-plugin/plugin\.json$' \
+    || say "woobin-harness/ 가 바뀌었는데 Codex plugin.json 의 version 을 안 올렸다"
 fi
+
+claude_version=$(jq -r '.version // empty' woobin-harness/.claude-plugin/plugin.json 2>/dev/null)
+codex_version=$(jq -r '.version // empty' woobin-harness/.codex-plugin/plugin.json 2>/dev/null)
+[ -n "$claude_version" ] || say "Claude plugin.json version 이 없다"
+[ -n "$codex_version" ] || say "Codex plugin.json version 이 없다"
+[ "$claude_version" = "$codex_version" ] \
+  || say "Claude/Codex plugin version 이 다르다: ${claude_version:-없음} != ${codex_version:-없음}"
 
 echo
 if [ "$fail" -ne 0 ]; then

@@ -39,7 +39,11 @@ def resolve_repo(explicit):
 
 
 def find_waste_scan():
+    bundled = os.path.realpath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "token-waste-audit", "scripts", "waste_scan.py"
+    ))
     for cand in [
+        bundled,
         os.path.join(HOME, ".claude/skills/token-waste-audit/scripts/waste_scan.py"),
         os.path.join(os.environ.get("CLAUDE_PLUGIN_ROOT", ""), "skills/token-waste-audit/scripts/waste_scan.py"),
     ]:

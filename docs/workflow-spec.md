@@ -284,7 +284,7 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 
 ### R9 — 구현자에게 검증을 지시하지 않는다
 
-**기전** `plan-exec-modes.md` 공통 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
+**기전** 호스트별 모드 파일(`plan-exec-modes.md` / `plan-exec-modes-codex.md`) 공통 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
 넣지 않는다. 검증은 **별도 컨텍스트**(plan-reviewer)의 몫.
 
 **근거** Opus 5 프롬프팅 문서: *"legacy harness scaffolding that adds separate verification steps"* 는
@@ -382,7 +382,7 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 ### R14 — 하네스 문서 동기화를 기계가 센다
 
 **기전** `scripts/check-harness-docs.sh` — 훅·에이전트·스킬의 **실제 개수**를 세어 README·
-`plugin.json`·`marketplace.json`·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
+Claude/Codex `plugin.json`·marketplace·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
 등재됐는지 확인하고, `woobin-harness/` 변경 시 문서 동반 수정 여부를 git diff로 판정한다.
 짝: `harness-doc-sync-guard.sh` (PostToolUse:Edit|Write|MultiEdit) — 이 레포에서 `woobin-harness/`를
 고치면 검사기를 돌려 결과를 additionalContext로 주입한다. 세션 1회, 차단하지 않는다.
@@ -409,7 +409,7 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 ## 4. 구성요소 인벤토리
 
-전부 `woobin-harness` 플러그인이 나른다. `~/.claude`에 사본을 두지 않는다(이중 발화·드리프트 방지).
+공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
 
 ### 훅 11개
 
@@ -426,6 +426,8 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 | `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커 | R12 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
+
+Codex는 이 11개 중 `sdd-kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 4개만 연결한다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
@@ -458,11 +460,17 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-### 스킬 43개
+Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
+
+### 스킬 44개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
 `design-variants-to-pr` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등). **개별 사용 빈도는 미측정** → §8
+
+Codex 호환으로 `git-guardrails-codex`를 추가했다. Claude 전용 `argument-hint`·`disable-model-invocation` frontmatter는 Codex validator가 거부하므로 제거하고, 명시 호출 제한은 description으로 옮겼다. Claude Buddy·Claude 세션 로그처럼 본질적으로 Claude 전용인 스킬은 description에 경계를 명시하고 그대로 배포한다.
+
+2026-08-12 결정론적 감사에서 Codex의 실제 prompt input이 44개를 모두 발견했고, 번들 자산(브레인스토밍 서버, 토큰/역량 분석기, 미디어 추출기, 포스트 조립기)의 네트워크 없는 fixture가 통과했다. 세부 결과와 의도적 미지원은 `docs/codex-compatibility-audit-2026-08-12.md`.
 
 상시 컨텍스트 비용은 스킬 **description만** 실린다(본문은 호출 시 로드). 이전 측정에서 유사 플러그인
 14엔트리가 ~500 tok이었다 — 세션 floor 43~46k의 1% 수준이라 **비용은 스킬 제거 사유가 아니다.**
@@ -477,8 +485,9 @@ mtime 캐시로 1초 갱신 부담 제거. claude-buddy **wrapper** 방식이라
 
 ## 5. 구현 모드
 
-전문은 `woobin-harness/plan-exec-modes.md`. 훅이 플랜 저장 시 **1개를 추천**한다 —
+전문은 Claude Code용 `woobin-harness/plan-exec-modes.md`와 Codex용 `woobin-harness/plan-exec-modes-codex.md`. 공유 `writing-plans` 스킬이 호스트 대응본에서 **1개를 추천**한다 —
 추천 근거는 overview의 순서 의존성이고, 그 판단은 **플랜을 방금 쓴 세션만 싸게 할 수 있다.**
+아래 표는 Claude Code 런치 값이며, Codex 대응은 각각 `gpt-5.6-terra/medium`, `gpt-5.6/medium`, `gpt-5.6/xhigh`를 쓴다.
 
 | 모드 | 런치 | 성립 조건 | 위임 |
 |------|------|-----------|------|
@@ -566,7 +575,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. `plan-implementer`의 `memory: local` 트레이드오프도 미측정 |
 | O2 | `maxTurns` 60/30 값의 근거 | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
 | O3 | 모드 3종의 **실사용 후 재측정** | 도입 2026-08-07, 아직 안 함. 기준선은 $2.57~2.82/태스크 |
-| O4 | 스킬 43개 개별 사용 빈도 | 미측정. 안 쓰는 스킬의 description이 상시 비용이다 |
+| O4 | 스킬 44개 개별 사용 빈도 | 미측정. 안 쓰는 스킬의 description이 상시 비용이다 |
 | O5 | 편집 가드 [A] | SDD 스킬을 안 쓰므로 원장이 안 생겨 **사실상 비활성**. 폐기 후보 1순위 |
 | O6 | `PLAN_DOCS_DIRS` 이중 값 | 전환기. 전 브랜치가 `woobin_plan`으로 넘어가면 좁힌다 |
 | O7 | R12의 **응답 검사 게이트 패턴**을 다른 훅에 확대 | 지금은 stale-branch에만. additionalContext 드롭은 모든 훅에 해당하는데 다른 훅은 검사가 없다 |
@@ -614,8 +623,9 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 
 | 파일 | 내용 |
 |------|------|
-| `home/HARNESS-LOG.md` | 개선 16건의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
-| `woobin-harness/plan-exec-modes.md` | 모드 3종 전문 |
+| `home/HARNESS-LOG.md` | 개선 이력의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
+| `woobin-harness/plan-exec-modes.md` | Claude Code 모드 3종 전문 |
+| `woobin-harness/plan-exec-modes-codex.md` | Codex 모델·effort·에이전트 대응본 |
 | `woobin-harness/hooks/*.sh` | 각 파일 헤더에 그 훅만의 상세 근거(사고 이력 포함) |
 | `docs/workflow.html` | 사람이 보는 요약 |
 | `README.md` | 레포 구조·플러그인 형태·전환 절차 |

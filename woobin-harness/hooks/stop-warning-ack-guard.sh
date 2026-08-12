@@ -11,7 +11,8 @@ input=$(cat)
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
 [ -n "$session_id" ] || exit 0
 
-marker_dir="$HOME/.claude/hooks/.stale-branch-pending"
+state_dir=${HARNESS_STATE_DIR:-$HOME/.claude}
+marker_dir="$state_dir/hooks/.stale-branch-pending"
 marker="$marker_dir/$session_id"
 [ -f "$marker" ] || exit 0
 
@@ -20,12 +21,12 @@ stop_hook_active=$(printf '%s' "$input" | jq -r '.stop_hook_active // false' 2>/
 
 signature="stale-branch 점검"
 
-last_text=""
+last_text=$(printf '%s' "$input" | jq -r '.last_assistant_message // empty' 2>/dev/null)
 if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
-  last_text=$(tail -n 2000 "$transcript_path" 2>/dev/null | jq -s -r '
-    [.[] | select(.type == "assistant")] | last
-    | (.message.content // []) | map(select(.type == "text") | .text) | join("\n")
-  ' 2>/dev/null)
+  [ -n "$last_text" ] || last_text=$(tail -n 2000 "$transcript_path" 2>/dev/null | jq -s -r '
+      [.[] | select(.type == "assistant")] | last
+      | (.message.content // []) | map(select(.type == "text") | .text) | join("\n")
+    ' 2>/dev/null)
 fi
 
 # 응답에 경고 원문이 들어갔으면 충족 — 마커 정리하고 조용히 종료.
@@ -40,8 +41,8 @@ if [ "$stop_hook_active" = "true" ]; then
   exit 0
 fi
 
-# transcript를 못 읽었으면(파싱 실패 등) fail-open — 잘못된 파싱으로 계속 막지 않는다.
-if [ -z "$transcript_path" ] || [ ! -f "$transcript_path" ]; then
+# 마지막 응답도 transcript도 못 읽었으면 fail-open — 잘못된 파싱으로 계속 막지 않는다.
+if [ -z "$last_text" ] && { [ -z "$transcript_path" ] || [ ! -f "$transcript_path" ]; }; then
   exit 0
 fi
 

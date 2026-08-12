@@ -4,8 +4,7 @@ description: >
   Transforms knowledge sources into an Obsidian StudyVault. Two modes:
   (1) Document Mode — PDF/text/web sources → study notes with practice questions.
   (2) Codebase Mode — source code project → onboarding vault for new developers.
-  Mode is auto-detected based on project markers in CWD.
-argument-hint: "[source-path-or-url]"
+  Mode is auto-detected based on project markers in CWD. Accepts an optional source path or URL.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, WebFetch
 ---
 
