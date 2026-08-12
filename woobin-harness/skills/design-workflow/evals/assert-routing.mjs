@@ -5,27 +5,32 @@ const expected = {
   'established-first-use': {
     route: 'system-evidence → implementation-contracts → review',
     design: 'absent',
-    mutation: 'allowed',
+    localMutation: 'allowed',
+    escalation: 'approval-required',
   },
   greenfield: {
     route: 'direction → system-evidence → implementation-contracts → review',
     design: 'absent',
-    mutation: 'approval-required',
+    localMutation: 'allowed',
+    escalation: 'approval-required',
   },
   incremental: {
     route: 'system-evidence → implementation-contracts → review',
     design: 'validate',
-    mutation: 'allowed',
+    localMutation: 'allowed',
+    escalation: 'approval-required',
   },
   'review-only': {
     route: 'system-evidence → review',
     design: 'validate',
-    mutation: 'forbidden',
+    localMutation: 'forbidden',
+    escalation: 'forbidden',
   },
   'guard-promotion': {
     route: 'system-evidence → implementation-contracts → evolution → review',
     design: 'absent',
-    mutation: 'approval-required',
+    localMutation: 'allowed',
+    escalation: 'approval-required',
   },
 }
 
@@ -46,7 +51,7 @@ const parsed = new Map()
 for (const rawLine of output.split(/\r?\n/)) {
   const line = rawLine.trim()
   if (line === '') continue
-  const match = /^(ROUTE|DESIGN_BEHAVIOR|MUTATION|FIRST_ACTION)=(.*)$/.exec(line)
+  const match = /^(ROUTE|DESIGN_BEHAVIOR|LOCAL_MUTATION|ESCALATION|FIRST_ACTION)=(.*)$/.exec(line)
   if (!match) {
     fail(`unexpected line: ${line}`)
   }
@@ -57,7 +62,7 @@ for (const rawLine of output.split(/\r?\n/)) {
   parsed.set(key, value)
 }
 
-for (const key of ['ROUTE', 'DESIGN_BEHAVIOR', 'MUTATION', 'FIRST_ACTION']) {
+for (const key of ['ROUTE', 'DESIGN_BEHAVIOR', 'LOCAL_MUTATION', 'ESCALATION', 'FIRST_ACTION']) {
   if (!parsed.has(key)) {
     fail(`missing key: ${key}`)
   }
@@ -65,10 +70,17 @@ for (const key of ['ROUTE', 'DESIGN_BEHAVIOR', 'MUTATION', 'FIRST_ACTION']) {
 
 assertEqual('ROUTE', parsed.get('ROUTE'), contract.route)
 assertEqual('DESIGN_BEHAVIOR', parsed.get('DESIGN_BEHAVIOR'), contract.design)
-assertEqual('MUTATION', parsed.get('MUTATION'), contract.mutation)
+assertEqual('LOCAL_MUTATION', parsed.get('LOCAL_MUTATION'), contract.localMutation)
+assertEqual('ESCALATION', parsed.get('ESCALATION'), contract.escalation)
 
-if (parsed.get('FIRST_ACTION').trim() === '') {
-  fail('FIRST_ACTION is empty')
+const firstAction = parsed.get('FIRST_ACTION').trim()
+const routeAnnouncement = `작업 유형: `
+const moduleAnnouncement = ` · 사용 모듈: ${contract.route}`
+if (!firstAction.startsWith(routeAnnouncement)) {
+  fail('FIRST_ACTION must start with route announcement')
+}
+if (!firstAction.includes(moduleAnnouncement)) {
+  fail(`FIRST_ACTION must include "${moduleAnnouncement}"`)
 }
 
 function assertEqual(key, actual, expectedValue) {

@@ -7,7 +7,8 @@ for test_script in \
   validate-design-md.sh \
   module-contract.sh \
   skill-contract.sh \
-  router-contract.sh
+  router-contract.sh \
+  eval-contract.sh
 do
   sh "$SCRIPT_DIR/$test_script"
 done

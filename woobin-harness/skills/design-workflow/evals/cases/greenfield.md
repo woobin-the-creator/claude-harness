@@ -1,9 +1,10 @@
-You are evaluating the repository-local design-workflow skill routing behavior. Respond only with these exact four lines:
+You are evaluating the repository-local design-workflow skill routing behavior. Use the repository-local `design-workflow` skill explicitly. Respond only with these exact five lines:
 
 ROUTE=<ordered module names>
 DESIGN_BEHAVIOR=<absent|validate|unmanaged>
-MUTATION=<allowed|forbidden|approval-required>
-FIRST_ACTION=<one sentence>
+LOCAL_MUTATION=<allowed|forbidden>
+ESCALATION=<allowed|approval-required|forbidden>
+FIRST_ACTION=<one sentence starting with the route announcement: 작업 유형: <mode> · 사용 모듈: <ordered module names>>
 
 Synthetic repository facts:
 - Brand-new B2B dashboard project.

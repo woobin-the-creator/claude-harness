@@ -12,6 +12,35 @@ for fixture in established-first-use greenfield incremental review-only guard-pr
   done
 done
 
+assert_fixture_route() {
+  fixture="$1"
+  expected="$2"
+  actual=$(
+    awk '
+      $0 == "# Expected route" { capture = 1; next }
+      capture && $0 != "" { print; exit }
+    ' "$ROUTES/$fixture.md"
+  )
+  test "$actual" = "$expected"
+}
+
+grep -F '작업 유형: <mode> · 사용 모듈: <ordered modules>' "$SKILL" >/dev/null
+grep -F '| Existing project, first explicit use | system-evidence → implementation-contracts → review | Scope inspection to current work; propose DESIGN.md only after durable value appears |' "$SKILL" >/dev/null
+grep -F '| Greenfield | direction → system-evidence → implementation-contracts → review | Obtain approval for direction before adoption |' "$SKILL" >/dev/null
+grep -F '| Established incremental UI | system-evidence → implementation-contracts → review | Skip direction |' "$SKILL" >/dev/null
+grep -F '| Large redesign | direction → system-evidence → implementation-contracts → review → evolution | Keep new direction candidate until approved |' "$SKILL" >/dev/null
+grep -F '| Review-only | system-evidence → review | Do not edit files |' "$SKILL" >/dev/null
+grep -F '| Recurring failure/enforce | system-evidence → implementation-contracts → evolution → review | Choose lowest effective guard; respect approval boundary |' "$SKILL" >/dev/null
+grep -F '| Render-invariant logic | none | State that this skill does not apply and continue normal engineering work |' "$SKILL" >/dev/null
+
+assert_fixture_route established-first-use 'system-evidence → implementation-contracts → review'
+assert_fixture_route greenfield 'direction → system-evidence → implementation-contracts → review'
+assert_fixture_route incremental 'system-evidence → implementation-contracts → review'
+assert_fixture_route review-only 'system-evidence → review'
+assert_fixture_route guard-promotion 'system-evidence → implementation-contracts → evolution → review'
+assert_fixture_route design-managed 'system-evidence → implementation-contracts → review'
+assert_fixture_route design-unmanaged 'system-evidence → implementation-contracts → review'
+
 grep -F 'system-evidence → implementation-contracts → review' "$ROUTES/established-first-use.md"
 grep -F 'direction → system-evidence → implementation-contracts → review' "$ROUTES/greenfield.md"
 grep -F 'review-only' "$ROUTES/review-only.md"

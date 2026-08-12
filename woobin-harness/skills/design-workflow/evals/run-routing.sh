@@ -6,24 +6,33 @@ if [ "$#" -ne 1 ]; then
   exit 2
 fi
 
-if ! command -v claude >/dev/null 2>&1; then
-  echo "claude CLI not found on PATH" >&2
-  exit 127
-fi
-
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../../../.." && pwd -P)
 PLUGIN_DIR="$ROOT/woobin-harness"
 CASES_DIR="$SCRIPT_DIR/cases"
 ASSERT="$SCRIPT_DIR/assert-routing.mjs"
 REQUESTED="$1"
-OUT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/design-workflow-routing.XXXXXX")
 
-if [ "$REQUESTED" = all ]; then
-  CASES="established-first-use greenfield incremental review-only guard-promotion"
-else
-  CASES="$REQUESTED"
+ALL_CASES="established-first-use greenfield incremental review-only guard-promotion"
+case "$REQUESTED" in
+  all)
+    CASES="$ALL_CASES"
+    ;;
+  established-first-use|greenfield|incremental|review-only|guard-promotion)
+    CASES="$REQUESTED"
+    ;;
+  *)
+    echo "unknown routing eval case: $REQUESTED" >&2
+    exit 2
+    ;;
+esac
+
+if ! command -v claude >/dev/null 2>&1; then
+  echo "claude CLI not found on PATH" >&2
+  exit 127
 fi
+
+OUT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/design-workflow-routing.XXXXXX")
 
 for case_name in $CASES; do
   case_file="$CASES_DIR/$case_name.md"
