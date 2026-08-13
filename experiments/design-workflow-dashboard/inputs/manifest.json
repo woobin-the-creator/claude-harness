@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "baselineRef": "36a8fe8e54c162f7b77e52c15cc70d649674505c",
+  "commonHashes": {
+    "common/product-brief.md": "71080f8f20d1e76ed980211091e9be37033bbef851164f9729f5b234685c2ecf",
+    "common/functional-contract.md": "9ef978ce2139c53b9707cad540c295969560d123992b76865decc854028d983a",
+    "common/src/types.ts": "7dcec250fdb35466b606e6e6164467adcaee60d1611c7e96ce2c532b6507d8cf",
+    "common/src/fixtures.ts": "f3964a74df5d37f5365eb76f60deba4682dd810498084b3b6e1bbf42d6ce14bb",
+    "common/package.json": "1dd5b8f7215cc1eece323b7801faf40c00abd3f4a53a20c8a8d962ca8cf97695",
+    "common/package-lock.json": "e98b93c4f7ba78a5256f452f7dc48c2eabd354c3fd3e3b6061164de1d8dc4a78",
+    "common/tsconfig.base.json": "cd42f733a381117828c1f92760875541fe709fa7dab9b3d0a36854e904a9c3d9"
+  },
+  "conditions": {
+    "baseline": {
+      "files": {
+        "CONDITION.json": "e9c9d83653ed82227c395e4a2e64dc16f5f12973fd418309c4c6e9b87c0d00cc",
+        "PROMPT.md": "400cff0e85af15bb2677b00f65a55aa6a1fe733c411b85396b8b2e276250f7ae",
+        "common/functional-contract.md": "9ef978ce2139c53b9707cad540c295969560d123992b76865decc854028d983a",
+        "common/package-lock.json": "e98b93c4f7ba78a5256f452f7dc48c2eabd354c3fd3e3b6061164de1d8dc4a78",
+        "common/package.json": "1dd5b8f7215cc1eece323b7801faf40c00abd3f4a53a20c8a8d962ca8cf97695",
+        "common/product-brief.md": "71080f8f20d1e76ed980211091e9be37033bbef851164f9729f5b234685c2ecf",
+        "common/src/fixtures.ts": "f3964a74df5d37f5365eb76f60deba4682dd810498084b3b6e1bbf42d6ce14bb",
+        "common/src/types.ts": "7dcec250fdb35466b606e6e6164467adcaee60d1611c7e96ce2c532b6507d8cf",
+        "common/tsconfig.base.json": "cd42f733a381117828c1f92760875541fe709fa7dab9b3d0a36854e904a9c3d9"
+      }
+    },
+    "design-rules": {
+      "files": {
+        "CONDITION.json": "f8fbe367e0caba319cd262e90054250fa595b418f74a566fe568186957063132",
+        "PROMPT.md": "db54b2c89626e34d1b0b9ce2ccde09e00401f5ed38f99fc5f0f807433b0b8d5e",
+        "common/functional-contract.md": "9ef978ce2139c53b9707cad540c295969560d123992b76865decc854028d983a",
+        "common/package-lock.json": "e98b93c4f7ba78a5256f452f7dc48c2eabd354c3fd3e3b6061164de1d8dc4a78",
+        "common/package.json": "1dd5b8f7215cc1eece323b7801faf40c00abd3f4a53a20c8a8d962ca8cf97695",
+        "common/product-brief.md": "71080f8f20d1e76ed980211091e9be37033bbef851164f9729f5b234685c2ecf",
+        "common/src/fixtures.ts": "f3964a74df5d37f5365eb76f60deba4682dd810498084b3b6e1bbf42d6ce14bb",
+        "common/src/types.ts": "7dcec250fdb35466b606e6e6164467adcaee60d1611c7e96ce2c532b6507d8cf",
+        "common/tsconfig.base.json": "cd42f733a381117828c1f92760875541fe709fa7dab9b3d0a36854e904a9c3d9",
+        "skill/design-rules/SKILL.md": "4884f4efa85e91831338dc50a6112d8d15093f6c90b71dbc6a2265944e56b9b3",
+        "skill/design-rules/references/instance-guide.md": "40f2bd37b83ce751f85c617c0343be1d5a4c8acec9a9789e31578bc3d0a11e83"
+      }
+    },
+    "design-workflow": {
+      "files": {
+        "CONDITION.json": "37badb4bf8bfdb9d652faa1db1820b60db74a603d271b7655f8fe8b9d1308a26",
+        "PROMPT.md": "cb317dc3d7db585c9dcf4a4cb239231de9adf3ed90052a727c09e3e345fe68c9",
+        "common/functional-contract.md": "9ef978ce2139c53b9707cad540c295969560d123992b76865decc854028d983a",
+        "common/package-lock.json": "e98b93c4f7ba78a5256f452f7dc48c2eabd354c3fd3e3b6061164de1d8dc4a78",
+        "common/package.json": "1dd5b8f7215cc1eece323b7801faf40c00abd3f4a53a20c8a8d962ca8cf97695",
+        "common/product-brief.md": "71080f8f20d1e76ed980211091e9be37033bbef851164f9729f5b234685c2ecf",
+        "common/src/fixtures.ts": "f3964a74df5d37f5365eb76f60deba4682dd810498084b3b6e1bbf42d6ce14bb",
+        "common/src/types.ts": "7dcec250fdb35466b606e6e6164467adcaee60d1611c7e96ce2c532b6507d8cf",
+        "common/tsconfig.base.json": "cd42f733a381117828c1f92760875541fe709fa7dab9b3d0a36854e904a9c3d9",
+        "skill/design-workflow/SKILL.md": "7ee17c76f333f309e699087463e78790d86cc6a598e7b9ba3e0e56f29d4f9d4d",
+        "skill/design-workflow/references/direction.md": "f4561e984594abe1069c59c91e689c0788abc5c091181cd90f14363d75bdcbe7",
+        "skill/design-workflow/references/implementation-contracts.md": "14d0a5b982d161a4787506b33df1ec5fccc80907f768033a499f1b3fa14933da",
+        "skill/design-workflow/references/review.md": "94b299c333b94700b746b65a3ae0a073dbbd134a0969e2c658cbc31b71dbf1d0",
+        "skill/design-workflow/references/system-evidence.md": "3bd927ee668010cd9cf4185b56712adfca5f3401e0f3989f1e9aadba467899c6"
+      }
+    }
+  }
+}
