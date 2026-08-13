@@ -1,0 +1,7 @@
+node_modules/
+variants/*/dist/
+launcher/dist/
+playwright-report/
+test-results/
+evaluation/private/
+evaluation/artifacts/
