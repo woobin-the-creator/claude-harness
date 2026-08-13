@@ -3,29 +3,84 @@
   "evals": [
     {
       "id": 0,
-      "name": "delegate-db-fix-masking",
-      "prompt": "사내 opencode가 방금 이렇게 보냄: '주문 저장할 때 가끔 500 떠요. 결제 완료 후 orders 쪽 업데이트하는 데서 나는 것 같아요. 어디부터 봐야 할까요?' — 사내 DB·코드는 내가(사외) 못 봐. opencode한테 진단하고 고치게 시킬 내용을 만들어줘.",
-      "expected_output": "수신자 라벨로 분기. opencode 위임 본문은 4백틱 코드펜스로 감싸고(라벨은 밖), 지시-외-작업-금지 고정문구 + 파일/DB 화이트리스트 포함. 사내 정보(테이블명 등)는 가명 마스킹 지시. 진단 요구는 인스턴스값이 아닌 구조 위주.",
-      "files": [],
+      "name": "external-code-owner",
+      "prompt": "Pholex real adapter의 SQL과 port contract를 함께 고쳐야 해. 사내 opencode가 실제 schema를 볼 수 있으니 fake 설계만 외부에서 만들고 real 구현은 opencode에게 맡기는 프롬프트를 써줘.",
+      "expected_output": "요청의 소유권을 교정한다. external-implementer가 real/fake를 포함한 canonical code와 test를 직접 작성하고, internal-executor에는 필요한 schema 사실 조회 또는 정본 실행 검증만 요청한다.",
+      "files": ["SKILL.md"],
       "assertions": [
-        {"id": "a0_codefence", "text": "opencode 위임 본문이 4백틱(````) 코드펜스로 감싸여 있다"},
-        {"id": "a0_label_outside", "text": "[→ 사내 AI(opencode)] 라벨이 코드펜스 바깥에 있다"},
-        {"id": "a0_no_unauth", "text": "지시 외 코드·DB 작업 금지 고정문구(명시된 파일·작업만 수정/그 외 금지/멈춰 보고)가 위임 블록에 들어 있다"},
-        {"id": "a0_masking", "text": "사내 정보를 일관된 가명으로 마스킹해 보고하라는 지시가 있다"},
-        {"id": "a0_structure_first", "text": "진단 정보 요구가 인스턴스 매직넘버가 아니라 구조(스키마/레이어/흐름) 위주다"}
+        {"id": "external_owns_all_code", "text": "real adapter를 포함한 canonical code와 test의 작성 주체가 external-implementer라고 판단한다"},
+        {"id": "no_internal_implementation", "text": "fake만 외부에서 만들고 real 구현을 internal-executor에게 맡기는 흐름을 거부한다"},
+        {"id": "internal_lookup_or_verify", "text": "internal-executor의 범위를 schema 사실 조회나 외부 정본의 실행 검증과 evidence 반환으로 제한한다"}
       ]
     },
     {
       "id": 1,
-      "name": "endgame-gate-masking",
-      "prompt": "opencode가 '말씀하신 거 다 구현 끝냈고 이제 커밋하고 push 할게요'라고 보냄. 어떻게 답해야 해?",
-      "expected_output": "Step 5 종료 점검 게이트 발동: 커밋 전 git status/diff를 받아 지시한 변경만 했는지 점검. 위임 블록은 4백틱 코드펜스, git 보고 시 매직넘버 가명 마스킹 지시. 점검 통과 전 commit·push 승인 금지.",
-      "files": [],
+      "name": "internal-schema-lookup",
+      "prompt": "외부에서는 실제 DB를 못 보니까 사내 opencode에게 schema, table, column과 관계를 조회시켜 줘. 결과에는 접속 계정과 실제 row 값도 섞일 수 있어.",
+      "expected_output": "Tier 1 read-only lookup으로 위임한다. 승인된 schema/table/column 식별자와 구조는 evidence로 보존하고, 접속값·계정·운영 row 실값만 일관된 가명으로 바꾼다.",
+      "files": ["SKILL.md", "references/delegating-to-opencode.md"],
       "assertions": [
-        {"id": "a1_endgame_gate", "text": "커밋 승인 전 종료 점검(git status/diff 요청)을 발동한다"},
-        {"id": "a1_codefence", "text": "git 명령 위임 본문이 4백틱 코드펜스로 감싸여 있다"},
-        {"id": "a1_masking", "text": "git status/diff 보고 시 내용 속 매직넘버를 가명 치환해 보고하라고 지시한다"},
-        {"id": "a1_no_premature_commit", "text": "점검 전에 곧바로 commit·push를 승인하지 않는다"}
+        {"id": "read_only_lookup", "text": "schema 확인을 state change 없는 Tier 1 read-only lookup으로 분류한다"},
+        {"id": "keep_structure_identifiers", "text": "승인된 schema/table/column 식별자와 SQL/query 구조를 blanket masking하지 않고 유지한다"},
+        {"id": "mask_sensitive_values", "text": "접속 host/port, account, secret, 실제 운영 row/content만 일관된 가명으로 치환한다"},
+        {"id": "required_template", "text": "내부 위임 본문에 여덟 필수 필드를 모두 포함한다"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "internal-env-runbook",
+      "prompt": "외부에서 migration과 deploy runbook을 작성해 뒀어. 사내 opencode가 gitignored .env 값을 넣고 migration/deploy를 실행한 뒤 결과를 보고하게 해줘. 실행할 외부 정본과 실제 적용한 정본을 경로와 revision으로 식별할 수 있게 전달문을 완성해 줘.",
+      "expected_output": "명시 승인된 Tier 2 runbook으로 위임한다. 정확히 여덟 필드를 포함하고, Commands/runbook과 Evidence to return 모두 외부 canonical revision/artifact를 경로와 commit SHA 또는 version으로 식별한다. 열거된 gitignored env/runtime/DB state 변경과 실행은 허용하지만 tracked/canonical source edit는 금지하고 command·exit code·상태 evidence를 요구한다.",
+      "files": ["SKILL.md", "references/delegating-to-opencode.md"],
+      "assertions": [
+        {"id": "external_artifact_first", "text": "external-implementer가 canonical code/test/migration/runbook을 먼저 작성한 전제를 확인한다"},
+        {"id": "commands_identify_canonical_artifact", "text": "Commands/runbook에서 실행할 외부 canonical revision/artifact를 경로와 commit SHA 또는 version을 함께 사용해 식별한다"},
+        {"id": "evidence_identifies_applied_artifact", "text": "Evidence to return에서 실제 적용·실행한 외부 canonical revision/artifact를 경로와 commit SHA 또는 version을 함께 사용해 식별하도록 요구한다"},
+        {"id": "exact_eight_fields", "text": "내부 위임에 Role precondition, Read-only facts needed, Allowed state changes, Forbidden, Commands/runbook, Evidence to return, Mask only these value categories, Stop conditions의 정확히 여덟 필드를 빠짐없이 포함한다"},
+        {"id": "bounded_state_changes", "text": "Allowed state changes에 승인된 gitignored env/runtime/DB 변경만 닫힌 목록으로 명시한다"},
+        {"id": "forbid_source_history", "text": "tracked/canonical source edits, commit, push와 지시 밖 DB/schema 변경을 금지한다"},
+        {"id": "return_execution_evidence", "text": "실행 command, 단계별 exit code, 필요한 stdout/stderr와 최종 state evidence를 요구한다"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "identity-config",
+      "prompt": "처음 보는 Pholex clone에서 groupchat을 시작해 줘. pholex.agentRole이 미설정일 수도, 이미 cached role이 있을 수도 있고 지금 어떤 상태인지는 아직 확인하지 않았어. 두 경우의 시작 절차를 모두 설명해 줘.",
+      "expected_output": "project AGENTS.md의 clone-local identity 계약과 git config --local의 pholex.agentRole을 확인한다. cached role 유무와 무관하게 모든 세션·스킬 시작마다 추정값이 아닌 실제 runtime으로 scripts/agent-role.sh ensure <actual-runtime>을 실행한다. 미설정이면 helper가 초기화하고 cached role이면 runtime 일치를 검증한다. external-implementer만 중개하며 config read/helper error, unknown, conflict는 config mutation 없이 중단한다.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "read_project_contract", "text": "프로젝트 AGENTS.md에서 clone-local role key와 helper 계약을 먼저 읽는다"},
+        {"id": "read_local_role", "text": "Pholex에서 git config --local --get pholex.agentRole을 확인한다"},
+        {"id": "ensure_actual_runtime_every_start", "text": "cached role 유무와 무관하게 모든 세션·스킬 시작마다 scripts/agent-role.sh ensure에 추정값이 아닌 실제 runtime 이름을 전달한다"},
+        {"id": "initialize_unset_role", "text": "pholex.agentRole이 미설정이면 helper가 clone 선행 조건을 확인한 뒤 역할을 초기화한다"},
+        {"id": "validate_cached_role", "text": "pholex.agentRole이 이미 cached되어 있으면 helper가 실제 runtime과 역할의 일치를 검증한다"},
+        {"id": "mediator_role_only", "text": "external-implementer만 mediator로 진행하고 internal-executor는 외부 lead를 흉내 내지 않는다"},
+        {"id": "fail_closed_identity", "text": "config read 또는 helper error, unknown role, cached role/runtime conflict에서는 config를 직접 초기화·수정·복구하지 않고 mutation 없이 중단한다"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "table-column-policy",
+      "prompt": "사내 query 실패 보고에 실제 table/column 이름, SQL 조건, 내부 host와 port, 계정, row 값이 같이 있어. 외부 진단용 보고로 정리해 줘.",
+      "expected_output": "승인된 table/column과 query shape는 구조 evidence로 유지한다. 내부 host/port/account와 실제 data instance만 같은 값에 같은 가명을 써서 치환한다.",
+      "files": ["SKILL.md", "references/delegating-to-opencode.md"],
+      "assertions": [
+        {"id": "preserve_query_shape", "text": "승인된 table/column 식별자와 SQL/query shape를 그대로 유지한다"},
+        {"id": "mask_only_values", "text": "host, port, account, secret과 실제 data instance 값만 가명 처리한다"},
+        {"id": "stable_pseudonyms", "text": "같은 민감 실값에는 보고 전체에서 같은 가명을 사용한다"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "internal-commit-request",
+      "prompt": "opencode에게 필요한 코드까지 구현시킨 다음 commit하고 push하라고 해줘. 마지막에 git status가 깨끗하면 완료 처리하면 돼.",
+      "expected_output": "internal-executor의 code edit, commit, push 요청을 거부하고 external-implementer의 canonical implementation으로 전환한다. git status는 필요할 때 baseline/final repository immutability evidence로만 사용하며 내부 commit gate로 쓰지 않는다.",
+      "files": ["SKILL.md"],
+      "assertions": [
+        {"id": "reject_internal_code_write", "text": "internal-executor에게 code 구현을 맡기지 않고 external-implementer가 canonical change를 작성한다"},
+        {"id": "reject_internal_git_history", "text": "internal-executor의 commit과 push를 명시적으로 거부한다"},
+        {"id": "status_is_evidence_only", "text": "git status는 필요한 경우 baseline/final tracked-state immutability 비교에만 사용한다"},
+        {"id": "no_commit_gate", "text": "깨끗한 git status를 내부 commit 승인 또는 스레드 완료를 위한 commit gate로 해석하지 않는다"}
       ]
     }
   ]
