@@ -1,101 +1,80 @@
 # 사내 AI(opencode)에 위임하는 프롬프트 작성법
 
-`[→ 사내 AI(opencode)]` 블록이 **단순 Q&A를 넘어 값 주입·배포·환경 구성**을 시킬 때 이 문서를 읽고 쓴다.
-SSO/포트/인증서/IP/URL 같은 **외부 계약에 묶인 값**을 다루는 위임일수록 중요하다.
+`[→ 사내 AI(opencode)]` 블록이 단순 조회를 넘어 gitignored env, runtime/container, migration/deploy,
+DB state를 바꾸는 runbook을 실행할 때 읽는다. 역할·소유권·마스킹·여덟 필드 템플릿의 정본은
+[`../SKILL.md`](../SKILL.md)의 「시작 전 identity gate」, 「모든 내부 위임의 필수 템플릿」,
+「완료: immutability/evidence gate」다. 이 문서는 설정 위임의 결정 규칙만 보강한다.
 
-> **재설계(2026-07-07): 코드 위임 폐기.** 이제 opencode에 **코드 작성(구현)을 위임하지 않는다.** 코드는 전부 사외 정본이 소유한다. 사내 AI는 **값 주입 + 런북 실행 + 증거 보고**만 하는 실행자다. 아래 "실행 위임" 섹션이 기본 모드이고, 기존 원칙 1~5는 값 채우기·설정 위임에 계속 적용된다.
+## 실행 전제
 
-## 왜 이 문서가 필요한가 — 전제부터 바로잡기
+1. 모든 새 세션·실행 위임 시작마다 프로젝트 `AGENTS.md`의 clone-local role 계약을 확인한다.
+2. Pholex에서는 `git config --local --get pholex.agentRole`을 읽고, cached role의 유무와 무관하게
+   실제 runtime으로 `scripts/agent-role.sh ensure <actual-runtime>`을 매번 실행한다. 미설정은
+   helper가 선행 조건을 확인해 초기화하고 cached role은 실제 runtime과 맞는지 검증한다.
+   config read/helper error, unknown, conflict면 config를 직접 초기화·수정·복구하지 않고 mutation 없이
+   중단한다. helper 성공 뒤에도 실제 runtime이 `opencode`, cached role이 `internal-executor`인
+   위임에서만 계속한다.
+3. external-implementer가 canonical code/test/migration/runbook을 먼저 작성한다.
+4. internal-executor는 위임된 사실 조회와 승인된 runbook 적용·실행·evidence 수집만 한다.
+5. tracked/canonical source 수정과 commit/push는 어떤 tier에서도 허용하지 않는다.
 
-opencode는 주니어/실행자이고, **이 대화의 전체 맥락을 못 본다**(포트 컨벤션, 등록된 redirect_uri,
-어제 내린 결정 등을 모른 채 받는다). 그리고 관찰된 경향이 하나 있다 — **모호한 출처를 만나면 멈추지 않고
-"그럴듯한 값 하나"를 골라 그대로 진행한다.**
+## 왜 결정 규칙이 필요한가
 
-흔한 오해: "고성능 AI면 알아서 판단했을 텐데 사내 AI가 약해서 못 한 거다." 반은 맞다(강한 모델일수록
-모호성을 감지해 되물을 확률이 높다). 하지만 거기에 기대면 재발 방지가 "더 똑똑한 모델을 쓰자"에 의존하게 된다.
-**더 튼튼한 해법은 모델 성능이 아니라 스펙에서 모호성을 제거하는 것이다.** 위임 프롬프트가 결정 규칙을
-안 주면, opencode가 다중값 중 아무거나 골라도 *지시를 어긴 게 아니게* 된다 — 그건 실행자 잘못이기 전에
-스펙 결함이다. 이 문서의 규칙들은 그 결함을 막기 위한 것이다.
+내부 실행자는 대화 전체의 port convention, 등록된 redirect URI, 이전 결정을 모른다. 모호한 출처가 있으면
+주변 환경에서 그럴듯한 값 하나를 골라 진행할 수 있다. 모델 성능에 기대지 말고 프롬프트에서 유일한 기준,
+허용 변화, stop condition, evidence를 결정론적으로 고정한다.
 
-> **모델 티어 선택과의 경계** — 위 문단은 "티어를 고르지 마라"가 아니다. 순서를 정하는 문장이다:
-> **① 스펙에서 모호성을 제거하고 → ② 그러고도 남는 잔여 위험만 티어로 덮는다.** 스펙 설계로
-> 제거되는 건 *결정 규칙의 부재*(어느 값을 쓸지)이고, 제거되지 않는 건 두 가지다 —
-> **명시된 stop-and-ask를 실제로 지키는가**(지시가 있었는데도 뚫린 이력이 있다)와
-> **예측 불가 원문에서 마스킹 대상을 골라내는가**. 그 잔여분의 판정표는
-> SKILL.md 「위임 모델 티어」에 있다. 티어를 먼저 올려 스펙 결함을 덮는 건 이 문서가 금지하는 그것이다.
+## 원칙 1 — 유일한 계약 기준 선언
 
-## 실행 위임 (재설계 후 기본 모드)
+설정값(IP, port, URL, key 이름, 경로)은 승인된 외부 계약에서 가져온다. 등록된 redirect URI나 합의된
+port convention처럼 어떤 문자열이 기준인지 `Commands/runbook`에 명시한다. 내부 실행자는 그 기준에 맞추고
+새 기준을 설계하지 않는다.
 
-코드 구현을 시키지 않으므로 `[→ 사내 AI]` 블록은 "무엇을 구현하라"가 아니라 **"무엇을 실행하고 무엇을 보고하라"**로 쓴다. 블록에 아래를 포함한다:
+## 원칙 2 — 환경에서 역산 금지
 
-1. **실행할 스크립트 + 순서** — "`scripts/onprem/collect-schema-evidence.sh` 를 실행하라." 여러 개면 번호로 순서를 못박는다.
-2. **예상 출력의 형태** — "각 단계에서 `[PASS]`/`[SKIP]` 라인과 가명 스키마 증거가 나온다." 무엇이 정상인지 미리 알려 실행자가 이상을 감지하게 한다.
-3. **증거 요구** — "**stdout 전체를 그대로 복사해** 보고하라. 요약하지 마라." 스크립트 첫 단계의 `git rev-parse HEAD`·`git status --porcelain` 출력이 '스크립트·코드 무수정' 증거다.
-4. **수정 금지 + stop-and-ask** — "스크립트·코드를 수정하지 마라. 수정이 필요하다고 판단되면 고치지 말고 멈춰 그 이유를 보고하라."
-5. **값 채우기(필요 시)** — 대상 파일(`.env.dev` / `backend/config/real_mapping.yaml`)을 명시하고, "채운 뒤 키 목록을 `grep -E '^\s+\w+:' <파일> | sed 's/:.*/:/'` 로 재출력해 증거화하라"(값이 아니라 *어떤 키를* 채웠는지).
+인증서 SAN, host network interface, 비어 있는 port 등은 계약값의 유효성을 검증하는 evidence이지 값을
+선택하는 출처가 아니다. 여러 후보 중 하나를 고르거나 빈 값을 발견해 새 값을 만들지 못하게 한다.
 
-**스팟체크 규율**: 증거를 받으면 **왕복당 무작위 1단계를 사용자가 직접 재실행**해 출력이 일치하는지 대조한다. `git status` 라인조차 텍스트로 지어낼 수 있으므로, 신뢰의 마지막 앵커는 사용자의 직접 재현이다.
+## 원칙 3 — stop-and-ask
 
-> 값 채우기(`real_mapping.yaml`·`.env.dev`)도 판단이다 — 어느 사내 컬럼이 어느 키인지 한 번 틀리면 데이터가 조용히 오염된다. 그 위임에는 아래 원칙 1~5를 그대로 적용한다.
+계약값이 없거나 여러 값이 충돌하거나 실행 중 예상 밖 상태를 만나면 추측·수정·우회하지 않고 중단해
+evidence와 함께 보고하게 한다. 실패처럼 보이는 정상적인 fail-closed 동작도 임의 명령으로 우회하지 않는다.
 
-## 원칙 1 — 단일 진실의 원천을 명시한다
+## 원칙 4 — 교차검증과 evidence
 
-설정값(IP·포트·URL·키 이름·경로)은 거의 항상 **외부 계약(external contract)**에서 나온다. 예:
-IdP에 등록된 redirect_uri, 발급된 client_id, 등록된 도메인, 합의된 포트 컨벤션. 위임할 때 그 계약값을
-**유일한 기준**으로 못박고, "여기에 맞춰라(역산하지 말고)"를 명시한다. 기준이 무엇인지 프롬프트 안에서
-opencode가 바로 알 수 있어야 한다 — 그는 우리 머릿속 컨벤션을 모른다.
+파생된 설정이 계약 문자열과 글자 단위로 일치하는지 확인한다. 실행한 command, 단계별 exit code, 필요한
+stdout/stderr, 상태 전후 evidence를 요구한다. `git status --short`는 tracked repository immutability 확인이
+실제로 필요할 때만 baseline/final로 비교하며, commit 준비나 승인에 사용하지 않는다.
+내부 evidence가 돌아오면 실용적인 경우 사용자가 안전한 read-only checkpoint 하나를 직접 재실행한다.
+state-changing action은 재실행하지 않고, checkpoint가 내부 evidence와 다르면 즉시 중단한다.
 
-## 원칙 2 — 환경에서 역산(derive)하지 못하게 막는다
+## 원칙 5 — 값 기반 마스킹
 
-opencode는 **편한 출처**에서 값을 골라 채우려 한다: 인증서 SAN에 들어있는 IP 목록, 호스트의 임의
-네트워크 인터페이스, 지금 비어있는 포트. 이게 사고의 근원이다.
+프로젝트 보안 정책을 우선한다. Pholex의 사외 보고에서는 IP/host/port/internal URL, account/employee ID,
+credential/secret/token/certificate, 개인·장비·lot 등 운영 식별자와 실제 row/content만 일관된 가명으로
+바꾼다. 승인된 schema/table/column 식별자, SQL/query shape, 설정 key, library interface, path, count,
+exit code는 진단에 필요한 구조 evidence이므로 유지한다.
 
-- **인증서 SAN은 "그 값이 유효한지 검증"하는 곳이지 "어느 값을 쓸지 결정"하는 곳이 아니다.** SAN에
-  IP가 여러 개면 "고르라"는 신호가 아니다 — 계약값 IP가 SAN에 *포함*되기만 하면 된다.
-- **비어있는 포트를 찾아 쓰지 마라.** 포트도 계약값(등록된 redirect_uri의 포트)에 맞춘다.
-- 위임 프롬프트에 "환경에서 값을 골라내지 말고 계약값을 그대로 박아라"를 한 줄로 넣는다.
+마스킹은 사외로 나가는 보고에만 적용한다. 승인된 사내→사내 데이터 처리 runbook의 입력 데이터를 가명으로
+변환하지 않는다.
 
-## 원칙 3 — 모호하면 멈추고 보고하게 한다(stop-and-ask)
+## 실행 위임 작성 순서
 
-출처가 다중값이거나(SAN에 IP 여러 개) 계약값을 모르면, **추측해서 진행하지 말고 멈춰 보고**하도록
-명시한다. "X가 여러 개이거나 불명확하면 고르지 말고 그 상태로 보고하라"는 한 줄이 사일런트 추측을 막는다.
+1. `Role precondition`에 `internal-executor` 확인과 conflict stop을 적는다.
+2. `Read-only facts needed`에 실행 전 필요한 최소 조회를 적는다.
+3. `Allowed state changes`에 승인된 gitignored env/runtime/DB 변화만 닫힌 목록으로 적는다.
+4. 고정 `Forbidden` 문구를 유지한다.
+5. `Commands/runbook`에 external canonical revision/artifact의 경로, commit/버전, 실행 순서를 적는다.
+6. `Evidence to return`에 실제 적용·실행한 revision/artifact 식별자, 단계별 command, exit code,
+   출력, 최종 state를 적는다.
+7. `Mask only these value categories`에 실제 민감값 범주만 적는다.
+8. `Stop conditions`에 계약 누락·충돌·명령 실패·예상 밖 diff/state를 적는다.
 
-## 원칙 4 — 교차검증을 요구한다(cross-check)
+내부 실행자가 code 수정 필요성을 발견하면 현재 실행을 중단하고 evidence만 반환한다. external-implementer가
+canonical code/test를 수정한 뒤 새 runbook을 제공해야 재개한다.
 
-파생된 모든 설정이 계약값과 **글자까지** 일치하는지 확인하고 보고하게 한다. 포트·IP·경로처럼 한 글자만
-틀려도 깨지는 값은 특히. 예: `APP_BASE_URL`·`HTTPS_PORT`·등록된 redirect_uri의 IP와 포트가 **셋 다
-동일한지** 확인 후 보고. 검증 가능한 사실(`ip addr`, `ss -ltnp`, `curl`로 redirect_uri 확인 등)은
-opencode가 명령 결과로 증거를 붙이게 한다.
+## 사례: redirect URI / IP 역산 사고
 
-단, IP·포트·URL은 **마스킹 대상**(SKILL.md 공통 규약 C)이다. 보고 시 **일관된 가명으로 치환**한다 —
-같은 실제값엔 같은 가명을 쓰면(`APP_BASE_URL=<IP_A>:<PORT_1>`, redirect_uri=`<IP_A>:<PORT_1>`)
-Claude가 실제값을 보지 않고도 **가명까지 일치하는지**로 교차검증할 수 있다. `ip addr`/`curl` 증거에도
-같은 가명 치환을 적용해 붙인다.
-
-## 사례 연구 — redirect_uri / IP 역산 사고 (2026-06-11, pholex Track B)
-
-무슨 일이 있었나:
-- pholex SSO 배포 위임에서 사외 프롬프트가 IP를 *"jfpage가 쓰는 IP"* + *"cert SAN에 포함된 IP"* 로
-  가리켰다. cert SAN에는 IP가 **여러 개** 있었고, opencode는 그중 **아무거나 하나**를 골라
-  `APP_BASE_URL`에 채웠다 — 실제 서빙 IP가 아닌 값으로.
-- 같은 결의 두 번째 버그: opencode가 운영 포트를 컨벤션(prod=10004)이 아닌 임의의 `10007`로 잡았다.
-
-뿌리 원인(둘 다 동일): **opencode가 "등록된 redirect_uri"라는 계약이 아니라, 주변의 편한 값(SAN 목록·
-빈 포트)에서 설정을 역산했다.** 그리고 그렇게 하도록 *프롬프트가 모호하게 허용*했다.
-
-교정 원칙(한 문장): **ADFS에 등록된 redirect_uri(IP+포트+경로)가 유일한 기준이고, `APP_BASE_URL`과
-`HTTPS_PORT`는 거기에 맞추는 것이지 호스트 환경에서 골라내는 게 아니다.**
-
-## 설정 민감 위임 체크리스트 (블록에 넣을 것)
-
-config·배포·환경 구성을 opencode에 위임할 때 `[→ 사내 AI]` 블록에 아래를 포함한다:
-
-1. **기준 선언** — "이 작업의 유일한 기준은 〈외부 계약값, 예: 등록된 redirect_uri 전체 문자열〉이다."
-2. **역산 금지** — "환경(cert SAN, 호스트 IP, 빈 포트)에서 값을 고르지 마라. 계약값을 그대로 박아라."
-3. **stop-and-ask** — "출처가 다중값이거나 계약값이 불명확하면 고르지 말고 멈춰 보고하라."
-4. **교차검증 + 증거** — "파생값(예: APP_BASE_URL·HTTPS_PORT)이 계약값과 IP·포트까지 일치하는지
-   확인하고, `ip addr`/`curl` 등 명령 결과를 증거로 붙여 보고하라."
-5. **맥락 보강** — opencode가 모르는 우리 컨벤션·결정(예: "prod=10004 / dev=10014, decisions.html 기록")을
-   프롬프트 안에 명시한다. 그는 레포 밖 맥락을 못 본다.
-
-이 다섯 줄은 모델 성능과 무관하게 사일런트 추측을 구조적으로 막는다 — 그게 핵심이다.
+과거 SSO 배포에서 인증서 SAN의 여러 IP 중 하나와 빈 port를 내부 실행자가 골라 설정해 등록된 redirect URI와
+달라졌다. 교정 계약은 단순하다. 등록된 redirect URI 전체 문자열이 유일한 기준이고, `APP_BASE_URL`과 port는
+거기에 맞춰야 한다. SAN과 network 상태는 기준값이 실제 환경에서 유효한지 확인하는 evidence로만 쓴다.
