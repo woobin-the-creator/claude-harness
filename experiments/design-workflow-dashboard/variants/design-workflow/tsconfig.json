@@ -1,0 +1,7 @@
+{
+  "extends": "../../inputs/design-workflow/common/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "vite.config.ts"]
+}
