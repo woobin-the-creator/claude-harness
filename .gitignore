@@ -2,3 +2,4 @@
 *.bak
 *.orig
 *.bak-*
+.claude/agent-memory-local/

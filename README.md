@@ -35,8 +35,8 @@ claude-harness/
 │   ├── hooks/*.sh                    11개 (공유 훅 스크립트)
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        44개
-│   ├── plan-exec-modes.md            Claude Code 구현 모드 3종
+│   ├── skills/<name>/SKILL.md        25개
+│   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
 ├── codex/agents/*.toml               Codex 커스텀 에이전트 4개
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)

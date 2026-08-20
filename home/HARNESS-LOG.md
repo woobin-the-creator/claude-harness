@@ -243,6 +243,7 @@ superpowers를 끄면 아래 훅의 트리거가 영향을 받는다. **경로·
 | `sdd-orchestrator-edit-guard.sh` [A] | `<repo>/.superpowers/sdd/*/progress.md` 원장 | SDD 스킬을 안 쓰면 원장이 안 생겨 **[A]는 사실상 비활성**. [B]는 무관하게 동작 |
 | `plan-session-boundary-guard.sh` | 프롬프트 정규식 | 무관, 유지 |
 | `subagent-model-default.sh` / `ctx-warn-statusline.sh` / idle 2종 / stale-branch 2종 | 무관 | 유지 |
+| `stale-branch-guard.sh` (R15 하향 분기) | **`gh` CLI + PR의 draft 상태** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다. 라벨 의존은 issue #3에서 제거했다 — 이제 신호가 draft 하나라 이름 취약점이 없고, ready 전환과 동시에 하향이 풀린다(의도) |
 
 ## 17. 300k 자동 핸드오프 + 플랜 진입 정규식 + handoff 스킬 실체화 (2026-08-10)
 
@@ -337,7 +338,75 @@ ctx 138k로 임계(120k)는 넘긴 상태였다. **"문서" 두 글자가 훅을
 태우는지 — `hooks.md` 전문 grep 0건, 안 태우면 훅 3개 우회) · O11(transcript mtime 갱신으로 R6 타이머
 리셋되는지) · O12(핸드오프 창이 실제로 싸게 먹히는지). **푸는 것이 곧 이 셋을 측정할 이유다.**
 
-## 19. Claude Code 플러그인을 Codex와 공용화 (2026-08-12)
+## 19. 미사용 스킬 18개 삭제 — 다운로드 출처만 (2026-08-10)
+
+**발단**: 사용자가 "claude-harness 스킬 목록에 예전에 다른 사람이 배포한 스킬을 받아놓고 한 번도 안
+쓴 게 섞여 있다"며 정리를 요청했다. workflow-spec §8 O4("스킬 43개 개별 사용 빈도 미측정")가 정확히
+이 자리다.
+
+**근거**: `~/.claude/projects/*/*.jsonl` 1개월치(2026-07-10~08-10, 세션 1,524개)를 `jq`로 전수 스캔해
+`Skill` 툴 호출 288건을 뽑았다(다른 tool_use 타입 — SlashCommand 등 — 은 로그에 없어 `Skill`이 유일한
+호출 경로임을 확인). woobin-harness 43개 중 18개가 0회였다.
+
+**출처 판정**: git 히스토리는 무의미했다 — 43개 전부 2026-08-08 패키징 커밋(d6c6a5b) 한 건에 새 파일로
+잡혀서 rename 감지가 안 되고, 그 이전 출처가 레포에 안 남는다. 대신 본문 내용으로 추정했다 —
+① 이 레포·사용자 고유 맥락(사내 SSO, 이 하네스의 훅 구현 세부사항, "StudyVault" 등 비공개 명칭)
+언급 여부, ② 이미 별도 설치된 `mattpocock-skills:` 플러그인과의 설명 중복(`diagnose`↔`diagnosing-bugs`,
+`ubiquitous-language`↔`domain-modeling` 등 "ubiquitous language" 문구까지 겹침), ③ 명시적 의존성
+문구(`to-prd`가 본문에 `/setup-matt-pocock-skills` 실행을 전제한다고 직접 씀), ④ 별도 제품을 감싸기만
+하는 라우팅 스킬(`buddy`는 로직 없이 `claude-buddy` MCP 서버 커맨드 라우팅뿐).
+
+**수단**: 미사용 18개 중 다운로드로 확인·추정된 것만 삭제 —
+`to-prd`·`diagnose`·`ubiquitous-language`·`design-an-interface`·`scaffold-exercises`·
+`migrate-to-shoehorn`·`write-a-skill`·`writing-beats`·`writing-fragments`·`writing-shape`·
+`edit-article`·`request-refactor-plan`·`qa`·`setup-pre-commit`·`git-guardrails-claude-code`·
+`zoom-out`·`caveman`·`buddy`. 레포(`woobin-harness/skills/`)와 이 머신의 설치본(`~/.claude/skills/`,
+심링크가 아니라 실파일이었다 — 이 머신이 README "원본 머신 전환" 절의 그 원본이라) 둘 다에서 지웠다.
+자작으로 추정된 미사용 5개(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·
+`tutor-setup`)는 안 쓰였어도 남겼다 — 미사용 ≠ 무가치, 이번 삭제 기준은 "출처가 남이고 안 씀"이었지
+"안 씀" 단독이 아니다.
+
+CLAUDE.md의 "고칠 때 같이 고쳐야 하는 것"에 따라 `plugin.json`(스킬 43→25, version 1.2.0→1.3.0),
+`marketplace.json`, `README.md`, `docs/workflow-spec.md`(§4 카운트 + O4 해소 기록)를 같이 고쳤다.
+`scripts/check-harness-docs.sh`로 개수 일치를 기계로 재확인했다.
+
+**남긴 것**: 미사용이지만 자작 추정 5개는 §8에 새 항목으로 남겨 다음 audit에서 "진짜 안 쓰는지 재확인"
+대상으로 삼는다 — 이번 판정(다운로드 여부)과 그 판정(가치 있는지)은 다른 질문이다.
+
+## 20. 사용량 하드 컷은 R13이 못 덮는다 (2026-08-10)
+
+**발단**: 플랜 구현 중 세션이 끊기는 일이 반복됐다. 처음엔 R13(300k 자동 핸드오프)이 겨누는 것과
+같은 문제로 보였는데, 확인해보니 **컨텍스트 창이 아니라 사용량 하드 컷**이었다. 둘은 커버가 갈린다 —
+R13은 Stop 훅이라 **턴이 끝날 때만** 발화하고, 하드 컷은 턴 도중에 온다.
+
+**문제 A (사전 경고가 불가능)**: `statusline/ctx-warn-statusline.sh`는 컨텍스트만 센다.
+훅 입력에도 사용량 잔량이 없다. 즉 R13이 쓴 수단(임계에서 깨워 대체 경로를 만들어 준다)을
+**여기서는 쓸 수 없다.** 그래서 이 규칙은 조건부가 아니라 무조건 절차다.
+
+**문제 B (핸드오프 문서를 못 찾는다)**: R13은 문서를 `~/.claude/idle-handoffs/<session_id>.md`에
+저장한다. 하드 컷당한 세션의 id를 새 세션은 모르므로 **컷 뒤엔 그 문서에 도달할 수 없다.**
+회복 진입점이 사전지식 없이 찾히는 곳에 있어야 한다는 요구가 여기서 나왔다.
+
+**수단**: R15 신설. `plan/<name>` 브랜치 + 플랜 문서 첫 커밋 + **draft PR**을 구현 첫 턴에
+만들고, 레이어마다 **커밋 → 리뷰 → push**. 마지막 레이어를 push하면 `gh pr ready`로 draft를 벗긴다
+(issue #3 — ready~머지 창에서 다른 세션이 "진행 중"으로 오판하는 걸 막는다. 처음엔 `plan-wip`
+라벨을 뒀다가, 라벨이 나르던 정보가 전부 draft + `plan/` 접두어에서 파생 가능해 **라벨을 없앴다**).
+훅은 **하나도 추가하지 않았다** — 전달 경로가 이미 있다
+(모드 파일은 킥오프 훅이 읽게 만든다). 기존 훅 수정 1건: `stale-branch-guard.sh`가 플랜 브랜치에서
+문구를 하향한다(면제가 아니라 등급 하향 — 경고·마커·ack 게이트 유지).
+
+**설계 판단 — 하드 컷은 파일을 지우지 않는다.** 워킹 트리는 디스크에 남는다. 처음엔 task 단위 커밋을
+생각했는데(손실 상한 = 커밋 간격), 그건 파일이 날아가는 실패를 가정한 것이었다. 실제로 잃는 건
+**"어디까지 했는지"라는 기록**이라 커밋의 역할은 보존이 아니라 **라벨링**이고 레이어 해상도로 충분하다.
+task 단위는 ②a에서 git 출력이 오케스트레이터 floor에 쌓여 매 요청에 재청구되는 대가까지 있었다.
+
+**대가**: 버리기가 되돌리기로 바뀐다(§3 R15 참조). 이 교환의 판정은 **하드 컷 빈도 vs 방향 오류 빈도**이고
+아직 세지 않았다 — §8 O14. 그리고 R13의 유인을 약화시킬 수 있다: 끊겨도 안 아프면 `/clear`를 미룬다.
+재측정에서 "핸드오프 문서를 썼는데도 `/clear` 안 함" 비율이 오르면 **원인 후보로 이 규칙을 먼저 보라.**
+
+**재측정**: 아직. O14를 먼저 세야 판정 기준선이 생긴다.
+
+## 21. Claude Code 플러그인을 Codex와 공용화 (2026-08-12)
 
 **발단**: 같은 개인 하네스를 Codex에서도 쓰고 싶다는 요청. 공식 계약을 대조하니 스킬은 양쪽 모두 `SKILL.md` 기반 open agent skills 표준을 읽고, Codex 플러그인도 `.codex-plugin/plugin.json` + `skills/` + `hooks/hooks.json` 구조를 쓴다. Codex는 플러그인 훅에 `CLAUDE_PLUGIN_ROOT`까지 호환 변수로 제공한다.
 
@@ -356,7 +425,7 @@ ctx 138k로 임계(120k)는 넘긴 상태였다. **"문서" 두 글자가 훅을
 
 **재측정**: Codex 설치 후 `/hooks` trust를 완료한 새 대화에서 ① stale 브랜치 경고와 Stop ack ② 플랜 경로 kickoff ③ 이 레포의 apply_patch 후 문서 동기화 경고를 각각 1회 확인한다. 비동기 훅 지원이 생기거나 transcript usage가 안정 schema로 공개되면 미연결 7개를 다시 평가한다.
 
-## 20. Codex 구성요소 전수 감사와 스킬 의미 패치 (2026-08-12)
+## 22. Codex 구성요소 전수 감사와 스킬 의미 패치 (2026-08-12)
 
 **발단**: #19의 구조 validator만으로는 "44개가 실제 Codex 프롬프트에 보이는가", "공유 훅 11개의 주요 분기가 살아 있는가", "스킬 본문에 Claude 툴 이름이 숨어 있지 않은가"를 증명하지 못했다. 사용자가 요구한 완료 기준도 구성요소 정상 작동 확인과 실패 목록이었다.
 

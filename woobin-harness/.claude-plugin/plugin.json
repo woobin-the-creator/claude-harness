@@ -1,9 +1,8 @@
 {
   "name": "woobin-harness",
-  "description": "플랜 세션 경계·구현 모드·컨텍스트 위생을 강제하는 개인 하네스. 훅 11개, 에이전트 4개, 스킬 44개.",
-  "version": "1.3.2",
+  "description": "플랜 세션 경계·구현 모드·컨텍스트 위생을 강제하는 개인 하네스. 훅 11개, 에이전트 4개, 스킬 25개.",
+  "version": "1.5.0",
   "author": {
     "name": "정우빈"
-  },
-  "hooks": "./hooks/claude-hooks.json"
+  }
 }

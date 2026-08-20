@@ -64,3 +64,11 @@ YAML이 스칼라를 매핑으로 파싱해 **모든 frontmatter 필드가 조�
 `workflow.html`(사람) · `workflow-spec.md`(모델 재검토) 둘로 충분하다. 세 번째 요약을 만들면
 같은 워크플로우를 서술하는 소유자가 셋이 되고, 위의 "같이 고쳐야 하는 것"이 지켜지지 않는 순간
 어느 게 사실인지 판정할 수 없어진다. 이 파일은 **라우팅과 소유권만** 담는다 — 내용을 서술하지 않는다.
+## Context Isolation (Subagent Rule)
+
+Keep the main context window lean. When this environment provides subagent tooling (Claude Code `Task`, OpenCode `task`/`agent`, Hermes `delegate_task`, Codex collab, or equivalent), use it to isolate context-heavy work. If no subagent tooling exists, ignore this section.
+
+1. **Delegate large read-only output.** Route codebase/document exploration whose raw output is expected to exceed a few thousand tokens (multi-file reads, broad searches, document/log dumps) and browser screenshot loops (Playwright etc.) to a subagent. Quick lookups of one or two files stay in the main context.
+2. **Dispatch self-contained prompts.** Subagents have no access to this conversation. Every dispatch must carry the goal, exact paths or search terms, constraints, and the expected return format.
+3. **Return summaries with references.** Subagents report a concise summary with `path:line` references (plus one final screenshot for visual checks) so specifics can be re-read on demand without re-exploration.
+4. **Verify in the main context.** Final user-facing verification — last diff review and final screenshot — is performed directly by the main agent. Subagent reports are input, not proof.
