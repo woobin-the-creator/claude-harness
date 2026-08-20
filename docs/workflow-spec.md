@@ -10,7 +10,7 @@
 
 ## 0. 리뷰 프로토콜 — 이 문서를 받은 모델에게
 
-세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R16)** 를 붙여서 답하라.
+세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R17)** 를 붙여서 답하라.
 
 | # | 판정 | 판정 방법 |
 |---|------|-----------|
@@ -81,7 +81,8 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │     plan-reviewer (레이어별 배치 1회, 같은 세션에서 스폰 가능)
    │     PR → pr-demo-video 스킬
    │
-   ├─(B) UI·디자인 ─── show-design-sample 스킬 (브라우저 없이 샘플 URL 전달, N<=3은 빌더 1개·N>=4 또는 명시적 병렬 요청은 시안별 빌더, PR은 범위 밖)
+   ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, 선택적 DESIGN.md, 조건부 모듈)
+   │                       └─ 복수 시안 격리 프리뷰·공유가 필요할 때만 show-design-sample
    ├─(C) 디버깅 ────── systematic-debugging 스킬 (재현 절차를 산출물로)
    └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
 ```
@@ -534,6 +535,22 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 ---
 
+### R17 — 제품 UI 작업은 한 Router가 분류하고 필요한 디자인 모듈만 읽는다
+
+**문제.** 신규 방향 탐색, 기존 시스템 보존, 구현 계약, 렌더 리뷰, 반복 실패의 가드 승격은 서로 다른 비용과 권한을 가진다. 하나의 큰 규칙 문서나 넓은 자동 트리거로 합치면 작은 변경도 모든 컨텍스트를 읽고 `design-rules`와 후보 비교 스킬이 경쟁한다.
+
+**규칙.** 명시적 첫 도입·리디자인·리뷰·반복 실패와 managed `DESIGN.md`가 있는 프로젝트의 UI 작업은 `design-workflow`가 먼저 분류한다. 그린필드/대규모 리디자인에서만 direction을 읽고, review-only는 쓰지 않으며, `DESIGN.md` 부재·unmanaged 상태는 작업을 막지 않는다. 복수 시안 렌더가 필요할 때만 `show-design-sample`로 내려간다.
+
+**기전.** 짧은 Router가 route를 공개하고 progressive disclosure reference를 조건부로 읽는다. 구조화된 `DESIGN.md`는 선택적 durable state이고, validator는 managed block만 검사한다. 프로젝트별 가드는 기존 컴포넌트·린터·테스트 스택에 생성한다.
+
+**근거.** `interface-design`은 방향·craft review, 기존 `design-rules`는 프로젝트 근거·실데이터·실패 선례, `ibm-products@eeff1e98`는 컴포넌트/린트/브라우저 가드가 각각 강했다. 2026-08-12 설계 인터뷰에서 하나의 Router+모듈, 선택적 구조화 `DESIGN.md`, 공통 validator+현지 가드, 위험도별 승인을 확정했다.
+
+**대가.** Router 오분류와 문서/실행 경로 drift가 새 실패 모드다. managed document와 validator가 추가되며, 첫 도입 시 현재 작업 범위의 시스템 조사가 필요하다.
+
+**무효화 조건.** 실제 라우팅 eval에서 증분 변경이 direction을 반복 로드하거나 review-only가 파일을 쓰는 회귀가 지속되고, route contract를 좁혀도 단일 스킬보다 비용·정확도가 개선되지 않을 때 폐기한다. 또는 plugin runtime이 동일 정본을 공유하는 typed module composition과 deterministic trigger를 제공해 Router prose가 불필요해질 때 그 원시 기능으로 대체한다.
+
+---
+
 ## 4. 구성요소 인벤토리
 
 공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
@@ -589,10 +606,13 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 27개
+### 스킬 28개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
-`show-design-sample` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
+`design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
+`close-session` · `token-waste-audit` · `handoff`.
+`design-rules`는 `design-workflow`의 backward-compatible concrete-UI entry이고,
+`show-design-sample`은 복수 시안 격리 프리뷰·공유가 필요할 때만 쓰는 preview/delivery branch다.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).
 
 2026-08-10, 1개월치 세션 로그(`Skill` 툴 호출 288건)를 전수 스캔해 개별 사용 빈도를 측정했다(O4 해소).

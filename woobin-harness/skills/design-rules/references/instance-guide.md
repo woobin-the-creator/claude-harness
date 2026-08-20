@@ -1,98 +1,12 @@
-# `DESIGN.md` 작성 가이드
+# Legacy `DESIGN.md` guide
 
-`design-rules` 스킬은 **원칙**을 갖고 있고 **값**은 갖고 있지 않다.
-`DESIGN.md`는 그 값을 채우는 파일이고, **당신 레포 루트에** 둔다 — 스킬 폴더 안이 아니다.
+This file stays so old `design-rules` links do not break. New project-local design memory is owned by `design-workflow`.
 
-두 가지 이유다:
-- 스킬을 업데이트하면 스킬 폴더는 덮어써진다. 인스턴스 파일이 거기 있으면 날아간다.
-- `DESIGN.md`는 당신 팀의 자산이라 당신 레포에 커밋돼야 한다.
+Use:
 
-파일명을 `DESIGN.md`로 잡은 건 다른 디자인 스킬들(taste-skill의 export 포맷, awesome-claude-design의 family 파일)과 같은 관례라서다. 이미 있으면 그걸 그대로 쓰고, 아래 섹션을 덧붙인다.
+- `../../design-workflow/templates/DESIGN.md` for the managed starter document.
+- `../../design-workflow/references/design-document.md` for the managed format, lifecycle, approval boundary, and validator behavior.
 
----
+Old free-form `DESIGN.md` files remain unmanaged and valid. Treat them as `DESIGN_UNMANAGED`: read them as project context when useful, do not trust them as machine lifecycle data, and do not overwrite or automatically rewrite them.
 
-## 없어도 된다
-
-`DESIGN.md`가 없으면 스킬은 내장 기본값으로 진행하고, 레포 고유 어휘(버튼·입력·모달 클래스)는
-**그 순간 코드를 읽어** 알아낸다. 만들라고 강요하지 않는다.
-
-**만들 가치가 있는 때**는 셋 중 하나다:
-- 팀에서 결정을 **못 박고** 싶다 (사람마다 다른 답이 나오는 걸 막는다)
-- 내장 기본값이 이 프로젝트에서 **틀렸다** (예: radius 위계가 2단뿐인 프로젝트)
-- 틀렸던 이력을 **쌓기 시작**하고 싶다 (§6이 그 자리다)
-
----
-
-## 양식
-
-아래 7개 섹션을 쓴다. **비어 있는 섹션은 지우지 말고 "없음"이라고 적는다** — 빈 칸이 있어야
-다음 사람이 "여기 채울 수 있구나"를 안다.
-
-### 1. 어휘 — 새로 만들기 전에 여기부터
-
-역할 → 이 레포의 실제 것. **스킬의 §4 "확정 버튼과 같은 어휘를 쓰라"가 여기서 구체값을 얻는다.**
-
-| 필요한 것 | 이미 있는 것 |
-|---|---|
-| 카드·패널 | |
-| 모달 | |
-| 버튼 (기본 / primary) | |
-| 아이콘 버튼 | |
-| 입력 + 라벨 | |
-| 페이지네이션 | |
-| 세그먼트 컨트롤 | |
-| 테이블 | |
-| 스켈레톤 | |
-
-**채우는 법**: 컴포넌트 디렉터리와 스타일시트에서 사용 빈도로 찾는다.
-`grep -roh 'className="[^"]*"' src | sort | uniq -c | sort -rn | head -40` 정도면 대개 드러난다.
-
-### 2. 토큰 — 정본이 어느 파일인지 먼저 적는다
-
-색·radius·spacing·폰트. **문서와 코드가 어긋나 있으면 그 사실을 여기 적는다** — 어긋난 문서를
-읽고 없는 토큰을 쓰는 사고가 흔하다.
-
-`[기본]`을 뒤집는 항목이면 **뒤집었다고 명시**한다.
-
-### 3. 대비 실측 — 라이트 / 다크
-
-토큰별 실제 계산값과 **판정**(어디에 쓸 수 있고 어디엔 못 쓰는지).
-스킬 §5가 "감이 아니라 실측"을 요구하는데, 매번 다시 계산하지 않으려면 여기 적어 둔다.
-
-| 토큰 | 값 | 판정 |
-|---|---|---|
-
-⚠️ 텍스트 4.5:1과 비텍스트 3:1(WCAG 1.4.11)은 **다른 기준**이다. 장식 경계선은 후자에서 자주 탈락한다.
-
-### 4. 치수 선례 — 실측에서만 보였던 것
-
-스킬 §2의 각 행이 이 레포에서 어떤 구체값으로 내려앉았는지. 컬럼 폭 배분, 모달 상한 식,
-입력 폭, 빈 상태 크기 갈림, 스켈레톤 행 수 등.
-
-### 5. 취향 오버라이드
-
-스킬 §4의 `[기본]` 중 **이 프로젝트에서 다른 것**만. 뒤집은 이유를 반드시 같이 적는다.
-없으면 "없음"이라고 적는다 — 그게 정상이다.
-
-### 6. 선례 — 규칙이 왜 이렇게 센가
-
-| PR/이슈 | 무엇이 틀렸나 | 남은 규칙 |
-|---|---|---|
-
-**이 섹션이 스킬의 §7("세 번째 재발이면 기계 가드로")을 실제로 작동시킨다.**
-같은 규칙이 몇 번째인지는 여기를 세어야 안다.
-
-### 7. 기계 가드 — 산문보다 이쪽이 정본
-
-| 가드 | 무는 것 | 위반 시 |
-|---|---|---|
-
-CI에서 도는 테스트·린트 규칙. **위반이 잡혔을 때 무엇을 해야 하는지**까지 적는다 —
-"실패했다"만 알고 처방을 모르면 사람은 allowlist에 추가해 버린다.
-
----
-
-## 실물 예시
-
-이 양식의 원본이 된 프로젝트의 `DESIGN.md`가 참고가 된다.
-(스킬 안에 사본을 두지 않는다 — 사본은 곧 원본과 어긋나고, 그게 이 규약이 피하려는 실패다.)
+If a project wants the managed format, ask before creating or migrating it.
