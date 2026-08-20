@@ -36,8 +36,8 @@ claude-harness/
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        26개
-│   ├── output-styles/*.md            2개 (fluent-korean 계열 — 출처는 그 디렉터리의 ATTRIBUTION.md)
+│   ├── skills/<name>/SKILL.md        27개
+│   ├── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
 │   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
 ├── codex/agents/*.toml               Codex 커스텀 에이전트 4개
