@@ -46,7 +46,7 @@ Collect the list of files. The **Standards** sub-agent will read them.
 
 ### 4. Spawn both sub-agents in parallel
 
-Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
+Launch both sub-agents in one parallel batch using the host's native sub-agent mechanism (Claude Code: two `Agent` calls; Codex: two parallel spawned agents). Use a general-purpose/worker profile for both; do not serialize them.
 
 **Standards sub-agent prompt** — include:
 

@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>랏 추적 · Hold 관제</title>
+<style>
+/* ─────────────────────────────────────────────────────────────
+   토큰. DESIGN.md가 없어 design-rules의 [기본]값을 따른다.
+   accent는 테마당 1개 고정. 위계는 색이 아니라 굵기·여백·경계선.
+   대비는 감이 아니라 실측 — 주석의 비율은 WCAG 상대휘도로 계산한 값.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --paper:#F6F6F3;
+  --surface:#FFFFFF;
+  --surface-2:#FAFAF8;
+  --surface-hover:#F1F1EC;
+
+  --text:#16191C;      /* 16.0:1 on paper */
+  --text-2:#3A4046;    /*  9.9:1 on paper */
+  --text-3:#6B7076;    /*  4.6:1 on paper — muted 하한선 */
+
+  --line:#E2E2DC;      /* 장식 경계선 */
+  --line-2:#D0D0C8;
+  --control:#8E8E86;   /* 컨트롤 경계선 3.3:1 vs surface (WCAG 1.4.11) */
+
+  --accent:#0F5F6B;    /* 7.4:1 on white */
+  --accent-ink:#FFFFFF;
+  --accent-soft:#E4EFF0;
+
+  --st-hold:#8A5A00;   /* 6.0:1 */
+  --st-late:#A32A1F;   /* 7.3:1 */
+  --st-run:#0F5F6B;    /* 7.4:1 */
+  --st-done:#6B7076;   /* 5.0:1 */
+  --bd-hold:#D9B26A; --bd-late:#D89A92; --bd-run:#7FB3B8; --bd-done:#C6C6BE;
+
+  /* radius 5단: 인라인태그 < 마이크로버튼 < 항목·입력 < 카드·패널 < 모달 */
+  --r-tag:3px; --r-micro:4px; --r-item:6px; --r-panel:10px; --r-modal:14px;
+
+  /* 여백 위계: 셀 내부 < 항목 간 < 카드 내부 < 카드 간 */
+  --sp-cell:5px; --sp-item:8px; --sp-in:14px; --sp-sec:24px;
+
+  --measure:880px;     /* 본문 폭 상한 — 컬럼 내용 길이에서 역산 */
+  --rail:240px;
+
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",
+         "Noto Sans KR",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+html[data-theme="dark"]{
+  --paper:#101315;
+  --surface:#171B1E;
+  --surface-2:#1C2124;
+  --surface-hover:#22282C;
+
+  --text:#E8EAEA;      /* 14.4:1 on surface */
+  --text-2:#B9C0C4;    /*  9.4:1 */
+  --text-3:#8A9298;    /*  5.5:1 */
+
+  --line:#262B2F;
+  --line-2:#323940;
+  --control:#6A7278;   /* 3.5:1 vs surface */
+
+  --accent:#4FC3CC;    /* 8.3:1 */
+  --accent-ink:#101315;
+  --accent-soft:#173134;
+
+  --st-hold:#E5B45C;   /* 9.0:1 */
+  --st-late:#F4867C;   /* 7.1:1 */
+  --st-run:#4FC3CC;    /* 8.3:1 */
+  --st-done:#8A9298;   /* 5.5:1 */
+  --bd-hold:#6E5624; --bd-late:#7A3B36; --bd-run:#2F6A70; --bd-done:#454C51;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--paper); color:var(--text);
+  font:400 13px/1.45 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit; color:inherit}
+
+:where(a,button,input,select,label[tabindex]):focus-visible{
+  outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-micro);
+}
+input[type="checkbox"]{accent-color:var(--accent); width:14px; height:14px; margin:0; flex:none}
+
+/* ── 셸: 단일 뷰포트. 페이지 스크롤을 새로 만들지 않는다 ─────────── */
+.app{height:100vh; display:grid; grid-template-rows:auto 1fr; overflow:hidden}
+
+.topbar{
+  display:flex; align-items:center; gap:10px;
+  padding:0 20px; height:50px;
+  border-bottom:1px solid var(--line); background:var(--surface);
+}
+.topbar h1{margin:0; font-size:14.5px; font-weight:700; letter-spacing:-0.01em}
+.scope{font-size:12px; color:var(--text-3)}
+.asof{
+  margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--text-3);
+  font-variant-numeric:tabular-nums;
+}
+/* 테마 토글 — 쉬는 상태에서 테두리로 "컨트롤"을 말한다 */
+.seg{display:inline-flex; border:1px solid var(--control); border-radius:var(--r-item); overflow:hidden}
+.seg button{
+  padding:4px 10px; font-size:12px; font-weight:600; line-height:1.3;
+  background:var(--surface); color:var(--text-2);
+  border:0; border-right:1px solid var(--control); cursor:pointer;
+}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+
+.body{
+  display:grid; grid-template-columns:var(--rail) minmax(0,var(--measure));
+  justify-content:start; min-height:0; overflow:hidden;
+}
+
+/* ── 좌측 필터 ───────────────────────────────────────────────── */
+.rail{
+  border-right:1px solid var(--line); background:var(--surface);
+  overflow-y:auto; padding:var(--sp-in) 14px var(--sp-sec);
+  display:flex; flex-direction:column; gap:var(--sp-sec);
+}
+.rail-head{display:flex; align-items:baseline; gap:var(--sp-item)}
+.rail-head h2{margin:0; font-size:13px; font-weight:700}
+.rail-head .mbtn{margin-left:auto}
+
+.mbtn{
+  border:1px solid var(--control); background:var(--surface); color:var(--text-2);
+  border-radius:var(--r-micro); padding:2px 7px;
+  font-size:11.5px; font-weight:600; line-height:1.4; cursor:pointer; white-space:nowrap;
+}
+.mbtn:hover{background:var(--surface-hover)}
+
+.group{display:flex; flex-direction:column; gap:var(--sp-item)}
+.group-head{display:flex; align-items:baseline; gap:6px}
+.group-head h3{margin:0; font-size:12.5px; font-weight:700}
+.group-head .sel{
+  margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--text-2);
+  font-variant-numeric:tabular-nums;
+}
+.group-actions{display:flex; gap:6px}
+.group-note{font-size:11px; line-height:1.4; color:var(--text-3)}
+
+.opts{display:flex; flex-direction:column; gap:2px; margin:0; padding:0; list-style:none}
+.opt{
+  display:flex; align-items:center; gap:var(--sp-item);
+  padding:4px 6px; border-radius:var(--r-item);
+}
+li.opt:hover{background:var(--surface-hover)}
+label.opt{cursor:pointer}   /* 개수 태그 자리는 눌리지 않는다 — 커서로 거짓말하지 않는다 */
+.opt-name{
+  font-family:var(--mono); font-size:12px; color:var(--text);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.opt-name.ko{font-family:var(--sans); font-size:12.5px}
+/* 개수 태그는 상태 pill이 아니다 — 3px 사각으로 구분 */
+.count{
+  margin-left:auto; flex:none;
+  font-family:var(--mono); font-size:11px; font-variant-numeric:tabular-nums;
+  color:var(--text-2); background:var(--surface-2);
+  border:1px solid var(--line-2); border-radius:var(--r-tag);
+  padding:0 4px; min-width:22px; text-align:right;
+}
+/* 셀 수 없는 항목은 숨기지 않고 흐리게 둔다 (이유는 group-note에 글로) */
+.opt.zero .opt-name{color:var(--text-3)}
+.opt.zero .count{color:var(--text-3)}
+.dot{width:7px; height:7px; border-radius:9999px; flex:none; background:currentColor}
+
+/* ── 본문 ────────────────────────────────────────────────────── */
+.main{
+  min-height:0; overflow:hidden;
+  display:grid; grid-template-rows:auto 1fr;
+  gap:var(--sp-in); padding:var(--sp-in) 20px 20px;
+}
+
+/* KPI: 카드로 부풀리지 않는다. 한 줄 스트립 + 구분선 */
+.kpis{
+  display:flex; align-items:stretch;
+  border-bottom:1px solid var(--line); padding-bottom:var(--sp-in);
+}
+.kpi{padding:0 20px; border-left:1px solid var(--line); display:flex; flex-direction:column; gap:2px}
+.kpi:first-child{padding-left:0; border-left:0}
+/* 라벨을 값만큼 읽히게 — 굵기·대비를 값과 같은 등급으로 */
+.kpi-label{font-size:12.5px; font-weight:700; color:var(--text); letter-spacing:-0.01em}
+.kpi-value{font-size:25px; font-weight:600; line-height:1.15; font-variant-numeric:tabular-nums}
+.kpi-value.on-hold{color:var(--st-hold)}
+.kpi-value.on-late{color:var(--st-late)}
+/* 기준 문구는 margin-left:auto로 밀지 않고 KPI 흐름에 이어 붙인다 */
+.kpi-scope{
+  padding:0 20px; border-left:1px solid var(--line);
+  display:flex; flex-direction:column; justify-content:center; gap:2px;
+  font-size:11.5px; line-height:1.4; color:var(--text-3); max-width:190px;
+}
+.kpi-scope b{color:var(--text-2); font-weight:700}
+
+.panel{
+  min-height:0; overflow:hidden;
+  display:grid; grid-template-rows:auto 1fr auto;
+  border:1px solid var(--line); border-radius:var(--r-panel); background:var(--surface);
+}
+.panel-head{
+  display:flex; align-items:center; gap:10px;
+  padding:10px var(--sp-in); border-bottom:1px solid var(--line);
+}
+.panel-head h2{margin:0; font-size:13px; font-weight:700}
+.shown{font-size:12px; color:var(--text-2); font-variant-numeric:tabular-nums}
+.sortwrap{margin-left:auto; display:flex; align-items:center; gap:6px}
+.sortwrap label{font-size:12px; font-weight:600; color:var(--text-2)}
+select{
+  border:1px solid var(--control); background:var(--surface); color:var(--text);
+  border-radius:var(--r-item); padding:3px 6px; font-size:12px; cursor:pointer;
+}
+
+.table-scroll{min-height:0; overflow:auto}
+table{width:100%; border-collapse:collapse; table-layout:fixed}
+thead th{
+  position:sticky; top:0; z-index:1;
+  background:var(--surface-2);
+  text-align:left; font-size:13.5px; font-weight:700; color:var(--text);
+  padding:7px 10px; border-bottom:1px solid var(--line-2); white-space:nowrap;
+}
+th.num, td.num{text-align:right}
+tbody td{
+  padding:6px 10px; border-bottom:1px solid var(--line);
+  font-size:13px; color:var(--text);
+  /* 한 줄에 고정한다 — 잘림은 …가 알리고 title이 확인해 준다 */
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-hover)}
+td.mono{font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums}
+td.id{font-weight:600}
+td.none{color:var(--text-3)}
+
+/* 상태는 pill이 맞다 — 상태를 나타내는 배지 */
+.badge{
+  display:inline-flex; align-items:center; gap:5px;
+  border-radius:9999px; padding:1px 9px 1px 7px;
+  font-size:12px; font-weight:600; line-height:1.6;
+  border:1px solid var(--bd);
+}
+.badge[data-s="Hold"]  {color:var(--st-hold); --bd:var(--bd-hold)}
+.badge[data-s="지연"]   {color:var(--st-late); --bd:var(--bd-late)}
+.badge[data-s="진행중"] {color:var(--st-run);  --bd:var(--bd-run)}
+.badge[data-s="완료"]   {color:var(--st-done); --bd:var(--bd-done)}
+
+/* 목록 안쪽 빈 상태: 행 자리만 차지하게 작게. 왜 비었는지 + 다음 행동 */
+.empty{padding:12px var(--sp-in); display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.empty p{margin:0; font-size:12.5px; color:var(--text-2)}
+
+.legend{
+  padding:8px var(--sp-in); border-top:1px solid var(--line);
+  display:flex; flex-direction:column; gap:3px;
+  font-size:11.5px; line-height:1.45; color:var(--text-3); background:var(--surface-2);
+  border-radius:0 0 var(--r-panel) var(--r-panel);
+}
+.legend code{font-family:var(--mono); color:var(--text-2)}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <h1>랏 추적</h1>
+    <span class="scope">2공장 · 3공장 · 패키징 · 테스트</span>
+    <!-- 아무것도 재지 않는 'Live' 라벨 대신, 실제로 참인 기준시각을 적는다 -->
+    <span class="asof">데이터 기준 2026-08-12 10:00</span>
+    <div class="seg" role="group" aria-label="테마">
+      <button type="button" id="themeLight" aria-pressed="true">라이트</button>
+      <button type="button" id="themeDark" aria-pressed="false">다크</button>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <aside class="rail" aria-label="필터">
+      <div class="rail-head">
+        <h2>필터</h2>
+        <button type="button" class="mbtn" id="resetAll">초기화</button>
+      </div>
+
+      <section class="group">
+        <div class="group-head">
+          <h3>라인</h3>
+          <span class="sel" id="lineSel">10/10</span>
+        </div>
+        <div class="group-actions">
+          <button type="button" class="mbtn" data-all="line">전체</button>
+          <button type="button" class="mbtn" data-none="line">해제</button>
+        </div>
+        <ul class="opts" id="lineOpts"></ul>
+        <p class="group-note">0건 라인도 목록에 남깁니다 — 조회 대상이며, 지금 선택한 상태에 해당하는 랏이 없을 뿐입니다.</p>
+      </section>
+
+      <section class="group">
+        <div class="group-head">
+          <h3>상태</h3>
+          <span class="sel" id="statusSel">4/4</span>
+        </div>
+        <div class="group-actions">
+          <button type="button" class="mbtn" data-all="status">전체</button>
+          <button type="button" class="mbtn" data-none="status">해제</button>
+        </div>
+        <ul class="opts" id="statusOpts"></ul>
+        <p class="group-note">개수는 선택한 라인 기준입니다.</p>
+      </section>
+    </aside>
+
+    <main class="main">
+
+      <section class="kpis" aria-label="요약 지표">
+        <div class="kpi"><span class="kpi-label">총 랏</span><span class="kpi-value" id="kTotal">8</span></div>
+        <div class="kpi"><span class="kpi-label">Hold 중</span><span class="kpi-value on-hold" id="kHold">3</span></div>
+        <div class="kpi"><span class="kpi-label">지연</span><span class="kpi-value on-late" id="kLate">2</span></div>
+        <div class="kpi"><span class="kpi-label">금일 완료</span><span class="kpi-value" id="kDone">2</span></div>
+        <div class="kpi-scope" id="kScope"><b>전체 기준</b><span>필터를 적용하지 않았습니다.</span></div>
+      </section>
+
+      <section class="panel" aria-label="랏 목록">
+        <div class="panel-head">
+          <h2>랏 목록</h2>
+          <span class="shown" id="shown">8건</span>
+          <div class="sortwrap">
+            <label for="sort">정렬</label>
+            <select id="sort">
+              <option value="holdtime-desc">Holdtime 긴 순</option>
+              <option value="holdtime-asc">Holdtime 짧은 순</option>
+              <option value="held-desc">Hold 발생 최신순</option>
+              <option value="held-asc">Hold 발생 오래된 순</option>
+              <option value="lot-asc">랏 ID 순</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <!-- 균등 분할이 아니라 들어갈 값의 길이에 비례해 배분한다.
+                 PLX-2608-0417(13자 mono) · TEST-L01(8자) · 08-11 20:18(11자 mono) · 3자 한글 -->
+            <colgroup>
+              <col style="width:19%"><col style="width:11%"><col style="width:13%"><col style="width:13%">
+              <col style="width:17%"><col style="width:13%"><col style="width:14%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col" id="th-lot">랏 ID</th>
+                <th scope="col">라인</th>
+                <th scope="col">공정스텝</th>
+                <th scope="col">상태</th>
+                <th scope="col" id="th-held">Hold 발생시각</th>
+                <th scope="col" class="num" id="th-holdtime">Holdtime</th>
+                <th scope="col">담당자</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="empty" hidden>
+            <p>선택한 라인·상태 조합에 해당하는 랏이 없습니다. 상태를 넓히거나 라인을 더 고르세요.</p>
+            <button type="button" class="mbtn" id="resetEmpty">필터 초기화</button>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span>Hold 중이 아닌 랏의 <b>Hold 발생시각·Holdtime</b>은 <b>해제된 직전 Hold</b> 기준입니다.</span>
+          <span><code>—</code> 는 Hold 이력이 <b>없음</b>을 뜻하며 <code>0h 00m</code>(있었지만 0분)과 다릅니다.</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* 하드코딩 더미. Hold 중인 랏의 Holdtime은 상단 기준시각(2026-08-12 10:00)과 실제로 맞춘다 —
+   라벨이 정직하려면 숫자도 서로 맞아야 한다. */
+const LOTS = [
+  {lot:"PLX-2608-0417", line:"F2-L07",   step:"ETCH-03",  status:"Hold",  held:"08-11 20:18", ht:"13h 42m", owner:"김도현"},
+  {lot:"PLX-2608-0392", line:"F2-L03",   step:"PHOTO-12", status:"지연",   held:"08-10 06:35", ht:"31h 05m", owner:"박서준"},
+  {lot:"QRT-2608-0113", line:"F3-L01",   step:"CMP-07",   status:"Hold",  held:"08-12 05:53", ht:"4h 07m",  owner:"이하늘"},
+  {lot:"PLX-2608-0455", line:"F2-L01",   step:"DIFF-04",  status:"진행중", held:null,          ht:null,      owner:"정민아"},
+  {lot:"PLX-2607-1188", line:"F3-L05",   step:"IMPL-09",  status:"Hold",  held:"08-11 06:09", ht:"27h 51m", owner:"최유진"},
+  {lot:"QRT-2608-0129", line:"PKG-L02",  step:"DEPO-05",  status:"지연",   held:"08-11 12:40", ht:"9h 26m",  owner:"한지호"},
+  {lot:"PLX-2608-0421", line:"F3-L02",   step:"THIN-02",  status:"완료",   held:null,          ht:null,      owner:"오세라"},
+  {lot:"QRT-2607-0904", line:"TEST-L01", step:"TEST-01",  status:"완료",   held:"08-11 23:15", ht:"2h 48m",  owner:"윤태경"}
+];
+
+const LINES = ["F2-L01","F2-L03","F2-L05","F2-L07","F3-L01","F3-L02","F3-L05","PKG-L01","PKG-L02","TEST-L01"];
+const STATUSES = ["Hold","지연","진행중","완료"];
+const SEVERITY = {"Hold":0,"지연":1,"진행중":2,"완료":3};
+
+const state = {
+  lines:   new Set(LINES),
+  status:  new Set(STATUSES),
+  sort:    "holdtime-desc"
+};
+
+const $ = (id) => document.getElementById(id);
+const minutes = (ht) => ht ? (+ht.match(/(\d+)h/)[1]) * 60 + (+ht.match(/(\d+)m/)[1]) : -1;
+
+/* ── 필터 UI ─────────────────────────────────────────────────── */
+function buildOpts(el, items, key, isKo){
+  el.innerHTML = "";
+  for (const v of items){
+    const li = document.createElement("li");
+    li.className = "opt";
+    li.dataset.value = v;
+
+    const label = document.createElement("label");
+    label.className = "opt";
+    label.style.padding = "0";
+    label.style.flex = "1";
+    label.style.minWidth = "0";
+    label.style.background = "none";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = state[key].has(v);
+    cb.addEventListener("change", () => {
+      cb.checked ? state[key].add(v) : state[key].delete(v);
+      render();
+    });
+
+    const name = document.createElement("span");
+    name.className = "opt-name" + (isKo ? " ko" : "");
+    name.textContent = v;
+    name.title = v;
+
+    if (isKo){
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.color = {"Hold":"var(--st-hold)","지연":"var(--st-late)",
+                         "진행중":"var(--st-run)","완료":"var(--st-done)"}[v];
+      label.append(cb, dot, name);
+    } else {
+      label.append(cb, name);
+    }
+
+    const count = document.createElement("span");
+    count.className = "count";
+
+    li.append(label, count);
+    el.append(li);
+  }
+}
+
+function facetCount(key, value){
+  return LOTS.filter(l =>
+    (key === "lines"  ? l.line === value   : state.lines.has(l.line)) &&
+    (key === "status" ? l.status === value : state.status.has(l.status))
+  ).length;
+}
+
+function paintCounts(el, items, key){
+  [...el.children].forEach((li, i) => {
+    const n = facetCount(key, items[i]);
+    li.querySelector(".count").textContent = n;
+    li.classList.toggle("zero", n === 0);
+  });
+}
+
+/* ── 렌더 ────────────────────────────────────────────────────── */
+function render(){
+  const rows = LOTS
+    .filter(l => state.lines.has(l.line) && state.status.has(l.status))
+    .sort((a,b) => {
+      switch(state.sort){
+        case "holdtime-desc": return minutes(b.ht) - minutes(a.ht);
+        case "holdtime-asc":  return minutes(a.ht) - minutes(b.ht);
+        case "held-desc":     return (b.held||"").localeCompare(a.held||"");
+        case "held-asc":      return (a.held||"￿").localeCompare(b.held||"￿");
+        default:              return a.lot.localeCompare(b.lot);
+      }
+    });
+
+  // KPI는 지금 목록에 보이는 집합에서 다시 센다. 필터를 걸었는데 숫자가 그대로면 거짓말이다.
+  $("kTotal").textContent = rows.length;
+  $("kHold").textContent  = rows.filter(l => l.status === "Hold").length;
+  $("kLate").textContent  = rows.filter(l => l.status === "지연").length;
+  $("kDone").textContent  = rows.filter(l => l.status === "완료").length;
+
+  const filtered = state.lines.size !== LINES.length || state.status.size !== STATUSES.length;
+  $("kScope").innerHTML = filtered
+    ? "<b>필터 기준</b><span>전체 " + LOTS.length + "건 중 " + rows.length + "건</span>"
+    : "<b>전체 기준</b><span>필터를 적용하지 않았습니다.</span>";
+  $("shown").textContent = filtered ? LOTS.length + "건 중 " + rows.length + "건" : LOTS.length + "건";
+
+  const tbody = $("rows");
+  tbody.innerHTML = "";
+  for (const l of rows){
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      '<td class="mono id" title="' + l.lot + '">' + l.lot + '</td>' +
+      '<td class="mono" title="' + l.line + '">' + l.line + '</td>' +
+      '<td class="mono" title="' + l.step + '">' + l.step + '</td>' +
+      '<td><span class="badge" data-s="' + l.status + '"><span class="dot"></span>' + l.status + '</span></td>' +
+      (l.held
+        ? '<td class="mono">' + l.held + '</td>'
+        : '<td class="mono none" title="Hold 이력 없음">—</td>') +
+      (l.ht
+        ? '<td class="mono num">' + l.ht + '</td>'
+        : '<td class="mono num none" title="Hold 이력 없음">—</td>') +
+      '<td title="' + l.owner + '">' + l.owner + '</td>';
+    tbody.append(tr);
+  }
+  $("empty").hidden = rows.length > 0;
+
+  // 정렬 기준 컬럼에 aria-sort
+  const dir = state.sort.endsWith("-asc") ? "ascending" : "descending";
+  const col = state.sort.startsWith("holdtime") ? "th-holdtime"
+            : state.sort.startsWith("held")     ? "th-held" : "th-lot";
+  ["th-lot","th-held","th-holdtime"].forEach(id => $(id).removeAttribute("aria-sort"));
+  $(col).setAttribute("aria-sort", dir);
+
+  paintCounts($("lineOpts"),   LINES,    "lines");
+  paintCounts($("statusOpts"), STATUSES, "status");
+  $("lineSel").textContent   = state.lines.size + "/" + LINES.length;
+  $("statusSel").textContent = state.status.size + "/" + STATUSES.length;
+}
+
+function syncBoxes(){
+  [...$("lineOpts").children].forEach((li,i)   => li.querySelector("input").checked = state.lines.has(LINES[i]));
+  [...$("statusOpts").children].forEach((li,i) => li.querySelector("input").checked = state.status.has(STATUSES[i]));
+}
+
+/* ── 바인딩 ──────────────────────────────────────────────────── */
+buildOpts($("lineOpts"),   LINES,    "lines",  false);
+buildOpts($("statusOpts"), STATUSES, "status", true);
+
+document.querySelectorAll("[data-all]").forEach(b => b.addEventListener("click", () => {
+  const k = b.dataset.all === "line" ? "lines" : "status";
+  (k === "lines" ? LINES : STATUSES).forEach(v => state[k].add(v));
+  syncBoxes(); render();
+}));
+document.querySelectorAll("[data-none]").forEach(b => b.addEventListener("click", () => {
+  state[b.dataset.none === "line" ? "lines" : "status"].clear();
+  syncBoxes(); render();
+}));
+
+function resetAll(){
+  state.lines  = new Set(LINES);
+  state.status = new Set(STATUSES);
+  syncBoxes(); render();
+}
+$("resetAll").addEventListener("click", resetAll);
+$("resetEmpty").addEventListener("click", resetAll);
+$("sort").addEventListener("change", e => { state.sort = e.target.value; render(); });
+
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  $("themeLight").setAttribute("aria-pressed", String(t === "light"));
+  $("themeDark").setAttribute("aria-pressed",  String(t === "dark"));
+}
+$("themeLight").addEventListener("click", () => setTheme("light"));
+$("themeDark").addEventListener("click",  () => setTheme("dark"));
+setTheme(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+
+render();
+</script>
+</body>
+</html>

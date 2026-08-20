@@ -18,6 +18,14 @@ Three related incidents trigger a generalization review, not an automatic promot
 
 External precedent needs local evidence before adoption. Local code needs approval before becoming policy.
 
+## Writing a rule
+
+Fill three slots and keep each to one clause: wrong form, replacement, observed consequence. A list item holds all three on one line. Past three lines, move the rule into a linked reference or onto the enforcement ladder.
+
+Keep the precedent. It is the only part a later session cannot recover by reading the code, and a rule stripped down to its prescription gets judged an exception.
+
+Write the prescription as the action to take, not the action to avoid: "keep it to one line" rather than "no wrapping". A prohibition names the thing it prohibits and invites it back.
+
 ## Enforcement ladder
 
 Prefer prose for rare judgment, component/API for repeated safe defaults, static scanners for mechanical mistakes, unit/a11y/browser tests for behavioral contracts, and CI only when confidence and cost justify a failure gate.

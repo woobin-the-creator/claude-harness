@@ -10,7 +10,7 @@
 
 ## 0. 리뷰 프로토콜 — 이 문서를 받은 모델에게
 
-세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R12)** 를 붙여서 답하라.
+세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R17)** 를 붙여서 답하라.
 
 | # | 판정 | 판정 방법 |
 |---|------|-----------|
@@ -49,6 +49,7 @@
 | E9 | 컨텍스트 창 | 1M (Opus 5 1M 컨텍스트) | 간접 — 창이 커져도 E1이 살아있으면 규칙은 유지된다 |
 | E10 | 하네스 버전 | Claude Code 2.1.226 | §4의 파일 경로·훅 이벤트 이름 |
 | E11 | **다른 세션이 내 세션에 턴을 열 수 있나** (크로스세션 메시징) | 2.1.224+ **기본 ON**. `crossSessionInbound: "refuse"`로 막아둠 | E1·E3·R6·R13 — 막지 않으면 이것들이 **사람 없이** 우회된다 |
+| E12 | **모델이 지시 없이 쓰는 한국어의 품질** | 낮다. 조사·어미 생략, 명사구 나열, 비유 어휘 치환이 관측된다 | R16 — 전적으로 |
 
 **E1·E2가 이 하네스의 축이다.** 컨텍스트가 "쌓여도 공짜"가 되거나 하네스가 죽은 구간을 자동 축출하면
 R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는 건 R9·R10·R11(품질 규칙)뿐이다.
@@ -285,7 +286,7 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 
 ### R9 — 구현자에게 검증을 지시하지 않는다
 
-**기전** `plan-exec-modes.md` 공통 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
+**기전** 호스트별 모드 파일(`plan-exec-modes.md` / `plan-exec-modes-codex.md`) 공통 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
 넣지 않는다. 검증은 **별도 컨텍스트**(plan-reviewer)의 몫.
 
 **근거** Opus 5 프롬프팅 문서: *"legacy harness scaffolding that adds separate verification steps"* 는
@@ -386,7 +387,7 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 ### R14 — 하네스 문서 동기화를 기계가 센다
 
 **기전** `scripts/check-harness-docs.sh` — 훅·에이전트·스킬의 **실제 개수**를 세어 README·
-`plugin.json`·`marketplace.json`·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
+Claude/Codex `plugin.json`·marketplace·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
 등재됐는지 확인하고, `woobin-harness/` 변경 시 문서 동반 수정 여부를 git diff로 판정한다.
 짝: `harness-doc-sync-guard.sh` (PostToolUse:Edit|Write|MultiEdit) — 이 레포에서 `woobin-harness/`를
 고치면 검사기를 돌려 결과를 additionalContext로 주입한다. 세션 1회, 차단하지 않는다.
@@ -485,7 +486,56 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 ---
 
-### R16 — 제품 UI 작업은 한 Router가 분류하고 필요한 디자인 모듈만 읽는다
+### R16 — 한국어 출력은 output-style이 사전에 규율한다
+
+**기전** `woobin-harness/output-styles/fluent-korean.md`(코딩 지침 유지판)와
+`fluent-korean-not-coding.md`(비유지판). 플러그인이 파일을 나르고, `~/.claude/settings.json`의
+`outputStyle: "fluent-korean"`이 그중 하나를 켠다(`bootstrap.sh` ③). 훅은 **하나도 쓰지 않는다** —
+출력 규율은 시스템 프롬프트 층위에서 사전에 걸어야 하고, 사후 검사는 이미 나간 문장을 못 되돌린다.
+
+**근거** 외부 산출물이다. 원본 저장소(snflkd/fluent-korean, MIT)가 동일 모델·동일 프롬프트로 찍은
+전후 비교를 근거로 제시한다. **이 하네스가 자체 측정한 것이 아니다** — §0의 증거 기준("로컬 실측")을
+만족하지 않는 유일한 규칙이므로, 리뷰 시 ② 판정 대상으로 먼저 올려라. → §8 O18
+
+채택 이유는 근거의 강도가 아니라 **적용 범위**다. 이 하네스는 서브에이전트에 한국어 프롬프트를 넘기고
+(`plan-implementer`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
+(`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain`·`handoff`). 원본이 지적한 대로
+다단 에이전트 환경에서는 품질 저하가 **단계마다 누적**되고, 그 손실이 산출물 자체의 완성도로 넘어간다.
+E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문에 각 단계가 앞 단계의 한국어를 **입력으로만**
+받으므로, 누적을 끊을 지점이 각 단계의 출력밖에 없다.
+
+**설계 판단 — 본문을 요약하지 않았다.** 원본이 조항마다 붙인 예시를 지우면 조항이 무엇을 의도했는지
+알 수 없어지고, 요약에 들어간 조항만 지켜지는 쪽으로 서술 압력이 쏠린다(원본 본문에 명시된 경고다).
+같은 이유로 본문은 한 글자도 고치지 않았다 — 원저자가 어휘 priming을 노려 지침 본문 자체를 그 지침대로
+썼다고 밝혔다. 이 레포가 더한 것은 원본 README가 제시한 **선택 블록 3개**뿐이고,
+무엇을 왜 골랐는지는 `woobin-harness/output-styles/ATTRIBUTION.md`에 있다.
+
+**대가**
+- **토큰이 는다.** ① 시스템 프롬프트가 매 세션 ~1.5k 커진다(세션 floor 43~46k 대비 3% 남짓).
+  ② 생략된 조사·어미·문장 성분을 복원하므로 응답 메시지가 길어진다. ③ "출력 직전 자기 점검" 블록을
+  붙였으므로 사고 토큰이 추가로 든다.
+- **`home/CLAUDE.md`의 "답변 밀도" 규칙과 방향이 반대다.** 밀도 규칙은 분량을 줄이라고 하고
+  이 규칙은 문장을 복원하라고 한다. 충돌은 아니다 — 줄일 대상은 **항목 수**이고 복원할 대상은
+  **문장 성분**이다. 다만 둘 다 압력이라서, 한쪽이 다른 쪽을 잡아먹는지는 관측해야 한다. → §8 O18
+- **서브에이전트 준수 여부가 불확실하다.** 원본 README가 직접 경고한다. 코딩판에 서브에이전트 조항이
+  있지만 실제 준수율은 안 재봤다.
+- **`outputStyle`은 플러그인이 못 켠다.** 파일과 활성화의 소유자가 갈린다(플러그인 / `bootstrap.sh`).
+  둘 중 하나만 옮기면 새 머신에서 목록에는 보이는데 적용은 안 된다.
+
+**무효화 조건**
+- **모델이 지시 없이도 위 항목을 지키게 됨**(E12가 거짓이 됨) → 폐기. 이 규칙은 E12에 전적으로 매달려 있다.
+  판정 방법: `outputStyle`을 잠시 비우고 같은 프롬프트를 돌려 조사·어미 생략과 명사구 종결을 센다
+- **원본 저장소가 갱신됨** → 본문만 diff로 비교하고 선택 블록 3개는 보존한다. 통째로 덮어쓰면 조용히 사라진다
+- 재측정에서 **응답 길이가 늘어 밀도 규칙이 사실상 죽음**(표 대신 산문이 돌아오는 등)
+  → 선택 블록 중 "모든 한국어 산출물에 적용"부터 뺀다. 보고문만 규율하는 원래 범위로 좁히는 것이 먼저다
+- **문체 지침이 따로 있는 산출물**(소설·대본·출제 등)을 만들기 시작함 → 원본 README의 "문체 민감 작업 예외"
+  블록을 **먼저 붙여라.** 지금은 그런 작업이 없어서 뺐고, 그래서 현재 설정은 모든 산출물에 무조건 적용된다
+- 원본 플러그인(`fluent-korean@fluent-korean`)을 직접 설치하게 됨 → 이 사본을 지운다.
+  이름이 같아서 둘 다 있으면 어느 쪽이 잡히는지 알 수 없다
+
+---
+
+### R17 — 제품 UI 작업은 한 Router가 분류하고 필요한 디자인 모듈만 읽는다
 
 **문제.** 신규 방향 탐색, 기존 시스템 보존, 구현 계약, 렌더 리뷰, 반복 실패의 가드 승격은 서로 다른 비용과 권한을 가진다. 하나의 큰 규칙 문서나 넓은 자동 트리거로 합치면 작은 변경도 모든 컨텍스트를 읽고 `design-rules`와 후보 비교 스킬이 경쟁한다.
 
@@ -503,7 +553,7 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 ## 4. 구성요소 인벤토리
 
-전부 `woobin-harness` 플러그인이 나른다. `~/.claude`에 사본을 두지 않는다(이중 발화·드리프트 방지).
+공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
 
 ### 훅 11개
 
@@ -520,6 +570,8 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 | `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커. 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R15 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
+
+Codex는 이 11개 중 `sdd-kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 4개만 연결한다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
@@ -552,7 +604,9 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-### 스킬 27개
+Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
+
+### 스킬 28개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
@@ -568,9 +622,30 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 안 쓰였어도 남겼다. 출처 판정은 git 히스토리(단일 패키징 커밋이라 무의미)가 아니라 본문 내용 기반
 추정이라 확실하지 않다.
 
+Codex 호환으로 `git-guardrails-codex`를 추가했다. Claude 전용 `argument-hint`·`disable-model-invocation` frontmatter는 Codex validator가 거부하므로 제거하고, 명시 호출 제한은 description으로 옮겼다. Claude Buddy·Claude 세션 로그처럼 본질적으로 Claude 전용인 스킬은 description에 경계를 명시하고 그대로 배포한다.
+
+2026-08-12 결정론적 감사에서 Codex의 실제 prompt input이 44개를 모두 발견했고, 번들 자산(브레인스토밍 서버, 토큰/역량 분석기, 미디어 추출기, 포스트 조립기)의 네트워크 없는 fixture가 통과했다. 세부 결과와 의도적 미지원은 `docs/codex-compatibility-audit-2026-08-12.md`.
+
 상시 컨텍스트 비용은 스킬 **description만** 실린다(본문은 호출 시 로드). 이전 측정에서 유사 플러그인
 14엔트리가 ~500 tok이었다 — 세션 floor 43~46k의 1% 수준이라 **비용은 스킬 제거 사유가 아니다.**
 제거 사유가 되는 건 프롬프트 충돌이다(§7-A의 superpowers 사례).
+
+### 출력 스타일 2개
+
+| 파일 | frontmatter | 용도 |
+|------|-------------|------|
+| `fluent-korean.md` | `keep-coding-instructions: true` | **기본값.** Claude Code 코딩 지침을 유지한다. `settings.json`의 `outputStyle`이 이걸 가리킨다 |
+| `fluent-korean-not-coding.md` | (없음 — 의도) | 코딩 지침을 뺀 판. 코드를 직접 안 고치는 세션용. 지금은 켜져 있지 않다 |
+
+`keep-coding-instructions`의 **부재가 비유지판에서는 의도다.** 리뷰어가 "빠졌다"고 채우면 두 판의
+구분이 사라진다(에이전트 frontmatter의 의도적 부재 3군데와 같은 성격이다).
+
+둘 다 외부(snflkd/fluent-korean, MIT)에서 가져왔고 원본 본문은 고치지 않았다. 이 레포가 더한 것은
+원본 README의 선택 블록 3개뿐이며, 무엇을 왜 골랐고 무엇을 일부러 뺐는지는 같은 디렉터리의
+`ATTRIBUTION.md`에 있다. 규칙과 대가는 §3 R16, 도입 서사는 `home/HARNESS-LOG.md` #21.
+
+**활성화는 플러그인이 못 한다.** 플러그인의 `settings.json`은 `agent`·`subagentStatusLine` 두 키만
+지원하므로 `outputStyle`은 `bootstrap.sh` ③이 병합한다. 파일과 스위치의 소유자가 갈리는 자리다.
 
 ### 그 외
 `ctx-warn-statusline.sh` — 200k 경고 / 300k 핸드오프 권장. transcript 마지막 assistant usage에서 산출,
@@ -581,8 +656,9 @@ mtime 캐시로 1초 갱신 부담 제거. claude-buddy **wrapper** 방식이라
 
 ## 5. 구현 모드
 
-전문은 `woobin-harness/plan-exec-modes.md`. 훅이 플랜 저장 시 **1개를 추천**한다 —
+전문은 Claude Code용 `woobin-harness/plan-exec-modes.md`와 Codex용 `woobin-harness/plan-exec-modes-codex.md`. 공유 `writing-plans` 스킬이 호스트 대응본에서 **1개를 추천**한다 —
 추천 근거는 overview의 순서 의존성이고, 그 판단은 **플랜을 방금 쓴 세션만 싸게 할 수 있다.**
+아래 표는 Claude Code 런치 값이며, Codex 대응은 각각 `gpt-5.6-terra/medium`, `gpt-5.6/medium`, `gpt-5.6/xhigh`를 쓴다.
 
 | 모드 | 런치 | 성립 조건 | 위임 |
 |------|------|-----------|------|
@@ -613,6 +689,11 @@ lead to overthinking."* 플랜 실행이 그 부류다.
    *단 예외*: 오탐의 대가가 비대칭이면 뒤집는다. `close-session-cleanup.sh`는 차단이 아니라 **보존**이
    기본값이다 — 여기서 오탐은 "남의 세션 작업 삭제"(복구 불가)라 재시도 통과 경로를 두지 않았고,
    `git branch -D`를 안 쓰므로 **커밋 유실이 구조적으로 불가능**하다.
+   같은 계산이 프로세스 정리에도 적용된다(2026-08-12): 정책을 못 정하면 **안 죽인다**.
+   *단 그 보존 규칙에도 예외가 있다* — 판정을 **이름이 아니라 출처로** 할 수 있으면 보존을 건너뛴다.
+   자동화 브라우저(`--remote-debugging-*`·임시 프로필)와 이 레포에서 뜬 compose 스택은
+   날아갈 사용자 데이터가 없어서 오탐의 대가가 애초에 비대칭이 아니다. 여기에 이름 기반 keep을
+   적용하면 목적 자체가 무력화된다 — 실제로 그렇게 짰다가 잡으려던 1.9GB를 통째로 살려뒀다.
 2. **소프트 지시로 못 막는 건 구조를 바꾼다** — "부분만 읽어라"가 안 먹혀서 파일 자체를 쪼갰다(R2).
 3. **효과는 다음 audit에서 재측정한다** — 처방만 남기면 재발한다. `token-waste-audit` 스킬이 그 도구.
 4. **근거 수치와 규칙은 별개로 검증** — 근거가 틀려도 규칙이 맞을 수 있다(R4).
@@ -690,6 +771,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O14 | **하드 컷 중단 빈도 vs 방향 오류 되돌림 빈도** | **미계측.** R15의 핵심 교환("버리기가 되돌리기로 바뀐다")이 전부 여기 매달려 있다. `token-waste-audit`의 세션 스캐너로 뽑을 수 있다 — 구현 세션이 컷으로 끊긴 건수 대비 `reset`/`checkout .`으로 되돌린 건수 |
 | O15 | 단일성 불변식(워크트리당 열린 draft 플랜 PR 1개) | 소프트 절차다. 깨졌을 때 실제로 진입점이 못 쓰이게 되는지 미검증. 깨지는 걸 관측하면 §6-2 순서로 구조화 |
 | O16 | 머지 전 플랜 디렉터리 삭제가 **권장**이라 미준수 가능 | 피해가 작아 권장으로 뒀다. 누적되면 에이전트가 낡은 플랜을 현재 설계로 오독할 위험이 있고, 날짜 접두어와 `plans/` 경로가 1차 방어다 |
+| O18 | **R16(한국어 output-style)의 근거가 로컬 실측이 아니다** | 2026-08-19 도입. 원본 저장소의 전후 비교를 그대로 채택했고 이 환경에서 재현하지 않았다. 같이 안 잰 것 셋: ① 세션 floor 증가분(추정 ~1.5k) ② 응답 길이 증가가 `home/CLAUDE.md` 밀도 규칙을 잡아먹는지 ③ 서브에이전트가 실제로 준수하는지. `token-waste-audit`의 세션 스캐너로 ①②는 전후 비교가 가능하다 |
 | O17 | ready 전환 후 머지 전 창에서 **R12 경고가 강한 문구로 복귀**하는 것이 성가신지 | 미검증. 그 창은 짧을 것으로 가정하지만 승인·CI 대기가 길어지면 매 세션 시작마다 "새 워크트리를 만들까요"를 듣는다. 관측되면 하향 조건을 `--draft` 대신 `--state open` PR 존재로 넓힌다 |
 
 - ⚠️ **`refuse`는 발신자에게 아무 통지도 하지 않는다** — 문서 원문: "A message refused on arrival
@@ -730,8 +812,9 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 
 | 파일 | 내용 |
 |------|------|
-| `home/HARNESS-LOG.md` | 개선 16건의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
-| `woobin-harness/plan-exec-modes.md` | 모드 3종 전문 |
+| `home/HARNESS-LOG.md` | 개선 이력의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
+| `woobin-harness/plan-exec-modes.md` | Claude Code 모드 3종 전문 |
+| `woobin-harness/plan-exec-modes-codex.md` | Codex 모델·effort·에이전트 대응본 |
 | `woobin-harness/hooks/*.sh` | 각 파일 헤더에 그 훅만의 상세 근거(사고 이력 포함) |
 | `docs/workflow.html` | 사람이 보는 요약 |
 | `README.md` | 레포 구조·플러그인 형태·전환 절차 |

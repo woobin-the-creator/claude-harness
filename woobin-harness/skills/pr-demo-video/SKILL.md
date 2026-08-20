@@ -17,13 +17,14 @@ GitHub only renders inline video/GIF in a PR/comment when the asset lives on its
 
 ## Show it in the chat (deliver as an animated "video")
 
-The fastest way to **show a demo in the chat as a video**: produce a **GIF** and `Read` it. The user's chat UI renders the GIF and it **animates / plays like a video** for them.
+The fastest way to **show a demo in the chat as a video** is to produce a **GIF** and attach/render it with the current host's local-media mechanism.
 
-- `Read demo.gif` → the user sees it play inline. (You, the model, may only see the first frame in the tool result — that's expected; it still animates for the user.)
+- Claude Code: `Read demo.gif` so the user sees it inline.
+- Codex desktop: return `![demo](/absolute/path/to/demo.gif)` in the user-facing response. Local media paths must be absolute.
 - So trim/lead the GIF with a meaningful frame (skip a blank loading state at the very start) since the first frame is what a static preview shows.
-- **mp4 cannot be delivered to the chat** — `Read` rejects it as binary, and the terminal chat has no video player. Always convert to GIF for chat delivery.
+- For portable inline delivery, prefer GIF. An mp4 may not render in terminal clients.
 - A single PNG frame `Read`s as a static image (good for one key moment); a tiled montage shows a storyboard. But for "like a video," use the **GIF**.
-- **This Read stays in the main session — never delegate it.** The whole point is that the *user* sees it. That is the opposite of the verification Read in step 3, which you do for yourself and must hand off.
+- **The final media rendering stays in the main session — never delegate it.** The whole point is that the *user* sees it. Verification in step 3 remains delegated.
 
 This is the default when the user wants to *see* the demo here, not (or in addition to) attaching it to a PR.
 

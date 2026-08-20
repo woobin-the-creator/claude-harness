@@ -13,7 +13,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** If working in an isolated worktree, it should have been created at execution time (`EnterWorktree` with `baseRef=fresh`, or `git worktree add`).
+**Context:** If working in an isolated worktree, create it from a fresh base at execution time (Claude Code: `EnterWorktree` with `baseRef=fresh`; either host: `git worktree add`).
 
 **Save plans to:** `docs/woobin_plan/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -149,16 +149,21 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-Do not start executing in this session. Report where the plan was saved and hand the turn back so the user can `/clear`.
+Do not start executing in this session. Report where the plan was saved and hand the turn back so the user can start a clean task/session (or use `/clear` where the host supports it).
 
-Then present the three execution modes defined in this plugin's `$CLAUDE_PLUGIN_ROOT/plan-exec-modes.md` (fall back to ~/.claude/plan-exec-modes.md if installed outside a plugin) — read that file and follow it. Recommend exactly one and state the evidence for it, because the only basis for the choice is the dependency graph you just wrote into `00-overview.md`, and no later session can reconstruct it as cheaply:
+Then read and follow the execution-mode file for the current host:
 
-- ① Speed (`xhigh` + sonnet) — only when two or more tracks share no files.
-- ② Thrift (`medium` + sonnet) — dependency chain or shared files. Most plans land here. Ask the layer-boundary sub-choice too: ②a manual `/clear` (cheapest, needs the user present) or ②b one `plan-implementer` per layer, serially (runs unattended).
-- ③ Max quality (`xhigh` + opus + separate-context reviewers) — migrations, prod-facing changes, UI that automated gates cannot check.
+- Claude Code: [plan-exec-modes.md](../../plan-exec-modes.md)
+- Codex: [plan-exec-modes-codex.md](../../plan-exec-modes-codex.md)
 
-The kickoff the user runs after `/clear` is three lines: `/effort <level>`, `/model <model>`, then the plan path plus the mode number. Warn that `/effort` persists to `settings.json` and tell them what to set it back to.
+Recommend exactly one and state the evidence for it, because the only basis for the choice is the dependency graph you just wrote into `00-overview.md`, and no later session can reconstruct it as cheaply:
+
+- ① Speed — only when two or more tracks share no files. Use the selected host file's model and effort.
+- ② Thrift — dependency chain or shared files. Most plans land here. Ask the layer-boundary sub-choice too: ②a manual clean-session boundary (cheapest, needs the user present) or ②b one `plan-implementer` per layer, serially (runs unattended).
+- ③ Max quality — migrations, prod-facing changes, UI that automated gates cannot check. Use the selected host file's model, effort, and reviewer contract.
+
+Use the selected host file's kickoff format. Do not emit Claude model names or `/effort` commands in Codex, and do not emit Codex model slugs or `-c model_reasoning_effort=...` in Claude Code.
 
 Never fan out a subagent per task, and never tell the implementer to verify its own work — both are measured losses, cited in the modes file.
 
-Measured basis: `~/.claude/HARNESS-LOG.md` §12·§16, and the sources at the bottom of the modes file.
+Measured basis: this harness repo's `home/HARNESS-LOG.md` §12·§16, and the sources at the bottom of the selected modes file.

@@ -44,7 +44,7 @@ If no StudyVault exists, inform user and stop.
 
 ### Phase 2: Ask Session Type
 
-**MANDATORY**: Use AskUserQuestion to let the user choose what to do. Analyze the dashboard to build context-aware options, then present them.
+**MANDATORY**: Let the user choose what to do before continuing. In Claude Code, use `AskUserQuestion`. In Codex, present a compact numbered list in plain text and wait for the reply; do not use a chooser that forces a “Recommended” label because that would leak a hint.
 
 Read the dashboard proficiency table and build options based on current state:
 
@@ -53,7 +53,7 @@ Read the dashboard proficiency table and build options based on current state:
 3. Always include "Choose a section" option so the user can pick any area
 4. If all areas are 🟩/🟦 → include "Hard-mode review" option
 
-Present these as an AskUserQuestion with header "Session" and concise descriptions showing which areas each option targets. The user MUST select before proceeding.
+Present these with a “Session” header and concise descriptions showing which areas each option targets. The user MUST select before proceeding.
 
 ### Phase 3: Build Questions
 
@@ -65,8 +65,10 @@ Present these as an AskUserQuestion with header "Session" and concise descriptio
 
 ### Phase 4: Present Quiz
 
-Use AskUserQuestion:
-- 4 questions, 4 options each, single-select
+Present all 4 questions with 4 options each, single-select:
+
+- Claude Code: use `AskUserQuestion` when its UI supports this shape.
+- Codex: render numbered questions and lettered choices in plain text, then ask for one compact reply such as `1B 2D 3A 4C`.
 - Header: "Q1. Topic" (max 12 chars)
 - Descriptions: neutral, no hints
 

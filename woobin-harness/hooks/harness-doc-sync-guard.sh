@@ -35,11 +35,14 @@ fi
 report=$(sh "$checker" 2>&1) || :
 printf '%s' "$report" | grep -q '✗\|⚠' || exit 0
 
+guide=CLAUDE.md
+[ "${HARNESS_HOST:-claude}" = "codex" ] && guide=AGENTS.md
+
 msg="[하네스 문서 동기화 검사] \`woobin-harness/\` 를 수정했습니다. 아래는 \`scripts/check-harness-docs.sh\` 결과입니다.
 
 $report
 
-✗ 는 반드시 고치고, ⚠ 는 판단해서 처리하세요. CLAUDE.md의 '고칠 때 같이 고쳐야 하는 것'이 산문이라
+✗ 는 반드시 고치고, ⚠ 는 판단해서 처리하세요. ${guide}가 가리키는 '고칠 때 같이 고쳐야 하는 것'이 산문이라
 2026-08-10에 실제로 \`docs/workflow.html\` 이 빠진 적이 있어서 판정을 스크립트로 옮겼습니다.
 이 알림은 세션 1회만 뜹니다."
 

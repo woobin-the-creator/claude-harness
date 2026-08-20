@@ -1,0 +1,43 @@
+{
+  "name": "design-workflow-dashboard-experiment",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "prepare:inputs": "node scripts/prepare-inputs.mjs",
+    "audit:inputs": "node scripts/audit-inputs.mjs",
+    "test:common": "vitest run common/tests/fixtures.test.ts",
+    "typecheck:baseline": "tsc -p variants/baseline/tsconfig.json",
+    "typecheck:design-rules": "tsc -p variants/design-rules/tsconfig.json",
+    "typecheck:design-workflow": "tsc -p variants/design-workflow/tsconfig.json",
+    "build:baseline": "npm run typecheck:baseline && vite build --config variants/baseline/vite.config.ts",
+    "build:design-rules": "npm run typecheck:design-rules && vite build --config variants/design-rules/vite.config.ts",
+    "build:design-workflow": "npm run typecheck:design-workflow && vite build --config variants/design-workflow/vite.config.ts",
+    "build:variants": "npm run build:baseline && npm run build:design-rules && npm run build:design-workflow",
+    "test:functional": "playwright test -c evaluation/playwright.config.ts evaluation/functional.spec.ts",
+    "blind-map": "node scripts/create-blind-map.mjs",
+    "build:launcher": "tsc -p launcher/tsconfig.json && vite build --config launcher/vite.config.ts",
+    "test:blind": "vitest run evaluation/blind-map.test.ts && EXPERIMENT_SERVER_MODE=blind playwright test -c evaluation/playwright.config.ts evaluation/blind-launcher.spec.ts",
+    "serve": "node scripts/serve-built.mjs --mode blind --port 4173",
+    "capture": "node evaluation/capture-scenes.mjs",
+    "measure": "node evaluation/collect-measurements.mjs",
+    "audit:experiment": "node scripts/audit-experiment.mjs",
+    "reveal": "node scripts/reveal-map.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "1.28.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.4",
+    "typescript": "7.0.2",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
+  }
+}

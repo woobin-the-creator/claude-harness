@@ -1,0 +1,128 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-return-guard.sh",
+            "timeout": 10,
+            "statusMessage": "자리비움 복귀 점검 중..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/sdd-kickoff-guard.sh",
+            "timeout": 10,
+            "statusMessage": "SDD 킥오프 플랜 크기 점검 중..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/plan-session-boundary-guard.sh",
+            "timeout": 10,
+            "statusMessage": "플랜 진입 세션 경계 점검 중..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/subagent-model-default.sh",
+            "timeout": 10,
+            "statusMessage": "서브에이전트 모델 기본값 적용 중..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/sdd-orchestrator-edit-guard.sh",
+            "timeout": 10,
+            "statusMessage": "SDD 편집 위임 점검 중..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/plan-saved-session-boundary.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/harness-doc-sync-guard.sh",
+            "timeout": 15,
+            "statusMessage": "하네스 문서 동기화 확인 중..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-handoff-stop.sh",
+            "timeout": 3900,
+            "statusMessage": "자리비움 감시 대기 중...",
+            "asyncRewake": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/stop-warning-ack-guard.sh",
+            "timeout": 10,
+            "statusMessage": "stale-branch 경고 전달 확인 중..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ctx-handoff-stop.sh",
+            "timeout": 10,
+            "statusMessage": "컨텍스트 크기 확인 중..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/stale-branch-guard.sh",
+            "timeout": 15,
+            "statusMessage": "stale-branch 점검 중..."
+          }
+        ]
+      }
+    ]
+  }
+}

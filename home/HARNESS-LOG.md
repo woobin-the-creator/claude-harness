@@ -34,6 +34,12 @@ Claude Code 하네스(훅·스킬·CLAUDE.md·설정)를 토큰/컨텍스트 문
 | 16 | 08-07 | 핸드오프가 없는 SDD 스킬을 계속 권함 + model·effort 레버 미사용 | 훅에서 SDD 문구 제거, 구현 모드 3종 도입 | (신규) |
 | 17 | 08-10 | 300k 초과 세션이 계속 돎 + 진입 가드가 어구 변형에 죽음 + 훅이 없는 스킬을 부름 + 문서 4종 동기화가 산문이라 샘 | handoff 스킬·ctx 핸드오프 훅 신설, 진입 정규식 확장, 문서 동기화 검사기 | (신규) |
 | 18 | 08-10 | 크로스세션 메시징이 기본 ON — 피어가 **사람 없이** 내 idle 세션의 턴을 열 수 있음 | `crossSessionInbound: "refuse"` + bootstrap 병합 | (신규) |
+| 19 | 08-10 | 스킬 43개 중 18개가 한 달간 0회 호출 — 안 쓰는 남의 스킬이 description으로 상시 적재 | 다운로드 출처로 확인·추정된 18개만 삭제 (자작 미사용 5개는 존치) | (신규) |
+| 20 | 08-10 | 구현 세션이 **컨텍스트가 아니라 사용량 하드 컷**으로 끊김 — R13이 못 덮는다 | R15: `plan/` 브랜치 + draft PR을 회복 진입점으로, 레이어마다 커밋→리뷰→push | (신규) |
+| 21 | 08-12 | 같은 하네스를 Codex에서도 쓰고 싶은데 훅·에이전트·모델명 계약이 다름 | 스킬은 단일 소유 유지, Claude 훅 정본 분리 + Codex는 안전한 4개만 연결 | (신규) |
+| 22 | 08-12 | 구조 validator만으로는 "Codex 프롬프트에 실제로 보이는가"를 증명 못 함 | 구성요소 전수 감사 + 스킬 본문의 호스트 종속 표현 패치 | (신규) |
+| 23 | 08-12 | 정리 규칙이 원본 머신에만 있었고, 종료 대상을 **이름**으로 판정함 | 스크립트를 플러그인으로 이관 + 출처(working_dir) 기준 판정 | (신규) |
+| 24 | 08-19 | 모델이 지시 없이 쓰는 한국어가 저품질이고, 다단 에이전트라 그 손실이 **단계마다 누적**됨 | 외부 output-style(`fluent-korean`) 도입 — 플러그인이 나르고 `outputStyle`이 켠다 | (신규) |
 
 ---
 
@@ -406,6 +412,145 @@ task 단위는 ②a에서 git 출력이 오케스트레이터 floor에 쌓여 �
 
 **재측정**: 아직. O14를 먼저 세야 판정 기준선이 생긴다.
 
+## 21. Claude Code 플러그인을 Codex와 공용화 (2026-08-12)
+
+**발단**: 같은 개인 하네스를 Codex에서도 쓰고 싶다는 요청. 공식 계약을 대조하니 스킬은 양쪽 모두 `SKILL.md` 기반 open agent skills 표준을 읽고, Codex 플러그인도 `.codex-plugin/plugin.json` + `skills/` + `hooks/hooks.json` 구조를 쓴다. Codex는 플러그인 훅에 `CLAUDE_PLUGIN_ROOT`까지 호환 변수로 제공한다.
+
+**그대로 공유하지 못한 것**: Codex의 command hook은 비동기가 아직 미지원이라 `idle-handoff-stop.sh`의 50분 `asyncRewake`를 연결하면 턴 종료를 50분 막게 된다. Codex `apply_patch`는 Claude `Write/Edit`의 `tool_input.file_path` 대신 patch 문자열을 주고, transcript 포맷은 안정 계약이 아니다. Claude 모델명 `sonnet/opus/haiku`를 Codex subagent 입력에 주입하는 것도 잘못된 override다.
+
+**수단**:
+- 공통 `skills/`는 단일 소유 유지. Codex validator가 거부한 `argument-hint`·`disable-model-invocation`만 제거하고 의미는 description에 옮겼다. Codex 전용 안전 설치 스킬 `git-guardrails-codex`를 추가했다.
+- Claude 훅 정본을 `hooks/claude-hooks.json`으로 옮기고 Claude manifest가 명시적으로 가리키게 했다. Codex는 기본 발견 경로 `hooks/hooks.json`에서 안전한 4개만 연결한다.
+- `codex-apply-patch-adapter.sh`가 patch 헤더에서 경로를 뽑아 공유 훅 입력으로 정규화한다. stale-branch 짝은 Codex의 `last_assistant_message`와 플러그인 데이터 디렉터리를 지원한다.
+- Codex plugin/marketplace manifest, 전역 `AGENTS.md` 라우터, custom-agent TOML 4개, `bootstrap-codex.sh`, 결정론적 validator/fixture를 추가했다.
+
+**기각**:
+- 기존 훅 11개를 Codex에 전부 연결 — fail-open처럼 보여도 3900초 Stop block과 잘못된 모델 주입은 무해하지 않다.
+- Codex용 스킬 44개를 복사 — 즉시 소유자가 둘이 되고 다음 수정부터 드리프트한다.
+- 플러그인 디렉터리를 `plugins/woobin-harness`로 이동 — 현재 Claude marketplace와 문서 경로 전부를 흔드는 이득 없는 대수술이다. Codex marketplace는 공식 계약대로 repo root 상대 `./woobin-harness`를 가리킨다.
+
+**재측정**: Codex 설치 후 `/hooks` trust를 완료한 새 대화에서 ① stale 브랜치 경고와 Stop ack ② 플랜 경로 kickoff ③ 이 레포의 apply_patch 후 문서 동기화 경고를 각각 1회 확인한다. 비동기 훅 지원이 생기거나 transcript usage가 안정 schema로 공개되면 미연결 7개를 다시 평가한다.
+
+## 22. Codex 구성요소 전수 감사와 스킬 의미 패치 (2026-08-12)
+
+**발단**: #19의 구조 validator만으로는 "44개가 실제 Codex 프롬프트에 보이는가", "공유 훅 11개의 주요 분기가 살아 있는가", "스킬 본문에 Claude 툴 이름이 숨어 있지 않은가"를 증명하지 못했다. 사용자가 요구한 완료 기준도 구성요소 정상 작동 확인과 실패 목록이었다.
+
+**실제 발견한 드리프트**:
+- `review`·`design-an-interface`·`qa`가 `Agent`/`Task`/`Explore`를 호스트 구분 없이 지시했다.
+- `tutor`가 `AskUserQuestion` 전용이었고, Codex의 추천 라벨은 퀴즈 힌트가 될 수 있었다.
+- `writing-plans`의 핸드오프가 Claude 모델명·`/effort`·`EnterWorktree`를 바로 내보냈다.
+- `explain`·`design-variants-to-pr`·`pr-demo-video`가 `~/.claude/skills`·`Read`·Claude 공저자 같은 경로/표면을 가정했다.
+- `capability-audit` 수집기가 동봉 `token-waste-audit`를 두고도 Claude 홈 경로만 찾았다.
+
+**수단**:
+- 공유 스킬에 Claude/Codex 호스트 분기를 최소한으로 추가하고, 상대 경로로 번들 자산을 찾게 바꿔 단일 소유를 유지했다.
+- `plan-exec-modes-codex.md`를 추가해 Codex 모델·effort·agent kickoff을 Claude 문구와 분리했다.
+- `scripts/test-hooks.sh`로 공유 훅 11개 전체의 trigger/once/block/ack 분기를, `scripts/test-skills.sh`로 44개 자산 구문·상대 참조·네트워크 없는 runtime을 고정했다.
+- `validate-codex.sh`가 임시 `CODEX_HOME` 설치 후 `codex debug prompt-input`을 실행해 스킬 44개, 전역 정책, 프로젝트 라우터가 실제 모델 입력에 있는지 집합으로 비교한다.
+
+**결과**: 44/44 스킬 발견, 11/11 공유 훅 fixture, 4/4 Codex 훅 wiring, 4/4 Codex agent 설치, 번들 로컬 runtime fixture가 통과했다. Codex 오작동 방지를 위해 훅 7개는 계속 미연결이며, `buddy`·Claude git guardrail·`close-session`은 전용/대체/no-op 경계를 명시했다. 상세 판정은 `docs/codex-compatibility-audit-2026-08-12.md`.
+
+**재측정**: Codex가 async command hook을 지원하거나 transcript usage 안정 schema를 공개할 때 미연결 7개를 다시 평가한다. 그전에는 환경 고유 외부 의존(Playwright, `pdftotext`, GitHub 쓰기)을 호환 실패와 섞지 않는다.
+
+## 23. 정리 규칙이 원본 머신에만 있었다 — 그리고 이름으로 판정하고 있었다 (2026-08-12)
+
+**발단**: "`/close-session`이 안 쓰는 프로세스 정리하는 스텝, 특정 앱은 예외처리 할 수 있어?"
+라는 질문 하나로 시작했는데, 답을 찾는 과정에서 결함 4개가 연달아 나왔다.
+
+**문제 A (레포에 없었다)**: `close-session-cleanup.sh`는 `~/.claude/hooks/`에만 있었고
+`idle-return-guard.sh`가 그걸 **절대경로로** 부르고 있었다. 훅 12개 중 유일하게
+`${CLAUDE_PLUGIN_ROOT}`를 안 쓴 참조다. 즉 정리 규칙 전체가 원본 머신 로컬이었고,
+다른 머신에서는 훅이 조용히 아무 일도 안 하고 지나갔다. README는 이걸 "wire 안 된 잔재"로
+분류해 두어 **문서가 오히려 발견을 늦췄다** — 실제로는 wire 돼 있었다.
+
+**문제 B (이름으로 판정하고 있었다)**: 앱 종료 대상을 프로세스 **이름** 목록으로 골랐다.
+그런데 Playwright가 띄운 Chrome도 프로세스 이름은 그냥 `Google Chrome`이다. 예외 목록을
+설계하면서 "일상용 브라우저니까 보존"이라고 `keep|Google Chrome`을 넣었는데, 실측해보니
+떠 있던 `Google Chrome` **1894MB가 최상위 프로세스 2개 전부 ms-playwright-mcp 인스턴스**였다.
+잡으려던 것을 정확히 살려두는 규칙을 쓴 것이다. **이름은 출처의 대리 변수가 못 된다.**
+
+**문제 C (여러 단어 이름이 통째로 누락)**: `APPS="Google Chrome Chromium ..."`을
+`for app in $APPS`로 순회해 `Google`·`Chrome` 두 토큰으로 쪼개졌다. `pgrep -x`가 못 잡으니
+여러 단어 이름 앱은 **기능이 생긴 이래 한 번도 종료된 적이 없었다.** 한 단어짜리(Slack·Notion
+·KakaoTalk)만 죽고 있었으니, 실제 동작은 "e2e 브라우저는 살려두고 메신저를 끈다"였다.
+
+**문제 D (동기 훅이 무한 대기)**: frontmost 판정용 `osascript`는 Automation 권한이 없는
+컨텍스트에서 TCC 프롬프트도 못 띄운 채 블록된다. 이 스크립트는 `UserPromptSubmit`에서
+**동기로** 도니 세션이 통째로 멈춘다. 실측 2분+.
+
+**수단**:
+- 스크립트·정책 기본값을 `woobin-harness/hooks/`로 옮기고 참조를 `${CLAUDE_PLUGIN_ROOT}`로.
+  정책 파일은 3단계 탐색(env → `~/.claude/` → 동봉 기본값). **파일 부재의 기본값이
+  보수적인 쪽이 아니라 가장 공격적인 쪽**이라 동봉본이 반드시 있어야 한다.
+- 판정을 두 갈래로 분리. **출처로 잡는 것**(자동화 브라우저 서명, compose `working_dir`이
+  이 레포 안)은 이름·정책·frontmost와 무관하게 정리한다. **이름으로 잡는 것**(사용자가 켠 GUI 앱)만
+  `keep`·`ondemand`·`idle|<일수>|<활동경로>` 정책을 탄다.
+- 도커는 `stop`이지 `down`이 아니다. 볼륨을 안 건드리므로 dev/prod DB가 살고 `docker start`로 복구된다.
+- `osascript`에 상한(`run_bounded`). 실패하면 앱 절을 **통째로 건너뛴다** — frontmost를 모르는 채
+  진행하면 지금 쓰는 앱이 보호를 잃는다.
+
+**대가**: 판정 층위가 둘로 늘어 "왜 안 죽었나"의 답이 한 곳에 없다. `CLOSE_SESSION_DRY_RUN=1`이
+보존 사유를 찍는 게 그 대가를 갚는 유일한 수단이라, dry-run을 **디버깅 도구가 아니라 설계의 일부**로
+취급해라. 그리고 `idle`의 활동 경로는 손으로 고른다 — Electron 앱은 떠 있기만 해도 `Cache`·`DIPS`가
+갱신되므로, 그런 경로를 쓰면 앱이 영원히 "활성"으로 판정돼 예외가 조용히 무력화된다.
+
+**재측정**: 아직. 다음 `/close-session`부터 리포트에 회수량이 찍히므로 그걸 기준선으로 쓴다.
+## 24. 한국어 출력 품질을 output-style로 사전 규율 (2026-08-19)
+
+**발단**: 사용자가 `snflkd/fluent-korean` 저장소를 읽고 적용하라고 지시했다. 이 항목은 앞의 20건과
+성격이 다르다 — **문제를 여기서 측정해서 발견한 것이 아니라, 외부에서 진단과 처방을 통째로 가져왔다.**
+그 사실 자체를 남긴다. 나중에 "왜 이건 근거 수치가 없지"라고 되묻지 않도록.
+
+**문제**: LLM이 지시 없이 쓰는 한국어는 조사와 어미를 생략하고, 명사구를 나열해서 문장을 끝내고,
+일반 어휘 자리에 비유 어휘를 넣는다. 토큰을 아끼도록 튜닝된 코딩 에이전트에서 특히 심하다.
+결과가 셋이다 — ① 사용자가 보고를 해독하는 데 품이 든다 ② 한국어 산출물의 완성도가 낮아진다
+③ 저품질 문장이 사고 과정 자체에 섞인다.
+
+**왜 이 하네스에서 특히 아픈가**: 여기는 서브에이전트에 한국어 프롬프트를 넘긴다
+(`plan-implementer`·`Explore`·`plan-reviewer`). E4대로 서브에이전트는 부모 프리픽스를 공유하지 않으므로,
+각 단계는 앞 단계의 한국어를 **입력으로만** 받는다. 즉 누적을 끊을 지점이 각 단계의 출력밖에 없다.
+`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain`처럼 한국어 산출물이 최종 결과인
+스킬도 여럿 굴린다.
+
+**수단**: R16 신설. 원본의 output-style 두 판을 `woobin-harness/output-styles/`에 담고
+(`fluent-korean` = 코딩 지침 유지, `fluent-korean-not-coding` = 비유지),
+`~/.claude/settings.json`의 `outputStyle`을 `fluent-korean`으로 박았다.
+`bootstrap.sh` ③의 jq 병합에 같은 키를 넣어 새 머신에서도 켜지게 했다.
+
+**훅은 하나도 만들지 않았다.** 출력 규율은 시스템 프롬프트 층위에서 **사전에** 걸어야 하고,
+사후 검사 훅은 이미 나간 문장을 되돌리지 못한다. 규율 2("소프트 지시로 못 막는 건 구조를 바꾼다")를
+쓸 자리가 아니다 — 여기서 시스템 프롬프트는 소프트 지시가 아니라 **구조 쪽**이다.
+
+**설계 판단 — 본문을 요약하지 않았다.** 원본 본문이 직접 경고한다. 조항마다 붙은 예시를 지우면
+그 조항이 무엇을 의도했는지 알 수 없어지고, 요약에 들어간 조항만 지켜지는 쪽으로 서술 압력이 쏠린다.
+같은 이유로 본문을 한 글자도 고치지 않았다 — 원저자가 어휘 priming을 노려 지침 본문 자체를
+그 지침대로 썼다고 밝혔기 때문이다. 이 레포가 더한 것은 원본 README가 "골라서 붙이라"고 제시한
+**선택 블록 3개**뿐이다: 희귀 어휘 자제 · 모든 한국어 산출물에 적용 · 출력 직전 자기 점검.
+사용자가 직접 고른 것이고, 무엇을 왜 뺐는지까지 `output-styles/ATTRIBUTION.md`에 적어뒀다.
+
+**일부러 안 붙인 것 하나가 나중에 문제가 된다.** "문체 민감 작업 예외" 블록을 뺐다. 그래서 지금 설정은
+소설·대본·출제처럼 별도 문체 지침이 있는 산출물에도 **무조건** 적용된다. 그런 작업을 시작하면
+이 블록을 먼저 붙여라 — R16 무효화 조건에 같은 내용을 박아뒀다.
+
+**대가**: 토큰이 는다. ① 시스템 프롬프트가 매 세션 ~1.5k 커진다 ② 생략된 성분을 복원하므로 응답이
+길어진다 ③ 자기 점검 블록 때문에 사고 토큰이 더 든다. 그리고 `home/CLAUDE.md`의 "답변 밀도" 규칙과
+압력 방향이 반대다 — 밀도 규칙이 줄이라는 건 **항목 수**이고 이 규칙이 복원하라는 건 **문장 성분**이라
+논리적 충돌은 아니지만, 한쪽이 다른 쪽을 잡아먹는지는 봐야 한다.
+
+**근거의 등급을 낮춰 적는다.** 원본 저장소는 동일 모델·동일 프롬프트 전후 비교를 제시하지만,
+이 환경에서 재현하지 않았다. `docs/workflow-spec.md` §0이 요구하는 "로컬 실측"을 만족하지 않는
+**유일한 규칙**이다. §8 O18에 그대로 열어뒀다.
+
+**재측정**: 아직. `token-waste-audit`의 세션 스캐너로 세션 floor 증가분과 응답 길이 변화는
+전후 비교가 가능하다. 서브에이전트 준수율은 도구가 없어 눈으로 봐야 한다.
+
+**곁다리로 걸린 함정 — 버전 번호가 이미 굳어 있었다.** `plugin.json`을 1.5.0 → 1.6.0으로 올렸는데,
+`installed_plugins.json`을 보니 **설치본이 이미 1.6.0**이었다(2026-08-11, 다른 브랜치 커밋 5f8776f에서
+설치됨). 즉 레포의 `version`이 설치본보다 뒤처져 있었고, 레포 값에 +1 한 번호가 **이미 굳은 캐시
+디렉터리**와 겹쳤다. 그대로 뒀으면 문서·파일은 다 맞는데 설치본만 옛날 것인 상태가 조용히 유지된다
+(2026-08-08 사고와 증상이 같고 원인만 다르다). 1.7.0으로 올려서 피했고, `CLAUDE.md`의 버전 올리기
+항목에 **"올릴 번호가 캐시에 이미 있는지 먼저 확인"** 과 확인 명령 두 줄을 박았다.
+
 ## 규율 (이 이력에서 반복 확인된 것)
 
 1. **소프트 개입 우선** — 차단은 세션 1회 + 재시도 통과. 오탐이 영구 장애가 되면 안 된다(#7, #10, #11 전부 이 형태).
@@ -413,3 +558,5 @@ task 단위는 ②a에서 git 출력이 오케스트레이터 floor에 쌓여 �
 3. **효과는 다음 audit에서 재측정한다** — 처방만 남기면 재발한다(스킬 `checklist.md`의 해결책 사다리 원칙).
 4. **근거 수치와 규칙은 별개로 검증** — 근거가 틀려도 규칙이 맞을 수 있다(#4).
 5. **env 전역 override보다 PreToolUse 조건부 주입** — 의도적 예외를 조용히 깨뜨리지 않는다(#8).
+6. **이름이 아니라 출처로 판정한다** — 이름이 같아도 출처가 다르면 다른 것이다. 이름으로 고른
+   목록은 조용히 반대로 동작할 수 있다(#21: e2e Chrome을 살려두고 메신저를 껐다).

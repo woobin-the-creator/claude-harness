@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>design-rules 블라인드 비교 — 랏 추적 대시보드</title>
+<style>
+  :root {
+    --canvas: #fbfbfa;
+    --ink: #16161a;
+    --ink-soft: #5c5c66;
+    --rule: #dcdcd6;
+    --surface: #fff;
+    --accent: #16161a;
+    --accent-ink: #fff;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--canvas);
+    color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+          "Malgun Gothic", "Segoe UI", sans-serif;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 10px 18px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* 라벨은 값만큼 읽히게 — 굵기로 위계를 낸다 */
+  .title { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .title span { font-weight: 500; color: var(--ink-soft); margin-left: 8px; }
+
+  .switch { display: flex; gap: 6px; margin-left: auto; }
+  /* 쉬는 상태에서 컨트롤임이 드러나야 한다 — 테두리는 텍스트 등급 색으로 */
+  .switch button {
+    font: inherit;
+    font-weight: 700;
+    padding: 5px 16px;
+    border: 1px solid var(--ink-soft);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .switch button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .switch button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .hint { font-size: 12.5px; color: var(--ink-soft); }
+
+  iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--surface); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="title">랏 추적 대시보드 <span>같은 프롬프트 · 두 가지 조건</span></div>
+    <p class="hint">어느 쪽이 어떤 조건인지는 가려져 있습니다. 각 목업 안에 라이트/다크 토글이 따로 있습니다.</p>
+    <div class="switch" role="group" aria-label="시안 전환">
+      <button type="button" data-arm="X" aria-pressed="true">시안 X</button>
+      <button type="button" data-arm="Y" aria-pressed="false">시안 Y</button>
+    </div>
+  </header>
+
+  <iframe id="stage" src="X.html" title="시안 X"></iframe>
+
+<script>
+  var stage = document.getElementById('stage');
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('.switch button'));
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var arm = btn.getAttribute('data-arm');
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      stage.src = arm + '.html';
+      stage.title = '시안 ' + arm;
+      history.replaceState(null, '', '?arm=' + arm);
+    });
+  });
+
+  var initial = new URLSearchParams(location.search).get('arm');
+  if (initial === 'Y') {
+    var target = buttons.filter(function (b) { return b.getAttribute('data-arm') === 'Y'; })[0];
+    if (target) target.click();
+  }
+</script>
+</body>
+</html>

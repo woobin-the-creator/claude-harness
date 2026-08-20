@@ -1,96 +1,117 @@
 ---
 name: groupchat-debug
-description: 사내 AI(opencode)가 보낸 에러 traceback·스택트레이스·장애 보고서를 붙여넣으면, air-gap이라 내가 직접 재현할 수 없는 사내 시스템을 텍스트 보고서만으로 원격 진단하고, 사내가 계측·검증·수정하도록 결정론적 지시(`[→ 사내 AI] #N`)까지 만들어내는 원격 진단 스킬. groupchat 삼자대화 계열(groupchat-ai의 자매 스킬)이며, 진단 사고법만 새로 정의하고 전송 포맷은 groupchat-ai에서 빌려 쓴다. Use this skill whenever 사용자가 사내/opencode가 보낸 에러를 붙여넣고 원인·조치를 물을 때 — "사내에서 또 500 에러 났대 (traceback 붙임)", "사내 ai가 이 에러 보고했어 분석해줘", "internal server error 원인 분석하고 사내에 보낼 수정 지시 만들어줘", "SSO 콜백 422 / 무한 리다이렉트 / DB connection 에러 보고서야", "사내 환경에서만 나는 에러인데 어떻게 잡지". 내가 직접 코드를 만져 재현하는 로컬 디버깅은 `diagnose`, 에러가 아닌 일반 삼자대화 중개는 `groupchat-ai`를 쓴다 — 이 스킬은 **사내발 에러 보고서**에 한정한다.
+description: 사내 AI(opencode)가 보낸 traceback·로그·장애 보고서를 air-gap 밖에서 진단하고, external-implementer가 canonical code/test fix를 작성하도록 돕는 원격 디버깅 스킬. internal-executor에는 사내 환경 재현, 로그·env·DB 사실 조회, 승인된 canonical fix/runbook 실행 검증과 evidence 반환만 맡긴다. 사용자가 사내/opencode의 500, SSO, DB connection, redirect, 422, build 장애 보고를 붙여넣고 원인·조치를 물을 때 사용한다. 로컬에서 직접 재현 가능한 버그는 `diagnose`, 장애가 아닌 일반 삼자대화는 `groupchat-ai`를 사용한다.
 ---
 
 # groupchat-debug
 
-사내 AI(opencode)가 보낸 **에러 보고서를 원격으로 진단**하고, 사내가 검증·수정하도록 지시까지 만든다.
+사내 AI가 보낸 error evidence를 외부 canonical repository와 대조해 원인을 좁히고 수정·검증 루프를 닫는다.
 
-## 이 스킬이 풀려는 문제 (왜 diagnose로 안 되나)
+## 역할 계약
 
-`diagnose`의 척추는 "**내가 직접 빠른 feedback loop를 만들어 재현한다**"이다. 그런데 사내 시스템은
-air-gap이라 내가 재현도 계측도 못 한다. 내가 가진 건 **external 정본 레포 코드 + 사내가 텍스트로 보낸 보고서**뿐이다.
+먼저 `groupchat-ai`의 「시작 전 identity gate」를 통과한다. 프로젝트 `AGENTS.md`의 clone-local role 계약과
+실제 runtime을 함께 확인한다. `external-implementer`만 진단 mediator로 진행한다. `internal-executor`에서
+호출되면 외부 lead를 흉내 내지 않고 이미 받은 재현·조회·검증 runbook만 수행한다. unknown/conflict에서는
+자동 변경 없이 중단한다.
 
-그래서 진단을 이렇게 뒤집는다:
+- **external-implementer**: 가설을 세우고 canonical code/test/docs/migration/runbook을 직접 수정·검증하며
+  code review와 commit/push를 맡는다.
+- **internal-executor**: 사내 환경에서 재현하고 로그·env·DB·내부 library 사실을 조회하며, 외부가 제공한
+  canonical fix/runbook을 적용·실행해 evidence를 반환한다.
+- internal-executor는 경로와 무관하게 tracked/canonical source를 수정하거나 commit/push하지 않는다.
+  `/real/`, migration, scripts에도 내부 code ownership 예외를 만들지 않는다.
 
-- **재현·계측을 사내에 위임**한다. 나는 가설을 세우고, 사내가 증거를 수집하도록 결정론적 지시를 내린다.
-- 모든 진단은 "**내가 보는 정본 = 사내가 실제 실행하는 코드**"라는 가정에 의존한다 → 진단 전에 이 가정부터 지킨다(Step 1.5).
+## groupchat-ai에서 재사용할 규약
 
-## 재사용 (중복 정의 금지)
+- `[→ 사내 AI(opencode)] · 프롬프트 #N`, `[나에게]`, `[대기]` 라벨과 일련번호 규칙
+- 모든 내부 위임 본문의 정확히 여덟 필드 템플릿과 4백틱 복사 포맷
+- Tier 1 read-only lookup/evidence와 Tier 2 승인된 env/runtime/DB state-changing runbook 구분
+- 값 기반 마스킹과 immutability/evidence completion gate
+- 설정값 위임 시 `groupchat-ai/references/delegating-to-opencode.md`의 역산 금지·교차검증·stop 조건
 
-- **사내 전송 포맷** `[→ 사내 AI(opencode)] · 프롬프트 #N` 과 `[나에게]`/`[대기]` 라벨 → `groupchat-ai` 규약 그대로.
-  일련번호 #N도 그 규칙대로 매긴다.
-- **설정값(IP·포트·URL·인증서·키) 위임**이 끼면 → `groupchat-ai/references/delegating-to-opencode.md`의
-  역산 금지·증거 요구 규율을 그 블록에 녹인다.
-- **소유 경계 / 시니어↔주니어 관계** → `groupchat-ai` 본문 그대로. opencode의 사내 **사실**은 신뢰하되,
-  설계·판단은 내 권위에 종속.
+이 스킬은 위 계약을 복제하지 않고 진단 사고법만 정의한다.
 
-이 스킬은 위를 전제하고 **진단 사고법만** 정의한다.
+## Workflow
 
-## 워크플로
+### 0. 보고서 파악
 
-### 0. 입력 — 보고서 받기
-사용자가 붙여넣은 블록은 기본적으로 opencode가 보낸 것으로 본다. traceback·로그·증상 서술을 식별한다.
-발신자/맥락이 모호하면 추측 말고 한 줄로 되묻는다.
+사용자가 붙여넣은 블록을 기본적으로 opencode 보고로 본다. traceback, log, symptom, 실행 환경, 이미 수행한
+명령을 분리한다. 발신자나 환경이 모호하면 추측하지 않고 한 줄로 확인한다.
 
-### 1. 분류 (triage)
-에러를 범주로 태깅한다. 최근 사내 장애는 대부분 이 범주다:
-**SSO/auth · DB/connection · env/config · redirect/routing · validation(422) · build/deps · nginx/네트워크**.
-범주가 "어느 영역을 의심할지"를 좁힌다(다음 단계의 표적).
+### 1. Identity와 immutability 확인
 
-### 1.5 사각지대 체크 — **진단의 전제 지키기 (런북보다 먼저)**
-사내 AI가 사용자 모르게 파일을 수정·추가했으면, 나는 **존재하지 않는 코드를 진단**하게 된다.
-그래서 진단 영역의 코드 일치부터 확인한다.
+진단에 필요한 경우에만 내부 실행자의 baseline `git status --short`와 실행 중인 canonical revision을 받는다.
+이 정보는 사내 실행본이 외부가 진단하는 revision과 같은지, tracked repository가 불변인지 확인하는 evidence다.
+commit 준비나 내부 변경 허용에 쓰지 않는다.
 
-- **대상**: traceback에 등장한 경로 **+ 그 경로를 와이어링하는 `di`/`config`**. (엉뚱한 어댑터가 로드되는 사고가 보통 여기서 난다.) 전체 트리를 매번 받지 않는다 — 표적만.
-- **방법**: 사내에 해당 경로의 `git status`·미커밋(unstaged) 변경·실제 파일 내용을 보고하도록 `[→ 사내 AI] #N`으로 요청.
-- **두 종류로 갈라 처리**:
+tracked/canonical source 차이가 발견되면 내부에 revert나 patch를 시키지 않는다. 경로·revision·diff evidence만
+받고 재현을 멈춘다. external-implementer가 canonical repository에서 필요한 code/test fix를 만든 뒤 다시
+검증한다. 모든 경로에 같은 규칙을 적용하고 옛 디렉터리 경계를 되살리지 않는다.
 
-| 발견 | 의미 | 조치 |
-|------|------|------|
-| ① **정본 영역 침범** (`ports`/`usecases`/`api`/`domain`/`di`/`config`/`fake`를 사내가 수정) | 소유 경계 위반 | **진단을 멈추고 교정 우선** — external 정본 기준으로 되돌리게 지시(groupchat-ai "교정 대상" 규율). 되돌린 뒤 진단 재개 |
-| ② **사내 영역 변경** (`adapters/real`을 내가 못 본 채 수정) | 정상 범위, 단 미반영 | 그 최신 내용을 받아 **진단 입력에 반영** |
-| 일치 | 사각지대 없음 | 다음 단계로 |
+### 2. Triage와 runbook 대조
 
-### 2. 런북 대조
-`docs/troubleshooting.md`에 같은 증상이 정리돼 있는지 본다. 있으면 과거 chat을 grep하지 말고 그 수정안을 바로 적용/지시한다. (코드 일치를 1.5에서 확인했으므로 런북 수정안이 헛다리가 아니다.)
+장애를 SSO/auth, DB/connection, env/config, redirect/routing, validation, build/deps, nginx/network 등으로
+분류한다. 프로젝트 `docs/troubleshooting.md`에서 같은 symptom을 먼저 확인한다. hit이면 과거 chat을 찾지 말고
+현재 canonical runbook을 적용한다.
 
-### 3. 권위 경계 판정
-traceback의 핵심 프레임이 **내 정본 영역**이냐 **사내 영역(`adapters/real`)**이냐를 가른다.
-이게 "누가 고치냐"를 결정한다. 경로로 1차 판정(`/real/` 포함 여부), 모호하면 호출 스택을 따라 실제 결함 지점을 찾는다.
+### 3. 가설 구성
 
-### 4. 가설 3–5개
-falsifiable하게 세운다(diagnose Phase 3 방식). 각 가설에 검증 주체 태그를 단다:
-- `[레포검증]` — external 코드만으로 내가 확인 가능.
-- `[환경검증]` — 사내 env/DB/실행상태에서만 확인 가능 → 계측 위임 대상.
+3~5개의 falsifiable hypothesis를 우선순위로 세우고 검증 주체를 붙인다.
 
-각 가설은 예측을 명시한다: "X가 원인이면 Y를 바꿨을 때 사라진다." 예측 없으면 vibe다 — 버린다.
+- `[레포검증]`: external canonical code/test로 확인한다.
+- `[환경검증]`: internal env/DB/runtime에서만 확인할 수 있어 Tier 1 evidence lookup으로 위임한다.
 
-### 5. 분기 + 검증 (하이브리드)
-가설 검증을 **자명함의 정도**로 갈라 왕복을 최소화한다.
+각 가설에 "X가 원인이면 Y evidence가 관찰된다"는 예측을 적는다. 예측 없는 추정은 버린다.
 
-- **자명 / 내 정본 영역 / 런북 히트** → 바로 내가 수정하고 `[구현 시작]`. (불필요한 왕복 안 만듦.)
-- **사내 영역 / 불확실 / `[환경검증]` 가설** → **계측 위임**: "이 값을 찍어 보고하라"는 지시를 `[→ 사내 AI] #N`으로.
-  - 한 번에 **한 변수**만 바꾸게 한다(diagnose Phase 4). 추측 수정 연쇄(500→422→무한리다이렉트)를 막는 핵심.
-  - **증거를 요구**한다(로그 라인·git diff·쿼리 결과). "고쳤다"는 보고가 아니라 증거로 가설을 확정한다.
+### 4. 최소 재현과 evidence 수집
 
-### 6. 루프 닫기
-사내 증거 보고 → 가설 확정/기각 → (확정 시) 수정 지시 또는 내 수정 → **정상 동작 확인**까지 본다.
-한 가설이 기각되면 다음 순위 가설로. 끝까지 "왜 그랬는지"가 설명돼야 닫는다.
+- 외부에서 확인 가능한 code path는 직접 읽고 test를 만든다.
+- 내부에서만 재현 가능한 symptom은 internal-executor에게 최소 재현 command와 관찰할 한 변수를 준다.
+- 한 번에 한 변수만 바꾼다. 여러 수정 후보를 동시에 적용하지 않는다.
+- command, exit code, 필요한 log line, query shape/count, runtime state를 evidence로 받는다.
+- 승인된 schema/table/column과 SQL/interface 구조는 유지하고 민감한 host/account/secret/실제 row 값만
+  프로젝트 보안 정책에 따라 일관된 가명으로 바꾼다.
+
+재현 자체가 runtime/DB state를 바꾸면 Tier 2로 분류하고 사용자의 명시 승인을 받은 canonical runbook만
+실행한다. internal-executor가 자체 patch나 ad-hoc schema 변경으로 재현을 우회하지 못하게 한다.
+
+### 5. Canonical fix
+
+가설이 확정되면 external-implementer가 canonical code와 regression test를 직접 수정한다. 사내에서만 확인한
+schema나 library interface는 evidence로 계약에 반영하되 민감한 실값은 code/docs에 넣지 않는다.
+
+내부 실행자에게는 새 정본의 revision과 승인된 적용·재현·검증 runbook만 전달한다. code 수정이 더 필요하면
+그 사실과 evidence를 돌려받아 외부에서 다음 patch를 만든다.
+
+### 6. 검증과 완료
+
+내부 검증 결과에서 다음을 확인한다.
+
+- canonical revision과 실행한 command/runbook이 식별된다.
+- 각 단계의 exit code와 기대한 behavior evidence가 있다.
+- 필요한 경우 final `git status --short`가 baseline과 같아 tracked repository immutability가 증명된다.
+- 승인된 env/runtime/DB state change가 열거한 범위 안이다.
+- 민감한 값만 가명 처리되고 진단 구조는 유지됐다.
+
+evidence가 부족하거나 code 수정 필요성이 남으면 완료로 포장하지 않고 hypothesis loop 또는 external backlog로
+돌린다. 내부 commit/push를 완료 조건으로 삼지 않는다.
 
 ### 7. 기록
-새 장애를 해결했으면 `runbook-logger` 스킬로 `docs/troubleshooting.md`에 한 항목 추가
-(증상→근본원인→진단→수정→재발방지). 진단 전 읽기(Step 2) ↔ 해결 후 기록의 루프를 닫는다.
+
+새 장애를 해결했으면 `runbook-logger`로 `docs/troubleshooting.md`에 증상, 근본 원인, 진단 evidence,
+canonical fix, 재발 방지를 기록한다.
 
 ## 출력 원칙
-- 사용자 대상 텍스트(`[나에게]`, 진행 설명)는 "~해요" 스타일. 결론(가장 가능성 높은 원인) 먼저, 근거는 뒤.
-- 사내 대상 블록(`[→ 사내 AI] #N`)은 명확한 지시체, 헤더/구분선으로 복사 경계를 분명히. groupchat-ai 포맷 그대로.
-- 가설은 **순위와 함께** 보여준다 — 사용자가 사내 도메인 지식으로 즉시 재정렬할 수 있다(diagnose Phase 3).
+
+- 가장 가능성 높은 원인과 다음 검증을 먼저 말한다.
+- 가설은 순위와 검증 주체를 함께 보여준다.
+- 내부 대상 블록은 `groupchat-ai`의 정확히 여덟 필드 템플릿을 사용한다.
+- "고쳤다"는 보고보다 command와 observable evidence로 결론을 닫는다.
 
 ## 함정
-- **사각지대 체크를 건너뛰지 말 것.** 내가 못 본 사내 수정 위에서 세운 가설은 전부 헛것이다. 런북보다 먼저.
-- **증거 없는 "고쳤어요" 보고를 확정으로 받지 말 것.** opencode는 모호하면 멈추지 않고 값 하나를 골라 진행한다 — 증거로 검증한다.
-- **한 번에 여러 변수를 바꾸게 지시하지 말 것.** 무엇이 고쳤는지 모르게 된다.
-- **내가 재현 못 한다는 걸 잊지 말 것.** 내 가설은 사내 증거로 닫기 전까지 가설일 뿐이다. 추측을 사실처럼 단정하지 않는다.
-- 정본 영역 침범(①)을 발견하면 진단보다 **교정이 먼저**다 — 어긋난 코드 위에서 진단해봐야 의미 없다.
+
+- 사내에서 code patch를 만들게 하지 않는다. 사내 전용 재현이어도 fix 소유권은 외부다.
+- 내부 변경을 되돌리라는 patch 지시로 또 다른 tracked 변경을 만들지 않는다. 차이를 보고받고 외부에서 해결한다.
+- 한 번에 여러 변수를 바꾸지 않는다.
+- fail-closed 동작을 임의 명령으로 우회하지 않는다.
+- 외부에서 재현할 수 없는 가설은 사내 evidence가 오기 전까지 사실로 단정하지 않는다.

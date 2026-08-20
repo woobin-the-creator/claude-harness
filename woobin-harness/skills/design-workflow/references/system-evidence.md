@@ -34,7 +34,7 @@ Avoid treating `transition: all` or layout-property animation as defaults.
 
 Use actual content to size layouts. Dynamic numeric columns may use `tabular-nums`.
 
-KPI labels and table headers need enough size, weight, and color contrast, but do not blindly enlarge every label.
+KPI labels and table headers need enough size, weight, and color contrast, but do not blindly enlarge every label. Separate a label from its value by weight, not by tone: give the label slightly more size and weight and the same contrast grade as the value. Observed: a mockup rendered labels at nearly the same tone as their values, so neither read first.
 
 Table cells default to a compact 한 줄 unless an explicit multiline variant is selected. Headings and body copy define long-text wrapping behavior.
 
@@ -43,6 +43,8 @@ Table cells default to a compact 한 줄 unless an explicit multiline variant is
 Ellipsis communicates truncation. Attach `title` or tooltip 실제로 잘렸을 때만, after measuring or otherwise proving overflow.
 
 State when a dense layout is preserving useful scan speed versus when it hides truth.
+
+For tables, fitting more rows and columns into one screen is the first principle. A cell that needs two lines is a signal to revisit the column width or the value format, not to let the row grow. Observed: wrapping a date-range and a notes column doubled those rows and cut the visible row count; reformatting the range to `08-11 > 08-12` restored it.
 
 ## Accessibility evidence
 
