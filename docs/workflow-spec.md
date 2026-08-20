@@ -80,7 +80,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │     plan-reviewer (레이어별 배치 1회, 같은 세션에서 스폰 가능)
    │     PR → pr-demo-video 스킬
    │
-   ├─(B) UI·디자인 ─── show-design-sample 스킬 (샘플 URL 전달까지, PR은 범위 밖)
+   ├─(B) UI·디자인 ─── show-design-sample 스킬 (브라우저 없이 샘플 URL 전달, N<=3은 빌더 1개·N>=4 또는 명시적 병렬 요청은 시안별 빌더, PR은 범위 밖)
    ├─(C) 디버깅 ────── systematic-debugging 스킬 (재현 절차를 산출물로)
    └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
 ```
