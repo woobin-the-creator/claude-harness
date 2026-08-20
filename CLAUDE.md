@@ -35,7 +35,20 @@
   덮어쓰면 과거 점수의 근거가 사라져 이력 전체가 해석 불가가 된다
 - **무엇이든 수정한 뒤** → `.claude-plugin/plugin.json`과 `.codex-plugin/plugin.json`의 `version`을 같이 올린다. **이 머신도 예외가 아니다** —
   설치본은 `~/.claude/plugins/cache/<mp>/<plugin>/<version>/`에 **버전별로 굳은 복사본**이라,
-  버전을 안 올리면 레포를 고쳐도 설치본은 옛날 그대로다(2026-08-08에 스킬을 추가하고 이걸 놓쳤다)
+  버전을 안 올리면 레포를 고쳐도 설치본은 옛날 그대로다(2026-08-08에 스킬을 추가하고 이걸 놓쳤다).
+  ⚠️ **올릴 번호가 캐시에 이미 있는지 먼저 봐라** — 레포의 `version`이 설치본보다 **뒤처져 있을 수 있다**
+  (다른 브랜치에서 설치했으면 그렇게 된다). 그 상태에서 레포 값에 +1 하면 **이미 굳은 디렉터리**에
+  떨어져서 갱신이 조용히 안 된다. 2026-08-19 실제로 레포 1.5.0 · 설치본 1.6.0이라 1.6.0이 막혀 있었다:
+
+  ```bash
+  ls ~/.claude/plugins/cache/woobin-harness/woobin-harness/          # 굳은 버전 목록
+  jq -r '.plugins["woobin-harness@woobin-harness"][].version' \
+     ~/.claude/plugins/installed_plugins.json                        # 지금 켜져 있는 버전
+  ```
+
+- **`output-styles/`를 추가·수정** → 파일은 플러그인이 나르지만 **켜는 스위치는 못 나른다.**
+  `~/.claude/settings.json`의 `outputStyle`과 `bootstrap.sh` ③의 jq 병합을 **둘 다** 봐라.
+  하나만 고치면 새 머신에서 스타일이 목록에는 보이는데 적용은 안 된다
 
 ```bash
 # 레포 수정 → 반영까지. 이 순서가 아니면 조용히 옛 버전이 돈다.

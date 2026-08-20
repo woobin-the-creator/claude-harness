@@ -37,6 +37,7 @@ claude-harness/
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
 │   ├── skills/<name>/SKILL.md        26개
+│   ├── output-styles/*.md            2개 (fluent-korean 계열 — 출처는 그 디렉터리의 ATTRIBUTION.md)
 │   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
 ├── codex/agents/*.toml               Codex 커스텀 에이전트 4개
@@ -52,7 +53,9 @@ claude-harness/
 └── bootstrap-codex.sh                Codex 플러그인이 못 나르는 것만 처리
 ```
 
-**플러그인이 못 나르는 것** — Claude Code의 전역 `CLAUDE.md`·statusline·설정은 `bootstrap.sh`가, Codex의 전역 `AGENTS.md`·사용자 커스텀 에이전트는 `bootstrap-codex.sh`가 처리한다.
+**플러그인이 못 나르는 것** — Claude Code의 전역 `CLAUDE.md`·statusline·설정·`outputStyle`은 `bootstrap.sh`가, Codex의 전역 `AGENTS.md`·사용자 커스텀 에이전트는 `bootstrap-codex.sh`가 처리한다.
+
+출력 스타일은 이 구분이 갈라지는 자리라서 한 번 더 적어둔다. **스타일 파일 자체는 플러그인이 나르지만, 그중 무엇을 켤지 정하는 `outputStyle` 키는 플러그인이 못 건드린다.** 그래서 파일은 `woobin-harness/output-styles/`에 있고 활성화는 `bootstrap.sh` ③이 한다. 둘 중 하나만 옮기면 새 머신에서 스타일이 목록에는 보이는데 적용은 안 되는 상태가 된다.
 
 ### Codex 훅이 4개인 이유
 

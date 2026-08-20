@@ -55,11 +55,17 @@ else
           \"woobin-harness@woobin-harness\": true })
         | .statusLine = { type: \"command\", command: \"\$HOME/.claude/statusline/ctx-warn-statusline.sh\" }
         | .crossSessionInbound = \"refuse\"
+        | .outputStyle = \"fluent-korean\"
        ' '$S' > '$S.tmp' && mv '$S.tmp' '$S'"
-  say "  extraKnownMarketplaces·enabledPlugins·statusLine·crossSessionInbound 갱신"
+  say "  extraKnownMarketplaces·enabledPlugins·statusLine·crossSessionInbound·outputStyle 갱신"
   # crossSessionInbound: 머신 고유 키가 아니라 하네스 정책이라 statusLine 과 같이 무조건 덮는다.
   # 근거·기각안은 docs/workflow-spec.md §7-A, home/HARNESS-LOG.md #18.
   # 이 값을 지우면 기본값이 "사람이 없어도 피어가 내 세션을 깨움"으로 돌아간다.
+  #
+  # outputStyle: 플러그인의 settings.json 은 agent·subagentStatusLine 두 키만 지원하므로
+  # 출력 스타일 파일은 플러그인이 나르지만 "그걸 켜는 일"은 플러그인이 못 한다. 그래서 여기 있다.
+  # 스타일 실체는 woobin-harness/output-styles/, 출처와 개조 내역은 그 디렉터리의 ATTRIBUTION.md.
+  # 근거는 home/HARNESS-LOG.md #21.
 fi
 
 say
@@ -74,6 +80,7 @@ say "  4) gptaku 플러그인: /plugin 에서 gptaku-plugins 마켓플레이스�
 say "  5) Claude Code 재시작 후 확인:"
 say "       /plugin        → woobin-harness 가 enabled 인지"
 say "       /context       → Custom Agents 에 plan-implementer·plan-reviewer 가 보이는지"
+say "       /config        → Output Style 이 fluent-korean 인지 (플러그인 스타일은 재시작 후에 잡힌다)"
 say "       claude --debug → 훅이 매칭되는지 (플랜 문서를 하나 Write 해보면 가장 빠르다)"
 say
 say "완료."
