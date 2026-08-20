@@ -17,22 +17,23 @@ In Claude Code, run exactly this, and nothing else:
 
 ```bash
 mkdir -p ~/.claude/idle-handoff && touch ~/.claude/idle-handoff/"$CLAUDE_CODE_SESSION_ID".handoff-done
-bash ~/.claude/hooks/close-session-cleanup.sh "$PWD"
+bash "$CLAUDE_PLUGIN_ROOT/lib/close-session-cleanup.sh" "$PWD"
 ```
 
 `CLAUDE_CODE_SESSION_ID` is set in the Bash tool environment and matches the `session_id` the hooks receive on stdin — do not try to derive the id any other way.
 
-The second command cleans up worktrees, branches, session-spawned apps, and dev caches, and checks disk and memory headroom. It is the same script the hook runs, so the rules live in one place — do not reimplement its checks here, do not pass it extra flags, and do not "fix up" anything it declined to remove or clean.
+The second command reclaims what the session left running and checks disk and memory headroom. It is the same script the hook runs, so the rules live in one place — do not reimplement its checks here, do not pass it extra flags, and do not "fix up" anything it declined to remove or clean.
 
 - Worktrees: it removes one only if it is simultaneously clean, merged into `origin/<default>`, and unlocked; everything else it reports and leaves alone.
 - Disk: below 20GB free or at/above 85% used, it prunes docker dangling images and build cache, then reports the remaining reclaimable space as a suggestion. It never touches volumes (dev/prod DBs live there), tagged images, or npm/system caches.
 - Memory threshold: below 10% free, it reports the top RSS consumers. That report never kills anything.
 - Automation browsers: it kills any browser carrying an e2e/MCP signature (`--remote-debugging-pipe|-port`, `--enable-automation`, `--headless`, or a `--user-data-dir` under ms-playwright/puppeteer/a temp dir). This matches on process arguments, not app name, because a Playwright-launched Chrome is also just called "Google Chrome" — and it ignores frontmost and the keep list, since the profile is throwaway. Opt out with `CLOSE_SESSION_KEEP_AUTOMATION=1`.
-- Apps: it quits idle GUI apps (and the Claude Desktop VM) that a session may have left running. `~/.claude/close-session-keep.conf` holds the policy: `keep|<App>` never quits, `ondemand|<App>` quits only when that run names it, `idle|<App>|<days>|<paths>` quits once the activity paths have gone untouched that long. Anything it cannot decide, it keeps. Per-run overrides: `CLOSE_SESSION_KEEP_APPS="A:B"` and `CLOSE_SESSION_QUIT_APPS="A:B"` (colon-separated, since app names contain spaces); if an app is in both, keep wins.
+- Docker stacks: it stops (never `down`s) compose projects whose `working_dir` label sits inside this repo or one of its worktrees — those are what the session started. Everything else, including non-compose containers, it only counts and reports. Volumes are never touched, so dev/prod DBs survive; `docker start` restores what it stopped. Opt out with `CLOSE_SESSION_KEEP_DOCKER=1`.
+- Apps: it quits idle GUI apps (and the Claude Desktop VM) a session may have left running. Policy comes from `~/.claude/close-session-keep.conf`, falling back to `lib/close-session-keep.conf.default` in this plugin: `keep|<App>` never quits, `ondemand|<App>` quits only when that run names it, `idle|<App>|<days>|<paths>` quits once the activity paths have gone untouched that long. Docker projects use the same policy under the name `docker/<project>`. Anything it cannot decide, it keeps.
 
-If the user asks to also close the on-demand apps, re-run the script with `CLOSE_SESSION_QUIT_APPS` naming them — do not kill anything yourself.
+Per-run overrides: `CLOSE_SESSION_KEEP_APPS="A:B"` and `CLOSE_SESSION_QUIT_APPS="A:B"` — colon-separated, because app names contain spaces. If an app is in both, keep wins. When the user asks to also close the on-demand apps, re-run the script with `CLOSE_SESSION_QUIT_APPS` naming them; never kill anything yourself.
 
-To change the policy, edit that conf — not this skill and not the script. Verify with `CLOSE_SESSION_DRY_RUN=1`, which decides everything, kills nothing, and prints the reason each app was kept.
+To change the policy, edit the conf — not this skill and not the script. `CLOSE_SESSION_DRY_RUN=1` decides everything, kills nothing, and prints why each app was kept.
 
 Under the thresholds it prints nothing at all. That conservatism is the design, not a gap — do not run prune commands yourself to "finish the job".
 

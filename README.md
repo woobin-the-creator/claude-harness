@@ -33,9 +33,10 @@ claude-harness/
 │   ├── hooks/claude-hooks.json       Claude Code 훅 11개
 │   ├── hooks/hooks.json              Codex가 자동 발견하는 안전한 훅 4개
 │   ├── hooks/*.sh                    11개 (공유 훅 스크립트)
+│   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        25개
+│   ├── skills/<name>/SKILL.md        26개
 │   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
 ├── codex/agents/*.toml               Codex 커스텀 에이전트 4개
@@ -113,7 +114,7 @@ Codex 훅은 설치 후 `/hooks` 신뢰 검토까지 해야 end-to-end 검증된
 | `plugins/` (1.0G) | `settings.json`의 `enabledPlugins`·`extraKnownMarketplaces`가 재설치를 유도한다 |
 | `projects/` (557M) | 세션 트랜스크립트 |
 | `.credentials.json` · `.claude.json` | **절대 커밋 금지** |
-| `hooks/`의 wire 안 된 잔재 | `rtk-rewrite.sh`, `close-session-cleanup.sh`, `.bak-260804` 2개, 설계 메모 `.md` 2개 |
+| `hooks/`의 wire 안 된 잔재 | `rtk-rewrite.sh`, `.bak-260804` 2개, 설계 메모 `.md` 2개.<br>`close-session-cleanup.sh`는 2026-08-12에 **잔재가 아니었음이 드러나** 플러그인으로 옮겼다 — `idle-return-guard.sh`가 절대경로로 부르고 있었고, 레포에 없어서 원본 머신 밖에서는 훅이 조용히 아무 일도 안 했다 |
 | `skills/_backup-mattpocock-260804` | 백업 사본 |
 | 외부 훅 3종 | `claude-buddy`(별도 레포) · `orca`(설치물) · `gptaku-update-check.cjs`(플러그인 부산물). `bootstrap.sh`가 체크리스트로 안내한다 |
 

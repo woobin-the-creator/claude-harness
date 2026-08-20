@@ -539,7 +539,7 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 25개
+### 스킬 26개
 
 파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
 `show-design-sample` · `review` · `pr-demo-video` · `close-session` · `token-waste-audit` · `handoff`.
@@ -602,6 +602,11 @@ lead to overthinking."* 플랜 실행이 그 부류다.
    *단 예외*: 오탐의 대가가 비대칭이면 뒤집는다. `close-session-cleanup.sh`는 차단이 아니라 **보존**이
    기본값이다 — 여기서 오탐은 "남의 세션 작업 삭제"(복구 불가)라 재시도 통과 경로를 두지 않았고,
    `git branch -D`를 안 쓰므로 **커밋 유실이 구조적으로 불가능**하다.
+   같은 계산이 프로세스 정리에도 적용된다(2026-08-12): 정책을 못 정하면 **안 죽인다**.
+   *단 그 보존 규칙에도 예외가 있다* — 판정을 **이름이 아니라 출처로** 할 수 있으면 보존을 건너뛴다.
+   자동화 브라우저(`--remote-debugging-*`·임시 프로필)와 이 레포에서 뜬 compose 스택은
+   날아갈 사용자 데이터가 없어서 오탐의 대가가 애초에 비대칭이 아니다. 여기에 이름 기반 keep을
+   적용하면 목적 자체가 무력화된다 — 실제로 그렇게 짰다가 잡으려던 1.9GB를 통째로 살려뒀다.
 2. **소프트 지시로 못 막는 건 구조를 바꾼다** — "부분만 읽어라"가 안 먹혀서 파일 자체를 쪼갰다(R2).
 3. **효과는 다음 audit에서 재측정한다** — 처방만 남기면 재발한다. `token-waste-audit` 스킬이 그 도구.
 4. **근거 수치와 규칙은 별개로 검증** — 근거가 틀려도 규칙이 맞을 수 있다(R4).

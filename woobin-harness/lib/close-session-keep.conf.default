@@ -1,0 +1,82 @@
+# /close-session 앱·스택 종료 정책 — 플러그인 동봉 **기본값**
+#
+# close-session-cleanup.sh 가 이 순서로 찾는다:
+#   1. $CLOSE_SESSION_KEEP_CONF
+#   2. ~/.claude/close-session-keep.conf   ← 이 머신의 설정. 있으면 이 파일은 안 읽힌다
+#   3. 이 파일
+#
+# 머신마다 켜두는 앱이 다르니 고칠 땐 이 파일이 아니라 사본을 고쳐라:
+#   cp "$CLAUDE_PLUGIN_ROOT/lib/close-session-keep.conf.default" ~/.claude/close-session-keep.conf
+# 한 줄에 하나. '#' 뒤는 주석. 필드 구분자는 '|' (앱 이름에 공백이 있어서 공백을 못 쓴다).
+#
+#   keep|<앱 이름>
+#       절대 종료하지 않는다.
+#
+#   ondemand|<앱 이름>
+#       평소엔 안 죽인다. CLOSE_SESSION_QUIT_APPS 로 **이번 실행에 콕 집었을 때만** 죽인다.
+#
+#   idle|<앱 이름>|<일수>|<활동경로>[,<활동경로>…]
+#       활동경로 아래에 <일수> 안에 수정된 파일이 하나도 없을 때만 종료한다.
+#       읽히는 경로가 하나도 없으면 "판정 불가"로 보고 보존한다 — 모르면 안 죽인다.
+#
+#       ⚠️ 활동경로는 **쓸 때 바뀌는** 경로여야 한다. **떠 있기만 해도 바뀌는** 경로면
+#       앱이 영원히 "활성"으로 판정돼 예외가 무력화된다. Electron 앱에서
+#       Cache/GPUCache/DIPS/Network Persistent State/Session Storage/*.log 는 전자가 아니라
+#       후자다 — 쓰지 마라. 대신 Local Storage·IndexedDB·History·Preferences 처럼
+#       사용자 행동으로만 갱신되는 걸 골라라.
+#
+#       고른 경로가 맞는지 확인:  ls -la <경로>   ← 마지막으로 그 앱을 쓴 시각과 맞아야 한다
+#
+# 앱 이름은 `pgrep -x` 가 잡는 프로세스 이름과 정확히 같아야 한다:
+#   ps -Ao comm= | sed 's|.*/||' | sort -u | grep -i <앱>
+#
+# 도커 compose 스택도 같은 정책을 쓴다. 이름 앞에 'docker/' 를 붙인다:
+#   keep|docker/<프로젝트>     ondemand|docker/<프로젝트>
+#   docker ps --format '{{.Label "com.docker.compose.project"}}' | sort -u
+# 접두사가 'docker:' 가 아니라 'docker/' 인 이유는 콜론이 아래 환경변수들의 구분자라서다.
+#
+# ⚠️ 정책이 안 통하는 두 가지가 있다. 세션이 띄운 게 확실하고 날아갈 사용자 데이터가 없어서,
+#    이름·정책과 무관하게 항상 정리된다. 절 단위로만 끌 수 있다:
+#      자동화 브라우저(--remote-debugging-*, ms-playwright 프로필)  → CLOSE_SESSION_KEEP_AUTOMATION=1
+#      이 레포 안에서 뜬 compose 스택                                → CLOSE_SESSION_KEEP_DOCKER=1
+#
+# 일회성 지시는 이 파일을 고치지 말고 환경변수로 (콜론 구분 — 앱 이름에 공백이 들어가니까):
+#   CLOSE_SESSION_KEEP_APPS="Orca:Paseo"     이번 실행만 보존
+#   CLOSE_SESSION_QUIT_APPS="Slack:Notion"   이번 실행만 종료 (아래 정책을 전부 무시)
+# 둘 다에 있으면 보존이 이긴다. 모호하면 안 죽이는 쪽이 이 스크립트의 규칙이다.
+#
+# 바꾼 뒤엔 반드시 dry-run 으로 판정만 확인해라 — 아무것도 안 죽이고 이유까지 찍는다:
+#   CLOSE_SESSION_DRY_RUN=1 bash ~/.claude/hooks/close-session-cleanup.sh "$PWD"
+
+# ── AI 에이전트 툴 ────────────────────────────────────────────────────────────
+# 사용자 결정(2026-08-12): 종료 스텝의 목적은 세션 중에 띄운 e2e 브라우저·도커 스택 같은
+# 일회용 자원을 걷어내는 것이지, 상시 쓰는 에이전트 툴을 끄는 게 아니다.
+# 7일 이상 손 안 댄 게 확인될 때만 끈다(사용자 지정, 2026-08-12).
+idle|Orca|7|~/Library/Application Support/Orca/Preferences,~/Library/Application Support/Orca/blob_storage,~/Library/Application Support/Orca/ai-vault
+idle|Paseo|7|~/.paseo/agents,~/.paseo/loops
+idle|Comet|7|~/Library/Application Support/Comet/Default/History
+# Claude Desktop: 대화 상태는 Local Storage·IndexedDB 에만 쌓인다. VM 때문에 떠 있기만 한
+# 경우와 실제로 쓴 경우가 여기서 갈린다. 이게 idle 이면 VM 종료 절차도 같이 돈다.
+idle|Claude|7|~/Library/Application Support/Claude/Local Storage,~/Library/Application Support/Claude/IndexedDB
+
+# ── 일상용 브라우저 ───────────────────────────────────────────────────────────
+# e2e·MCP 가 띄운 브라우저는 프로세스 이름이 그냥 "Google Chrome" 이라 이름으로는
+# 일상용과 구분되지 않는다. 그건 스크립트가 --remote-debugging-* / --user-data-dir
+# 서명으로 따로 잡아 keep 과 무관하게 죽인다. 그러니 이 줄은 **진짜 브라우징 세션만**
+# 지킨다 — 열어둔 탭이 /close-session 으로 날아가지 않게.
+keep|Google Chrome
+
+# ── 항시 유지 (사용자 결정, 2026-08-12) ───────────────────────────────────────
+# 세션이 띄운 게 아니라 사용자가 직접 켜둔 앱들이다. 종료 스텝의 대상이 아니다.
+keep|KakaoTalk
+keep|Telegram
+keep|Discord
+keep|Obsidian
+
+# ── 요청 시에만 종료 (사용자 결정, 2026-08-12) ────────────────────────────────
+# 자동으로는 안 죽인다. 메모리가 급할 때 이렇게 콕 집어서:
+#   CLOSE_SESSION_QUIT_APPS="Slack:Spotify:Notion:Zoom" /close-session
+ondemand|Slack
+ondemand|Spotify
+ondemand|Notion
+ondemand|Zoom
