@@ -28,7 +28,8 @@ claude-harness/
 │   ├── hooks/hooks.json              settings.json의 hooks 객체를 옮긴 것
 │   ├── hooks/*.sh                    11개 (wire된 것만)
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        25개
+│   ├── skills/<name>/SKILL.md        26개
+│   ├── output-styles/*.md            2개 (fluent-korean 계열 — 출처는 그 디렉터리의 ATTRIBUTION.md)
 │   └── plan-exec-modes.md            훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── docs/workflow.html                사람이 보는 워크플로우 요약
@@ -40,7 +41,9 @@ claude-harness/
 └── bootstrap.sh                      플러그인이 못 나르는 것만 처리
 ```
 
-**플러그인이 못 나르는 것** — 플러그인의 `settings.json`은 `agent`·`subagentStatusLine` 두 키만 지원한다. 그래서 `~/.claude/CLAUDE.md`(글로벌 지침), `statusLine`, `permissions`는 `bootstrap.sh`가 처리한다.
+**플러그인이 못 나르는 것** — 플러그인의 `settings.json`은 `agent`·`subagentStatusLine` 두 키만 지원한다. 그래서 `~/.claude/CLAUDE.md`(글로벌 지침), `statusLine`, `permissions`, `outputStyle`은 `bootstrap.sh`가 처리한다.
+
+출력 스타일은 이 구분이 갈라지는 자리라서 한 번 더 적어둔다. **스타일 파일 자체는 플러그인이 나르지만, 그중 무엇을 켤지 정하는 `outputStyle` 키는 플러그인이 못 건드린다.** 그래서 파일은 `woobin-harness/output-styles/`에 있고 활성화는 `bootstrap.sh` ③이 한다. 둘 중 하나만 옮기면 새 머신에서 스타일이 목록에는 보이는데 적용은 안 되는 상태가 된다.
 
 ## 새 머신에 올리기
 
