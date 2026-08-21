@@ -1,6 +1,6 @@
 {
   "name": "woobin-harness",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Personal coding harness with reusable planning, review, debugging, writing, and safety workflows for Codex and Claude Code.",
   "author": {
     "name": "정우빈"

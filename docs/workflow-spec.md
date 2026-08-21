@@ -68,7 +68,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
 요구사항
    │
    ├─(A) 기능 개발 ─────────────────────────────────────────────
-   │     brainstorming 스킬로 인터뷰 → 스펙 저장
+   │     grill-me 스킬로 스펙 초안 → 빈칸 인터뷰 → 스펙 저장
    │        └ 훅 plan-session-boundary-guard 발화 (ctx ≥120k)
    │     ── 세션 경계 ① /clear ──
    │     writing-plans → docs/<plandir>/plans/<name>/ 에 분할 저장
@@ -615,9 +615,9 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 28개
+### 스킬 27개
 
-파이프라인에 직접 물린 것: `grill-me` · `brainstorming` · `writing-plans` · `systematic-debugging` ·
+파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff`.
 `grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).

@@ -692,6 +692,38 @@ recommend로 자동 선택해서 구현해"라며 인터뷰를 빠져나갔다.
 훅이 Codex 컨텍스트는 정상 출력하는데 `.stale-branch-pending/<session>` 마커를 안 남긴다. 미조치.
 
 
+## 27. brainstorming을 지웠다 — 그리고 죽어 있던 테스트를 발견했다 (2026-08-21)
+
+**계기**: 최근 3일(08-19~08-21) 세션 로그 246개를 훑어 스킬 발동을 전수로 셌다. 실제 발동은
+`design-rules` 8 · `claude-blog-translate-ko` 7 · `handoff`/`grill-me`/`show-design-sample`/`writing-plans` 각 3.
+`brainstorming`은 **0회**였다. 로그에 이름이 자주 보였지만 전부 이 레포에서 그 파일을 편집한 흔적이었다.
+
+**근거**: #26에서 `grill-me`를 "스펙 초안 먼저, 빈칸만 인터뷰"로 다시 쓰면서 두 스킬의 역할이 겹쳤다.
+`grill-me`의 description은 그린필드를 `brainstorming`으로 넘기라고 적혀 있었지만, 실제 사용에서
+그 분기는 한 번도 타지 않았다. 파이프라인 A단계의 첫 스킬 자리를 `grill-me`가 이미 가져간 상태였다.
+
+**조치**: `woobin-harness/skills/brainstorming/` 삭제. 개수 28→27(README · 두 plugin.json 설명 ·
+marketplace.json · workflow-spec §4), 버전 1.11.0→1.12.0. 파이프라인 다이어그램(§2)의 A단계 첫 줄과
+§4 큐레이션 목록에서 `brainstorming`을 `grill-me`로 교체. `grill-me`·`writing-plans`의 description에
+남아 있던 상호참조를 제거했다 — **지운 스킬을 권하는 문구가 남으면 없는 스킬을 계속 권한다**(#22의 전례).
+`plan-saved-session-boundary.sh`의 "brainstorming·planning 대화" 문구도 "스펙·플래닝 대화"로 고쳤다.
+
+**곁다리 — `scripts/test-skills.sh`가 죽어 있었다.** 첫 단언이 `skill_count -eq 44`인데 실제는 28이었다.
+44는 `9233f2a`(Codex 호환 추가) 시점의 개수이고, 그 뒤 스킬을 정리하면서 아무도 이 숫자를 안 고쳤다.
+즉 **이 테스트는 첫 줄에서 실패한 채로 방치돼 있었고**, 뒤에 있는 픽스처들은 한 번도 실행되지 않았다.
+`check-harness-docs.sh`는 README·plugin.json·spec의 개수만 세고 **테스트 안의 하드코딩된 개수는
+안 본다** — 검사기가 검사하지 않는 사본이 하나 더 있었던 셈이다(CLAUDE.md "같이 고쳐야 하는 것"의
+동일 실패 형태). 27로 고치고 brainstorming 서버 픽스처를 제거했다. 고치자 **두 번째 죽은 개수**가 바로 뒤에서
+드러났다 — capability-audit 픽스처의 `expected = {"hooks":11,"agents":4,"skills":44}`도 44였다.
+첫 줄이 죽어 있으면 그 뒤 전부가 검증되지 않은 채 썩는다는 걸 그대로 보여준 사례다. **개수를 하드코딩하는 자리를
+검사기 대상에 넣는 것은 미조치로 남긴다.**
+
+**곁다리 2 — `~/.claude/skills/`에 하네스 스킬 사본 22개가 살아 있다.** #? 시점(위 152~155행)의
+"플러그인 비활성화 + 3개만 로컬화" 결정의 잔재가 22개로 불어난 상태다. CLAUDE.md는 이 사본을
+명시적으로 금지한다. `writing-plans`·`grill-me`·`review`·`tutor`·`tutor-setup` 5개는 레포본과 **내용이
+다르다** — 옛 description을 담은 사본이 플러그인본과 나란히 목록에 올라간다. 미조치, 별건.
+
+
 ## 규율 (이 이력에서 반복 확인된 것)
 
 1. **소프트 개입 우선** — 차단은 세션 1회 + 재시도 통과. 오탐이 영구 장애가 되면 안 된다(#7, #10, #11 전부 이 형태).
