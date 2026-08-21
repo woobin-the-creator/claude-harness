@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>발동 0회 스킬 6개 — 어디서 끊기는가</title>
+<style>
+  body { margin:0; background:#fff; font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; }
+  svg { display:block; }
+</style>
+<svg width="1660" height="1215" viewBox="0 0 1660 1215" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ar-blue" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L11,6 L0,11 z" fill="#2563eb"/>
+    </marker>
+    <marker id="ar-gray" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L11,6 L0,11 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="ar-orange" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L11,6 L0,11 z" fill="#ea580c"/>
+    </marker>
+    <marker id="ar-green" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,1 L11,6 L0,11 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1660" height="1215" fill="#ffffff"/>
+
+  <!-- ── 제목 ── -->
+  <text x="40" y="46" style="font-size:27px;font-weight:800;fill:#111827">발동 0회 스킬 6개 — 각자 <tspan style="fill:#ea580c">어디서 끊기는지가 다르다</tspan></text>
+  <text x="40" y="72" style="font-size:14px;fill:#6b7280">woobin-harness · 세션 로그 246개(2026-08-19~08-21) 전수. 아래 6개는 이 기간 발동 기록이 하나도 없다.</text>
+
+  <!-- ── 컬럼 헤더 ── -->
+  <g style="font-size:12.5px;font-weight:700;fill:#374151">
+    <rect x="40"   y="92" width="230" height="26" rx="4" fill="#f3f4f6"/>
+    <text x="155"  y="105" text-anchor="middle" dominant-baseline="middle">① 입력 (이 일이 생겼나)</text>
+    <rect x="300"  y="92" width="170" height="26" rx="4" fill="#f3f4f6"/>
+    <text x="385"  y="105" text-anchor="middle" dominant-baseline="middle">② 트리거 게이트</text>
+    <rect x="500"  y="92" width="250" height="26" rx="4" fill="#f3f4f6"/>
+    <text x="625"  y="105" text-anchor="middle" dominant-baseline="middle">③ 스킬이 하는 일</text>
+    <rect x="780"  y="92" width="260" height="26" rx="4" fill="#f3f4f6"/>
+    <text x="910"  y="105" text-anchor="middle" dominant-baseline="middle">④ 산출물</text>
+    <rect x="1070" y="92" width="550" height="26" rx="4" fill="#f3f4f6"/>
+    <text x="1345" y="105" text-anchor="middle" dominant-baseline="middle">⑤ 끊긴 지점과 판정</text>
+  </g>
+
+  <!-- ══════════ ROW 1 : tutor-setup ══════════ -->
+  <g>
+    <rect x="40" y="140" width="230" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="155" y="163" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">📄 PDF·문서·코드베이스를</text>
+    <text x="155" y="181" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">학습자료로 만들 일</text>
+    <text x="155" y="209" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:#ea580c">✕ 3일간 0건</text>
+
+    <line x1="272" y1="169" x2="298" y2="169" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+
+    <rect x="300" y="140" width="170" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="385" y="160" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;fill:#9a3412">description 빈칸</text>
+    <text x="385" y="180" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">YAML 접힘(&gt;) 스칼라</text>
+
+    <line x1="472" y1="169" x2="498" y2="169" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+
+    <rect x="500" y="136" width="250" height="66" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="157" style="font-size:14px;font-weight:800;fill:#1e40af">⚙️ tutor-setup</text>
+    <text x="512" y="177" style="font-size:12px;fill:#1e3a8a">CWD 스캔 → 모드 자동판정</text>
+    <text x="512" y="194" style="font-size:12px;fill:#1e3a8a">(문서 / 코드베이스) → 노트 생성</text>
+
+    <line x1="752" y1="169" x2="778" y2="169" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+
+    <path d="M790 140 h240 a12 12 0 0 1 0 12 v46 a12 12 0 0 1 0 12 h-240 a12 12 0 0 1 0 -12 v-46 a12 12 0 0 1 0 -12 z" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+    <text x="910" y="163" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;fill:#065f46">🛢 Obsidian StudyVault</text>
+    <text x="910" y="182" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#047857">dashboard + concepts/*.md</text>
+  </g>
+
+  <!-- ══════════ ROW 2 : tutor ══════════ -->
+  <g>
+    <rect x="40" y="248" width="230" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="155" y="271" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">🙋 "퀴즈 내줘 / 학습"</text>
+    <text x="155" y="289" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">— vault가 있어야 성립</text>
+    <text x="155" y="317" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:#ea580c">✕ 3일간 0건</text>
+
+    <line x1="272" y1="277" x2="298" y2="277" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+
+    <rect x="300" y="248" width="170" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="385" y="268" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;fill:#9a3412">description 빈칸</text>
+    <text x="385" y="288" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">YAML 접힘(&gt;) 스칼라</text>
+
+    <line x1="472" y1="277" x2="498" y2="277" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+
+    <rect x="500" y="244" width="250" height="66" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="265" style="font-size:14px;font-weight:800;fill:#1e40af">⚙️ tutor</text>
+    <text x="512" y="285" style="font-size:12px;fill:#1e3a8a">개념 단위로 묻고 오답 기록 →</text>
+    <text x="512" y="302" style="font-size:12px;fill:#1e3a8a">약한 영역만 재출제(blind spot)</text>
+
+    <!-- vault → tutor 되먹임 -->
+    <path d="M900 202 v10 q0 6 -6 6 h-188 q-6 0 -6 6 v14" fill="none" stroke="#059669" stroke-width="1.8" marker-end="url(#ar-green)"/>
+    <text x="806" y="212" text-anchor="middle" dominant-baseline="middle" style="font-size:11px;fill:#047857">vault를 읽는다</text>
+
+    <line x1="752" y1="277" x2="778" y2="277" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="780" y="248" width="260" height="58" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+    <text x="910" y="271" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;fill:#0c4a6e">🖥️ 숙련도 대시보드</text>
+    <text x="910" y="290" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#0369a1">시도·정답·상태·오답노트</text>
+  </g>
+
+  <!-- tutor 쌍 묶음 판정 -->
+  <rect x="1070" y="136" width="550" height="174" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.8"/>
+  <text x="1088" y="162" style="font-size:15px;font-weight:800;fill:#92400e">tutor + tutor-setup — 쌍으로 판정해야 한다</text>
+  <text x="1088" y="187" style="font-size:12.5px;fill:#78350f">setup이 vault를 만들고 tutor가 그걸 읽는다. <tspan style="font-weight:700">한쪽만 남기면 둘 다 무의미하다.</tspan></text>
+  <text x="1088" y="209" style="font-size:12.5px;fill:#78350f">끊긴 곳은 <tspan style="font-weight:700;fill:#b45309">①입력</tspan> — StudyVault 워크플로 자체를 안 쓰고 있다. 스킬 결함이 아니다.</text>
+  <text x="1088" y="231" style="font-size:12.5px;fill:#78350f">다만 <tspan style="font-weight:700;fill:#b45309">②게이트도 동시에 막혀 있다</tspan> — description을 YAML 접힘 스칼라(<tspan style="font-family:monospace">&gt;</tspan>)로 써서</text>
+  <text x="1088" y="251" style="font-size:12.5px;fill:#78350f">스킬 목록에 <tspan style="font-weight:700">설명이 빈칸으로 뜬다.</tspan> 쓰기로 해도 자동으로는 안 붙는다.</text>
+  <text x="1088" y="277" style="font-size:12.5px;fill:#78350f">레포본과 <tspan style="font-family:monospace;font-size:11.5px">~/.claude/skills/</tspan> 사본이 <tspan style="font-weight:700;fill:#b45309">내용까지 다르다</tspan> — 어느 쪽이 도는지 불명.</text>
+  <text x="1088" y="299" style="font-size:13px;font-weight:800;fill:#92400e">→ 판정: StudyVault를 계속 쓸 건가? <tspan style="fill:#b91c1c">아니면 둘 다 삭제.</tspan> 쓸 거면 &gt;를 한 줄 문자열로.</text>
+
+  <!-- ══════════ ROW 3 : to-issues ══════════ -->
+  <g>
+    <rect x="40" y="356" width="230" height="58" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="155" y="379" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">📋 확정된 플랜·PRD</text>
+    <text x="155" y="397" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">"이슈로 쪼개줘"</text>
+    <text x="155" y="425" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:#2563eb">✓ 입력은 있었다</text>
+
+    <line x1="272" y1="385" x2="298" y2="385" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+
+    <rect x="300" y="356" width="170" height="58" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="385" y="377" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;fill:#1e3a8a">description 정상</text>
+    <text x="385" y="396" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#2563eb">게이트 통과</text>
+
+    <line x1="472" y1="385" x2="498" y2="385" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+
+    <rect x="500" y="352" width="250" height="66" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="373" style="font-size:14px;font-weight:800;fill:#1e40af">⚙️ to-issues</text>
+    <text x="512" y="393" style="font-size:12px;fill:#1e3a8a">플랜 → tracer-bullet 수직 슬라이스</text>
+    <text x="512" y="410" style="font-size:12px;fill:#1e3a8a">(전 계층 관통) → HITL/AFK 분류</text>
+
+    <!-- 끊김: 스킬 내부 의존 -->
+    <line x1="752" y1="385" x2="778" y2="385" stroke="#ea580c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ar-orange)"/>
+    <circle cx="765" cy="360" r="11" fill="#fff" stroke="#ea580c" stroke-width="2"/>
+    <text x="765" y="361" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;font-weight:800;fill:#ea580c">✕</text>
+
+    <rect x="780" y="352" width="260" height="66" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="910" y="372" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;font-weight:700;fill:#9a3412">🔌 issue tracker + triage 라벨</text>
+    <text x="910" y="392" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">본문: "없으면 /setup-matt-pocock-skills"</text>
+    <text x="910" y="409" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;font-weight:700;fill:#b91c1c">그 명령은 백업 폴더에만 있다</text>
+  </g>
+
+  <rect x="1070" y="332" width="550" height="106" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.8"/>
+  <text x="1088" y="357" style="font-size:15px;font-weight:800;fill:#991b1b">to-issues — 끊긴 곳은 <tspan style="fill:#b91c1c">③스킬 내부</tspan>다</text>
+  <text x="1088" y="381" style="font-size:12.5px;fill:#7f1d1d">발동해도 곧바로 막힌다. 전제하는 셋업 명령이 <tspan style="font-family:monospace;font-size:11.5px">_backup-mattpocock-260804/</tspan> 안에만 남아 있다.</text>
+  <text x="1088" y="403" style="font-size:12.5px;fill:#7f1d1d"><tspan style="font-weight:700">같은 구멍이 <tspan style="font-family:monospace;font-size:11.5px">review</tspan> 스킬에도 있다</tspan>(15행) — review도 3일간 발동 0회였다.</text>
+  <text x="1088" y="427" style="font-size:13px;font-weight:800;fill:#991b1b">→ 판정: 외부 의존을 걷어내고 <tspan style="font-family:monospace;font-size:12px">gh issue</tspan> 직접 호출로 바꾸거나, 삭제.</text>
+
+  <!-- ══════════ ROW 4 : writing-claude-md ══════════ -->
+  <g>
+    <rect x="40" y="464" width="230" height="58" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="155" y="487" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">📝 CLAUDE.md를</text>
+    <text x="155" y="505" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">새로 쓰거나 손볼 때</text>
+    <text x="155" y="533" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:#2563eb">✓ 3일간 여러 번 있었다</text>
+
+    <line x1="272" y1="493" x2="298" y2="493" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+
+    <!-- 게이트에서 끊김 -->
+    <rect x="300" y="464" width="170" height="58" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2" stroke-dasharray="5 4"/>
+    <text x="385" y="484" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;font-weight:700;fill:#9a3412">목록에서 빈칸</text>
+    <text x="385" y="503" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">+ 동명 스킬 3개와 경합</text>
+    <circle cx="470" cy="464" r="11" fill="#fff" stroke="#ea580c" stroke-width="2"/>
+    <text x="470" y="465" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;font-weight:800;fill:#ea580c">✕</text>
+
+    <line x1="472" y1="493" x2="498" y2="493" stroke="#ea580c" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#ar-orange)"/>
+
+    <rect x="500" y="460" width="250" height="66" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="481" style="font-size:14px;font-weight:800;fill:#1e40af">⚙️ writing-claude-md</text>
+    <text x="512" y="501" style="font-size:12px;fill:#1e3a8a">모든 줄에 <tspan style="font-weight:700">Delete Test</tspan> 적용 →</text>
+    <text x="512" y="518" style="font-size:12px;fill:#1e3a8a">4부 구조(방향·포인터·함정·검증)</text>
+
+    <line x1="752" y1="493" x2="778" y2="493" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+    <rect x="780" y="464" width="260" height="58" rx="8" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+    <text x="910" y="487" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;fill:#0c4a6e">🖥️ 군살 없는 CLAUDE.md</text>
+    <text x="910" y="506" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#0369a1">"agent가 틀릴 것"만 남긴다</text>
+  </g>
+
+  <rect x="1070" y="446" width="550" height="98" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.8"/>
+  <text x="1088" y="471" style="font-size:15px;font-weight:800;fill:#1e40af">writing-claude-md — 끊긴 곳은 <tspan style="fill:#ea580c">②게이트</tspan>. 유일하게 <tspan style="fill:#059669">고치면 살아난다</tspan></text>
+  <text x="1088" y="495" style="font-size:12.5px;fill:#1e3a8a">본문 품질은 6개 중 가장 높다. 그런데 스킬 목록에 설명이 빈칸으로 뜬다.</text>
+  <text x="1088" y="517" style="font-size:12.5px;fill:#1e3a8a">게다가 <tspan style="font-family:monospace;font-size:11.5px">claude-md-management</tspan>의 스킬 2개 + 개인 사본까지 <tspan style="font-weight:700">같은 자리를 넷이 다툰다.</tspan></text>
+  <text x="1088" y="537" style="font-size:13px;font-weight:800;fill:#1e40af">→ 판정: <tspan style="fill:#059669">유지.</tspan> 중복 사본·경합 스킬을 정리하면 트리거가 붙을 것으로 본다.</text>
+
+  <!-- ══════════ ROW 5 : web-artifacts-builder ══════════ -->
+  <g>
+    <rect x="40" y="572" width="230" height="58" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="155" y="595" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">🎨 복잡한 웹 아티팩트</text>
+    <text x="155" y="613" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#1e3a8a">(상태·라우팅·컴포넌트)</text>
+
+    <line x1="272" y1="601" x2="298" y2="601" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="300" y="572" width="170" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="385" y="592" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;fill:#9a3412">목록에서 빈칸</text>
+    <text x="385" y="611" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">개인 사본과 중복</text>
+
+    <line x1="472" y1="601" x2="498" y2="601" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="500" y="568" width="250" height="66" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="512" y="589" style="font-size:14px;font-weight:800;fill:#4b5563">⚙️ web-artifacts-builder</text>
+    <text x="512" y="609" style="font-size:12px;fill:#6b7280">React+Vite+Tailwind+shadcn 스캐폴드</text>
+    <text x="512" y="626" style="font-size:12px;fill:#6b7280">→ 단일 HTML로 번들</text>
+
+    <line x1="752" y1="601" x2="778" y2="601" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="780" y="572" width="260" height="58" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="910" y="595" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;fill:#4b5563">🖥️ claude.ai 아티팩트 HTML</text>
+    <text x="910" y="614" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#6b7280">(수동 스크립트 2개 경유)</text>
+
+    <!-- 대체 경로 -->
+    <path d="M910 630 v22 h-390 v-18" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar-blue)"/>
+    <rect x="360" y="640" width="330" height="30" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="525" y="656" text-anchor="middle" dominant-baseline="middle" style="font-size:12px;font-weight:700;fill:#1e40af">지금은 네이티브 Artifact 툴 + artifact-design이 한다</text>
+  </g>
+
+  <rect x="1070" y="554" width="550" height="98" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.8"/>
+  <text x="1088" y="579" style="font-size:15px;font-weight:800;fill:#991b1b">web-artifacts-builder — 끊긴 곳은 <tspan style="fill:#b91c1c">④산출물</tspan>. 자리를 뺏겼다</text>
+  <text x="1088" y="603" style="font-size:12.5px;fill:#7f1d1d">Apache-2.0 LICENSE가 동봉된 <tspan style="font-weight:700">외부 유래 스킬</tspan>이다. 이 하네스의 워크플로와 무관하다.</text>
+  <text x="1088" y="625" style="font-size:12.5px;fill:#7f1d1d">같은 산출물을 이제 <tspan style="font-family:monospace;font-size:11.5px">Artifact</tspan> 툴과 <tspan style="font-family:monospace;font-size:11.5px">artifact-design</tspan> 스킬이 더 짧은 경로로 만든다.</text>
+  <text x="1088" y="645" style="font-size:13px;font-weight:800;fill:#991b1b">→ 판정: <tspan style="fill:#b91c1c">삭제 1순위.</tspan> 6개 중 유일하게 "고쳐도 쓸 이유"가 없다.</text>
+
+  <!-- ══════════ ROW 6 : runbook-logger ══════════ -->
+  <g>
+    <rect x="40" y="700" width="230" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="155" y="723" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">🔥 운영 장애를 추적해</text>
+    <text x="155" y="741" text-anchor="middle" dominant-baseline="middle" style="font-size:13.5px;fill:#9a3412">원인·수정이 <tspan style="font-weight:700">확정된 직후</tspan></text>
+    <text x="155" y="769" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:#ea580c">✕ 3일간 0건 (정상)</text>
+
+    <line x1="272" y1="729" x2="298" y2="729" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="300" y="700" width="170" height="58" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="385" y="720" text-anchor="middle" dominant-baseline="middle" style="font-size:12.5px;fill:#9a3412">목록에서 빈칸</text>
+    <text x="385" y="739" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#c2410c">개인 사본과 중복</text>
+
+    <line x1="472" y1="729" x2="498" y2="729" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <rect x="500" y="692" width="250" height="74" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="512" y="712" style="font-size:14px;font-weight:800;fill:#1e40af">⚙️ runbook-logger</text>
+    <text x="512" y="731" style="font-size:12px;fill:#1e3a8a">대화에서 <tspan style="font-weight:700">실제 확인된 사실만</tspan> 추출</text>
+    <text x="512" y="748" style="font-size:12px;fill:#1e3a8a">→ 기존 항목과 dedup → 번호 부여</text>
+    <text x="512" y="763" style="font-size:11.5px;fill:#2563eb">추측이면 기록 금지</text>
+
+    <line x1="752" y1="729" x2="778" y2="729" stroke="#9ca3af" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+    <path d="M790 696 h240 a12 12 0 0 1 0 12 v46 a12 12 0 0 1 0 12 h-240 a12 12 0 0 1 0 -12 v-46 a12 12 0 0 1 0 -12 z" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+    <text x="910" y="719" text-anchor="middle" dominant-baseline="middle" style="font-size:13px;fill:#065f46">🛢 docs/troubleshooting.md</text>
+    <text x="910" y="738" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#047857">증상→근본원인→진단→수정→재발방지</text>
+    <text x="910" y="755" text-anchor="middle" dominant-baseline="middle" style="font-size:11.5px;fill:#047857">+ §0 빠른분류 표 · docs PR</text>
+  </g>
+
+  <rect x="1070" y="676" width="550" height="106" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.8"/>
+  <text x="1088" y="701" style="font-size:15px;font-weight:800;fill:#065f46">runbook-logger — 끊긴 곳은 <tspan style="fill:#059669">①입력뿐</tspan>. 결함이 아니다</text>
+  <text x="1088" y="725" style="font-size:12.5px;fill:#065f46">"확정된 장애 해결"이 3일간 없었다. 이건 스킬이 아니라 <tspan style="font-weight:700">기간의 성질</tspan>이다.</text>
+  <text x="1088" y="747" style="font-size:12.5px;fill:#065f46">발동 빈도로 재는 게 애초에 틀린 부류 — 1년에 세 번 도는 게 정상인 스킬이다.</text>
+  <text x="1088" y="771" style="font-size:13px;font-weight:800;fill:#065f46">→ 판정: <tspan style="fill:#059669">유지.</tspan> description 빈칸만 고치면 된다.</text>
+
+  <!-- ══════════ 공통 원인 ══════════ -->
+  <rect x="40" y="812" width="1000" height="122" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+  <text x="60" y="840" style="font-size:16px;font-weight:800;fill:#92400e">⚠️ 6개 중 5개가 공유하는 원인 — 스킬 목록에서 <tspan style="fill:#b45309">설명이 빈칸</tspan>으로 뜬다</text>
+  <text x="60" y="866" style="font-size:12.5px;fill:#78350f">설명이 없으면 모델이 "지금 이 스킬을 쓸 때인가"를 판정할 근거가 없다. <tspan style="font-weight:700">구조적으로 자동 발동이 불가능하다.</tspan></text>
+  <text x="60" y="889" style="font-size:12.5px;fill:#78350f">유력 용의자: <tspan style="font-family:monospace;font-size:11.5px">~/.claude/skills/</tspan> 에 하네스 스킬 사본이 <tspan style="font-weight:700">22개</tspan> 살아 있다 — CLAUDE.md가 명시적으로 금지한 그것이다.</text>
+  <text x="60" y="911" style="font-size:12.5px;fill:#78350f">6개 전부 여기 사본이 있고, <tspan style="font-family:monospace;font-size:11.5px">tutor</tspan>·<tspan style="font-family:monospace;font-size:11.5px">tutor-setup</tspan>은 레포본과 <tspan style="font-weight:700;fill:#b45309">내용까지 다르다</tspan>(옛 사본이 나란히 목록에 오른다).</text>
+  <text x="60" y="929" style="font-size:11.5px;fill:#a16207">※ 빈칸이 되는 정확한 기전은 이 세션에서 확정하지 못했다 — 중복이 유력하지만 단정하지 않는다.</text>
+
+  <!-- ══════════ 범례 ══════════ -->
+  <rect x="1070" y="812" width="550" height="122" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="1088" y="838" style="font-size:13px;font-weight:800;fill:#374151">범례</text>
+  <line x1="1090" y1="858" x2="1130" y2="858" stroke="#2563eb" stroke-width="2" marker-end="url(#ar-blue)"/>
+  <text x="1142" y="858" dominant-baseline="middle" style="font-size:12px;fill:#374151">살아 있는 흐름</text>
+  <line x1="1300" y1="858" x2="1340" y2="858" stroke="#9ca3af" stroke-width="1.8" stroke-dasharray="4 4" marker-end="url(#ar-gray)"/>
+  <text x="1352" y="858" dominant-baseline="middle" style="font-size:12px;fill:#374151">한 번도 안 탄 경로</text>
+  <line x1="1090" y1="884" x2="1130" y2="884" stroke="#ea580c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar-orange)"/>
+  <circle cx="1118" cy="884" r="9" fill="#fff" stroke="#ea580c" stroke-width="2"/>
+  <text x="1118" y="885" text-anchor="middle" dominant-baseline="middle" style="font-size:11px;font-weight:800;fill:#ea580c">✕</text>
+  <text x="1142" y="884" dominant-baseline="middle" style="font-size:12px;fill:#374151">끊긴 지점</text>
+  <rect x="1300" y="876" width="26" height="16" rx="4" fill="#ecfdf5" stroke="#6ee7b7"/>
+  <text x="1334" y="884" dominant-baseline="middle" style="font-size:12px;fill:#374151">🛢 데이터 저장소</text>
+  <rect x="1090" y="904" width="26" height="16" rx="4" fill="#f0f9ff" stroke="#bae6fd"/>
+  <text x="1124" y="912" dominant-baseline="middle" style="font-size:12px;fill:#374151">🖥️ 화면/결과</text>
+  <rect x="1300" y="904" width="26" height="16" rx="4" fill="#eff6ff" stroke="#93c5fd"/>
+  <text x="1334" y="912" dominant-baseline="middle" style="font-size:12px;fill:#374151">⚙️ 스킬</text>
+
+  <!-- ══════════ 추천 strip ══════════ -->
+  <rect x="40" y="952" width="1580" height="228" rx="12" fill="#111827"/>
+  <text x="66" y="984" style="font-size:16px;font-weight:800;fill:#f9fafb">추천 — 끊긴 지점이 다르니 처방도 다르다</text>
+
+  <rect x="66" y="1000" width="500" height="158" rx="8" fill="#7f1d1d"/>
+  <text x="86" y="1026" style="font-size:14px;font-weight:800;fill:#fecaca">삭제</text>
+  <text x="86" y="1052" style="font-size:13px;fill:#fee2e2">▸ <tspan style="font-weight:700">web-artifacts-builder</tspan> — 네이티브 Artifact가 대체.</text>
+  <text x="100" y="1071" style="font-size:12px;fill:#fca5a5">외부 유래·고쳐도 쓸 이유 없음. 1순위.</text>
+  <text x="86" y="1097" style="font-size:13px;fill:#fee2e2">▸ <tspan style="font-weight:700">to-issues</tspan> — 전제하는 셋업이 존재하지 않음.</text>
+  <text x="100" y="1116" style="font-size:12px;fill:#fca5a5">살리려면 <tspan style="font-family:monospace">gh issue</tspan> 직접 호출로 다시 써야 한다.</text>
+  <text x="100" y="1135" style="font-size:12px;fill:#fca5a5">※ <tspan style="font-family:monospace">review</tspan>도 같은 구멍 — 같이 봐야 한다.</text>
+
+  <rect x="586" y="1000" width="500" height="158" rx="8" fill="#78350f"/>
+  <text x="606" y="1026" style="font-size:14px;font-weight:800;fill:#fde68a">쌍으로 결정 — 사용자만 답할 수 있다</text>
+  <text x="606" y="1052" style="font-size:13px;fill:#fef3c7">▸ <tspan style="font-weight:700">tutor + tutor-setup</tspan></text>
+  <text x="620" y="1073" style="font-size:12px;fill:#fcd34d">Obsidian StudyVault 학습 루틴을 계속 쓸 건가?</text>
+  <text x="620" y="1094" style="font-size:12px;fill:#fcd34d">쓴다 → <tspan style="font-family:monospace">&gt;</tspan> 접힘 스칼라를 한 줄 문자열로 고치고</text>
+  <text x="634" y="1113" style="font-size:12px;fill:#fcd34d">개인 사본(내용 다름)을 지운다.</text>
+  <text x="620" y="1136" style="font-size:12px;fill:#fcd34d">안 쓴다 → <tspan style="font-weight:700">둘 다 삭제.</tspan> 하나만 남기면 무의미.</text>
+
+  <rect x="1106" y="1000" width="500" height="158" rx="8" fill="#064e3b"/>
+  <text x="1126" y="1026" style="font-size:14px;font-weight:800;fill:#a7f3d0">유지 — 트리거만 고치면 된다</text>
+  <text x="1126" y="1052" style="font-size:13px;fill:#d1fae5">▸ <tspan style="font-weight:700">writing-claude-md</tspan> — 본문 품질 최상.</text>
+  <text x="1140" y="1071" style="font-size:12px;fill:#6ee7b7">경합 4개(개인 사본 + 타 플러그인 2개) 정리.</text>
+  <text x="1126" y="1097" style="font-size:13px;fill:#d1fae5">▸ <tspan style="font-weight:700">runbook-logger</tspan> — 발동 0은 정상이다.</text>
+  <text x="1140" y="1116" style="font-size:12px;fill:#6ee7b7">드물게 도는 게 설계 의도. 빈도로 재지 마라.</text>
+  <text x="1126" y="1141" style="font-size:12px;font-weight:700;fill:#a7f3d0">공통 선행조치: <tspan style="font-family:monospace">~/.claude/skills/</tspan> 사본 22개 정리</text>
+</svg>
