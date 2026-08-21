@@ -68,7 +68,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
 요구사항
    │
    ├─(A) 기능 개발 ─────────────────────────────────────────────
-   │     brainstorming 스킬로 인터뷰 → 스펙 저장
+   │     grill-me 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장(필요하면 스펙 저장)
    │        └ 훅 plan-session-boundary-guard 발화 (ctx ≥120k)
    │     ── 세션 경계 ① /clear ──
    │     writing-plans → docs/<plandir>/plans/<name>/ 에 분할 저장
@@ -615,10 +615,10 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 28개
+### 스킬 19개
 
-파이프라인에 직접 물린 것: `grill-me` · `brainstorming` · `writing-plans` · `systematic-debugging` ·
-`design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
+파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
+`design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff`.
 `grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
 
@@ -644,6 +644,25 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 추정된 미사용 스킬(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·`tutor-setup`)은
 안 쓰였어도 남겼다. 출처 판정은 git 히스토리(단일 패키징 커밋이라 무의미)가 아니라 본문 내용 기반
 추정이라 확실하지 않다.
+
+2026-08-21, 7일치 로그 전수(세션 JSONL 2,116개)에서 28개 중 21개가 0회였다. 여기서 **9개를 지워 19개로 줄였다**
+(`obsidian-vault`·`tutor`·`tutor-setup`·`to-issues`·`writing-claude-md`·`web-artifacts-builder`·`review`·`agent-ready-audit`·`brainstorming`).
+삭제 기준은 **미사용이 아니다** — 위 문단이 이미 "비용은 제거 사유가 아니다"라고 못 박았다. 실제로 쓴 기준은 셋이다:
+① **죽은 전제** — `obsidian-vault`가 가리키는 볼트 경로가 WSL 경로라 이 머신에 없다(`tutor`·`tutor-setup`이 같은 볼트에 매달려 있다).
+② **없는 커맨드에 의존** — `to-issues`·`review` 본문이 `/setup-matt-pocock-skills` 실행을 지시하는데 이 하네스에 그 커맨드가 없다.
+08-10 퍼지의 삭제 기준("그 스킬팩의 setup 커맨드를 전제하는 것")에 걸리는데 살아남았던 누락이다.
+③ **1st-party와 중복** — `writing-claude-md`는 `claude-md-management` 플러그인·`/init`과, `review`는 `/code-review`·`/simplify`와 겹친다.
+`web-artifacts-builder`는 frontmatter에 `license:`가 남은 Anthropic 배포본 그대로이고 claude.ai artifact 전용이다.
+
+`brainstorming`은 다른 이유로 지웠다 — **`grill-me`가 그 종착점을 이미 갖고 있다.** specs 파일 저장도, `writing-plans` 인계도,
+기각한 대안 기록도 `grill-me` 안에 있다. 실사용은 29회 대 1회(08-07)였다. 유일하게 `brainstorming`만 갖고 있던
+"그린필드에서 접근 2~3안을 나란히 내는 단계"는 `grill-me` §②에 이식했다(초안 여러 개 → `[?1] 접근 선택`을 첫 라운드 단독 질문으로).
+같이 사라진 visual-companion 브라우저 서버(88KB)는 로그상 한 번도 안 돌았고, 시각적 선택은 `show-design-sample`이 맡는다.
+
+**같이 발견한 것**: `~/.claude/skills/`에 플러그인 이전의 실디렉터리 사본이 22개 남아 있었다(k-skill 심링크 62개와 별개).
+10개는 정본과 갈라져 있었고 — `grill-me` 사본은 08-07판이라 08-21 재작성 전 물건이었다 — 두 벌의 description이 모두 상시 로드되므로
+이 문단이 말하는 바로 그 **프롬프트 충돌**이다. 백업(`~/.claude/skills-backup-woobin-260821.tgz`) 후 22개를 지웠다.
+그리고 `scripts/test-skills.sh`·`scripts/validate-codex.sh`가 스킬 **44개**를 단언하고 있었다(실제 28개) — 08-12부터 계속 실패하던 게이트다.
 
 Codex 호환으로 `git-guardrails-codex`를 추가했다. Claude 전용 `argument-hint`·`disable-model-invocation` frontmatter는 Codex validator가 거부하므로 제거하고, 명시 호출 제한은 description으로 옮겼다. Claude Buddy·Claude 세션 로그처럼 본질적으로 Claude 전용인 스킬은 description에 경계를 명시하고 그대로 배포한다.
 
@@ -790,7 +809,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O10 | 인바운드 피어 메시지가 여는 턴이 **`UserPromptSubmit`을 태우는지** | **미문서화.** `hooks.md` 전문에 cross-session·SendMessage·peer 언급 0건(2026-08-10 grep). 태우면 `idle-return-guard`가 부분 커버, 안 태우면 UserPromptSubmit 훅 **3개가 통째로 우회**된다. `refuse`가 걸려 있는 동안은 무해하므로 **풀 때 먼저 측정해라** |
 | O11 | 인바운드 턴이 transcript mtime을 갱신해 **R6 idle 타이머를 리셋하는지** | 미검증. 리셋되면 자리비움 핸드오프가 무한 연기된다 |
 | O12 | R13 핸드오프 창 패턴 | 미검증 아이디어 — 옛 세션을 `/clear` 대신 살려둔 채 새 세션을 띄우고, 핸드오프 문서에 구멍이 나면 질의 1회로 때운 뒤 닫는다. TTL 1시간 안이면 cache **read**지 creation이 아니다. 발신 방향이라 `refuse`와 무관하게 지금도 가능 |
-| O13 | 자작 추정 미사용 스킬 5개(`internal-sso-oidc`·`agent-ready-audit`·`obsidian-vault`·`tutor`·`tutor-setup`) | O4 삭제에서 남겼다(HARNESS-LOG.md #19). 안 쓴다는 사실만으론 안 지운다 — 다음 audit에서도 0회면 "자작이라도 진짜 안 쓰면 지운다"를 다시 판단해라 |
+| O13 | ~~자작 추정 미사용 스킬 5개~~ | **해소(2026-08-21).** 사전 등록한 재판단 시점이 왔다 — 5개 전부 여전히 0회였다. `obsidian-vault`·`tutor`·`tutor-setup` 삭제, `internal-sso-oidc`·`agent-ready-audit`(→ 후자도 삭제) 판정은 §4 참조. **자작 추정 자체가 틀렸다**: `obsidian-vault`에 WSL 경로 `/mnt/d/...`가 박혀 있었다 — 이 머신에서 쓴 적이 없다는 뜻이다. 내용 기반 출처 추정의 한계를 실제로 확인한 사례 |
 | O14 | **하드 컷 중단 빈도 vs 방향 오류 되돌림 빈도** | **미계측.** R15의 핵심 교환("버리기가 되돌리기로 바뀐다")이 전부 여기 매달려 있다. `token-waste-audit`의 세션 스캐너로 뽑을 수 있다 — 구현 세션이 컷으로 끊긴 건수 대비 `reset`/`checkout .`으로 되돌린 건수 |
 | O15 | 단일성 불변식(워크트리당 열린 draft 플랜 PR 1개) | 소프트 절차다. 깨졌을 때 실제로 진입점이 못 쓰이게 되는지 미검증. 깨지는 걸 관측하면 §6-2 순서로 구조화 |
 | O16 | 머지 전 플랜 디렉터리 삭제가 **권장**이라 미준수 가능 | 피해가 작아 권장으로 뒀다. 누적되면 에이전트가 낡은 플랜을 현재 설계로 오독할 위험이 있고, 날짜 접두어와 `plans/` 경로가 1차 방어다 |

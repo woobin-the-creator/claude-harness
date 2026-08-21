@@ -6,12 +6,8 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)
 SKILLS="$ROOT/woobin-harness/skills"
 TEST_ROOT=$(mktemp -d)
-BRAINSTORM_SESSION=
 
 cleanup() {
-  if [ -n "$BRAINSTORM_SESSION" ] && [ -d "$BRAINSTORM_SESSION" ]; then
-    "$SKILLS/brainstorming/scripts/stop-server.sh" "$BRAINSTORM_SESSION" >/dev/null 2>&1 || true
-  fi
   rm -rf "$TEST_ROOT"
 }
 trap cleanup EXIT HUP INT TERM
@@ -20,8 +16,8 @@ fail() { printf '✗ %s\n' "$*" >&2; exit 1; }
 pass() { printf '✓ %s\n' "$*"; }
 
 skill_count=$(find "$SKILLS" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')
-[ "$skill_count" -eq 44 ] || fail "expected 44 skills, found $skill_count"
-pass "44 packaged skills"
+[ "$skill_count" -eq 19 ] || fail "expected 19 skills, found $skill_count"
+pass "19 packaged skills"
 
 for script in $(find "$SKILLS" -type f -name '*.sh' -print); do
   case "$(sed -n '1p' "$script")" in
@@ -68,18 +64,6 @@ if missing:
 PY
 pass "packaged Markdown references"
 
-# The visual companion must start, serve its authenticated page, and stop in the
-# same owner shell so the lifecycle watchdog sees a live harness process.
-start_out=$("$SKILLS/brainstorming/scripts/start-server.sh" --background --idle-timeout-minutes 1)
-printf '%s' "$start_out" | jq -e '.type == "server-started" and (.url | startswith("http://localhost:"))' >/dev/null
-brainstorm_url=$(printf '%s' "$start_out" | jq -r '.url')
-BRAINSTORM_SESSION=$(printf '%s' "$start_out" | jq -r '.screen_dir | sub("/content$"; "")')
-curl -fsS "$brainstorm_url" | grep -q '<!DOCTYPE html>' || fail "brainstorming server did not serve HTML"
-stop_out=$("$SKILLS/brainstorming/scripts/stop-server.sh" "$BRAINSTORM_SESSION")
-printf '%s' "$stop_out" | jq -e '.status == "stopped"' >/dev/null
-BRAINSTORM_SESSION=
-pass "brainstorming visual companion start/serve/stop"
-
 mkdir -p "$TEST_ROOT/projects" "$TEST_ROOT/history"
 scan="$TEST_ROOT/scan.json"
 audit="$TEST_ROOT/audit.json"
@@ -95,7 +79,7 @@ import json
 import sys
 
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-expected = {"hooks": 11, "agents": 4, "skills": 44}
+expected = {"hooks": 11, "agents": 4, "skills": 19}
 assert data["A3_hygiene"]["installed"] == expected, data["A3_hygiene"]["installed"]
 assert not any("waste_scan.py not found" in error for error in data["errors"]), data["errors"]
 PY
