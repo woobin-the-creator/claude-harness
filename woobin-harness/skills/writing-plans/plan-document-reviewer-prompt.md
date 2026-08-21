@@ -4,7 +4,11 @@ Use this template when dispatching a plan document reviewer subagent.
 
 **Purpose:** Verify the plan is complete, matches the spec, and has proper task decomposition.
 
-**Dispatch after:** The complete plan is written.
+**Dispatch after:** The complete plan is written **and** the Self-Review checklist in `SKILL.md` has been run.
+
+**Dispatch only for:** irreversible work — migrations, prod-facing changes, anything headed for execution
+mode ③. For ordinary plans the checklist catches the same things at a fraction of the cost, so this
+dispatch is pure overhead.
 
 ```
 Subagent (general-purpose):
@@ -12,7 +16,7 @@ Subagent (general-purpose):
   prompt: |
     You are a plan document reviewer. Verify this plan is complete and ready for implementation.
 
-    **Plan to review:** [PLAN_FILE_PATH]
+    **Plan to review:** [PLAN_DIR_PATH]  — read `00-overview.md` first, then every `task-N.md`
     **Spec for reference:** [SPEC_FILE_PATH]
 
     ## What to Check
@@ -23,6 +27,8 @@ Subagent (general-purpose):
     | Spec Alignment | Plan covers spec requirements, no major scope creep |
     | Task Decomposition | Tasks have clear boundaries, steps are actionable |
     | Buildability | Could an engineer follow this plan without getting stuck? |
+    | Split integrity | Task numbers in the overview's table match the actual `task-N.md` files; no task body leaked into the overview |
+    | Self-containment | No references to a planning conversation; every file path is absolute or repo-relative; every task names a real completion-check command |
 
     ## Calibration
 
