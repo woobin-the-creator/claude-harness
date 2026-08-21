@@ -105,7 +105,7 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 ### R1 — 플랜 저장 후 세션 경계
 
 **기전** `plan-saved-session-boundary.sh` (PostToolUse:Write). `docs/(superpowers|woobin_plan)/plans/*.md`
-저장을 감지 → `/exit` 후 `claude --effort <모드> --model <모드>` 재런치 지시 + 자기완결성 4항목 점검 요구.
+또는 분할 레이아웃의 `plans/*/00-overview.md` 저장을 감지 → `/exit` 후 `claude --effort <모드> --model <모드>` 재런치 지시 + 자기완결성 4항목 점검 요구.
 프로젝트 `CLAUDE.md`에 같은 절이 있다(이중 소유 — §9-1 참조).
 
 **근거** 2026-07-29, 14일 전수, 구현 세션 18개. 구현 세션은 중앙값 **200k**를 물려받고 시작(최대 414k).
@@ -126,9 +126,18 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 
 ### R2 — 플랜 분할 저장 (00-overview + task-N)
 
-**기전** 같은 훅. 500행(`PLAN_SPLIT_MIN_LINES`) 초과 플랜은 `00-overview.md`(≤400행/15,000자) +
-`task-N.md`로 쪼개고 원본은 스텁으로 교체. 이미 존재하는 단일 파일 플랜은 `sdd-kickoff-guard.sh`가
-킥오프 시점에 "통째로 Read 금지, 목차·제약만" 결정론적 명령으로 커버.
+**기전** 두 겹이다.
+
+1. **`writing-plans` 스킬이 처음부터 분할해서 쓴다** — `plans/YYYY-MM-DD-<slug>/00-overview.md`(≤400행/15,000자)
+   + `task-N.md`. 통째로 썼다가 쪼개면 같은 문서를 두 번 쓰는 값을 낸다. 스킬은 append-only다 —
+   기존 플랜 파일을 수정·삭제·이동하지 않고, 대상 디렉터리가 이미 있으면 slug를 바꾸거나 사용자에게 묻는다.
+2. **같은 훅이 백스톱** — 스킬 없이 단일 파일로 저장되면 500행(`PLAN_SPLIT_MIN_LINES`) 초과 시
+   분할 지시 + 원본을 스텁으로 교체. **분할된 채로 저장된 경우엔 `00-overview.md` 하나에만 발화**하고
+   (`task-N.md`는 침묵) 분할 지시 대신 R1의 자기완결성 점검·모드 추천만 낸다 —
+   여기서 조기 종료하면 스킬이 분할 저장한 플랜에는 훅이 한 번도 안 울린다.
+
+이미 존재하는 단일 파일 플랜은 `sdd-kickoff-guard.sh`가 킥오프 시점에
+"통째로 Read 금지, 목차·제약만" 결정론적 명령으로 커버.
 
 **근거** 2026-07-30. R1 경계가 잘 작동했는데도 구현 세션 2개가 $52.64. 재시작 floor가 가정한 45k가
 아니라 **93~122k**였고 최대 항목이 **플랜 통독 48k tok**(1,650행/74KB, Read 2회). floor는 오케스트레이터의
@@ -562,7 +571,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 | `idle-handoff-stop.sh` | Stop | 50분 무활동(asyncRewake) | `exit 2` 재기동 | R6 |
 | `ctx-handoff-stop.sh` | Stop | 턴 종료 시 ctx ≥300k | `exit 2` 재기동, 세션 1회 | R13 |
 | `idle-return-guard.sh` | UserPromptSubmit | 65분 경과 / `/close-session` | block 1회 | R6 |
-| `plan-saved-session-boundary.sh` | PostToolUse:Write | 플랜 경로 저장 | additionalContext | R1·R2 |
+| `plan-saved-session-boundary.sh` | PostToolUse:Write | 플랜 경로 저장 (분할본은 `00-overview.md`만) | additionalContext | R1·R2 |
 | `plan-session-boundary-guard.sh` | UserPromptSubmit | 플랜 진입 프롬프트 + ctx ≥120k | additionalContext, 세션 1회 | R1 |
 | `sdd-kickoff-guard.sh` | UserPromptSubmit | 구현 의도 정규식 + 플랜 경로 | additionalContext, 세션 1회 | R2 |
 | `sdd-orchestrator-edit-guard.sh` | PreToolUse:Edit\|Write\|MultiEdit | [A] SDD 원장 존재 / [B] ctx ≥150k **AND** 편집 ≥15회 | deny 1회 → 재시도 통과 | — |
@@ -624,7 +633,7 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 빈칸이 6개를 넘으면 조사가 덜 된 것이다. 실측에서 반복 관측됐으나 규정이 없던 셋(사용자의 되묻기,
 시각적 선택지는 렌더가 서술을 이긴다, "나머지는 추천대로" 이탈구)도 조문화했다.
 **§3에 새 규칙을 만들지 않았다** — 훅·에이전트에 걸리는 하네스 규칙이 아니라 스킬 내부 규율이고,
-채울 `무효화 조건`이 "실측 27건"뿐이라 §0이 요구하는 등급에 못 미친다. 서사는 `home/HARNESS-LOG.md` #25.
+채울 `무효화 조건`이 "실측 27건"뿐이라 §0이 요구하는 등급에 못 미친다. 서사는 `home/HARNESS-LOG.md` #26.
 `design-rules`는 `design-workflow`의 backward-compatible concrete-UI entry이고,
 `show-design-sample`은 복수 시안 격리 프리뷰·공유가 필요할 때만 쓰는 preview/delivery branch다.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).

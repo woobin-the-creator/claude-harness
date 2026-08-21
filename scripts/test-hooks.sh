@@ -76,6 +76,25 @@ out=$(printf '%s' "$plan_input" \
 assert_silent "$out" "plan-saved-session-boundary once-only"
 pass "plan-saved-session-boundary trigger/once"
 
+# plan-saved-session-boundary: 분할 저장된 플랜은 00-overview.md 에만 발화하고 task-N.md 는 침묵한다.
+split_overview="$plan_root/docs/woobin_plan/plans/2026-08-21-sample/00-overview.md"
+split_task="$plan_root/docs/woobin_plan/plans/2026-08-21-sample/task-1.md"
+mkdir -p "$(dirname "$split_overview")"
+printf '# Plan\n\n- task\n' >"$split_overview"
+printf '### Task 1\n' >"$split_task"
+out=$(printf '%s' "{\"session_id\":\"plan-split-session\",\"tool_input\":{\"file_path\":\"$split_overview\"}}" \
+  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
+      "$HOOKS/plan-saved-session-boundary.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("이미") and contains("분할 불필요")' \
+  "plan-saved-session-boundary: overview did not use the presplit branch"
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("2026-08-21-sample 플랜으로 구현")' \
+  "plan-saved-session-boundary: kickoff target is not the plan directory"
+out=$(printf '%s' "{\"session_id\":\"plan-split-session\",\"tool_input\":{\"file_path\":\"$split_task\"}}" \
+  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
+      "$HOOKS/plan-saved-session-boundary.sh")
+assert_silent "$out" "plan-saved-session-boundary task-N.md silence"
+pass "plan-saved-session-boundary presplit overview/task branches"
+
 # plan-session-boundary-guard: high-context plan-entry prompt emits once.
 plan_ctx_transcript="$TEST_ROOT/plan-context.jsonl"
 printf '%s\n' '{"type":"assistant","message":{"usage":{"input_tokens":130000,"cache_read_input_tokens":1000,"cache_creation_input_tokens":0}}}' >"$plan_ctx_transcript"

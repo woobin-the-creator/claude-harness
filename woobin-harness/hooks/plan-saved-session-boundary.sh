@@ -18,6 +18,10 @@
 #
 # 단, 플랜 문서가 자기완결적이지 않으면 새 세션이 되묻느라 절약분이 날아간다 —
 # 그래서 경계를 넘기 전에 자기완결성 점검을 먼저 시킨다.
+#
+# 2026-08-21 — writing-plans 스킬이 처음부터 plans/<slug>/ 로 분할 저장하도록 바뀌었다(같은 문서를
+# 두 번 쓰지 않으려고). 그래서 이 훅도 분할 산출물에 발화해야 한다: `00-overview.md` 1개에만 울리고
+# `task-N.md`는 침묵하며, 그 경우 분할 지시 대신 자기완결성 점검·모드 추천만 낸다.
 
 set -u
 
@@ -45,8 +49,16 @@ path=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null
 # case 글롭은 변수 alternation을 못 받으므로(| 가 확장 전에 파싱됨) grep으로 판정한다.
 printf '%s' "$path" | grep -qE "/docs/(${PLAN_DOCS_DIRS})/plans/.*\.md$" || exit 0
 
-# 이미 분할한 산출물(plans/<이름>/00-overview.md·task-N.md)에는 다시 발화하지 않는다.
-printf '%s' "$path" | grep -qE "/docs/(${PLAN_DOCS_DIRS})/plans/.*/.*\.md$" && exit 0
+# 분할 레이아웃(plans/<이름>/…)에서는 00-overview.md 하나에만 발화한다.
+# writing-plans 스킬은 2026-08-21부터 **처음부터** plans/<slug>/ 로 쓴다. 예전처럼 여기서
+# 통째로 exit하면 그 경로에서는 훅이 한 번도 안 울려서 R1의 자기완결성 4항목 점검과
+# 모드 추천이 통째로 사라진다 — 스킬 없이 플랜을 쓰는 세션에는 이 훅이 유일한 발동원이다.
+# task-N.md는 계속 침묵한다(플랜 하나당 N번 울릴 이유가 없다).
+presplit=0
+if printf '%s' "$path" | grep -qE "/docs/(${PLAN_DOCS_DIRS})/plans/.*/.*\.md$"; then
+  printf '%s' "$path" | grep -qE "/00-overview\.md$" || exit 0
+  presplit=1
+fi
 
 # 같은 플랜을 여러 번 Write해도 세션당 한 번만 알린다.
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
@@ -67,7 +79,13 @@ est_tok=$((chars / 1550))   # k 토큰. 한글 혼용 문서 실측 비율 1.55�
 
 plan_dir=$(printf '%s' "$path" | sed 's/\.md$//')
 
-if [ "$lines" -ge "$SPLIT_MIN_LINES" ]; then
+if [ "$presplit" -eq 1 ]; then
+  # 이미 분할된 채로 저장됐다 — 분할 지시는 불필요하고, 킥오프 대상은 플랜 디렉터리다.
+  split_step="   (이미 \`00-overview.md\` + \`task-N.md\` 로 분할 저장돼 있습니다. 분할 불필요 —
+   overview가 400행/15,000자 이내인지, 태스크 목록 번호가 실제 \`task-N.md\` 파일과 일치하는지만 확인하세요.)"
+  kickoff_target=$(dirname "$path")
+  step_n=2
+elif [ "$lines" -ge "$SPLIT_MIN_LINES" ]; then
   split_step="2. **이 플랜을 분할 저장하세요** — 현재 ${lines}행(${chars}자, 약 ${est_tok}k 토큰)입니다.
    오케스트레이터가 이걸 통째로 Read하면 그 토큰이 구현 세션 전 구간의 **매 요청**에 cache read로 재청구됩니다
    (2026-07-30 실측: 1,650행 플랜 = 48k tok, 오케스트레이터 floor 93~122k, 세션당 \$2~11).
