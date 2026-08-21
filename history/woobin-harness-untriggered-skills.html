@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<style>
+  body{margin:0;background:#fff;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+  text{font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;dominant-baseline:middle}
+</style></head><body>
+<svg width="1600" height="1080" viewBox="0 0 1600 1080" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="ab" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#2563eb"/></marker>
+  <marker id="ag" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#94a3b8"/></marker>
+  <marker id="ao" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#ea580c"/></marker>
+  <marker id="agr" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+    <path d="M0,1 L11,6 L0,11 z" fill="#059669"/></marker>
+</defs>
+<rect width="1600" height="1080" fill="#fff"/>
+
+<text x="40" y="42" font-size="27" font-weight="700" fill="#0f172a">woobin-harness 스킬 28개 · 최근 7일 트리거 분류</text>
+<text x="40" y="72" font-size="13.5" fill="#64748b">기간 2026-08-14 ~ 08-21 · 소스: ~/.claude/projects 세션 JSONL 2,116개 · Skill tool_use + &lt;command-name&gt; 슬래시 호출 전수</text>
+
+<!-- ===== pipeline ===== -->
+<rect x="40" y="96" width="230" height="56" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+<text x="56" y="118" font-size="13.5" font-weight="700" fill="#065f46">🛢 세션 JSONL 2,116개</text>
+<text x="56" y="137" font-size="11" fill="#047857">~/.claude/projects · 전 프로젝트</text>
+
+<rect x="40" y="180" width="230" height="56" rx="9" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+<text x="56" y="202" font-size="13.5" font-weight="700" fill="#065f46">🛢 스킬 인벤토리 28개</text>
+<text x="56" y="221" font-size="11" fill="#047857">woobin-harness/skills/*</text>
+
+<rect x="320" y="96" width="210" height="56" rx="9" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="336" y="118" font-size="13.5" font-weight="700" fill="#1e3a8a">⚙️ 호출 이벤트 추출</text>
+<text x="336" y="137" font-size="11" fill="#3b82f6">Skill tool_use · /슬래시</text>
+
+<rect x="580" y="96" width="230" height="56" rx="9" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="596" y="118" font-size="13.5" font-weight="700" fill="#1e3a8a">⚙️ 스킬명 정규화</text>
+<text x="596" y="137" font-size="11" fill="#3b82f6">handoff ↔ woobin-harness:handoff 병합</text>
+
+<rect x="870" y="96" width="190" height="56" rx="9" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="886" y="118" font-size="13.5" font-weight="700" fill="#1e3a8a">⚙️ 7일 창 필터</text>
+<text x="886" y="137" font-size="11" fill="#3b82f6">timestamp ≥ 08-14</text>
+
+<rect x="1120" y="96" width="240" height="56" rx="9" fill="#e0e7ff" stroke="#4338ca" stroke-width="2.5"/>
+<text x="1136" y="118" font-size="13.5" font-weight="700" fill="#312e81">◆ 28개를 좌우로 분기</text>
+<text x="1136" y="137" font-size="11" fill="#4338ca">호출 ≥1회 ? 트리거됨 : 미트리거</text>
+
+<path d="M270,124 L316,124" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#agr)"/>
+<path d="M530,124 L576,124" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+<path d="M810,124 L866,124" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+<path d="M1060,124 L1116,124" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+<!-- inventory joins the classifier from the right -->
+<path d="M270,208 L1450,208 L1450,124 L1364,124" stroke="#059669" stroke-width="2" fill="none" marker-end="url(#agr)"/>
+<text x="1030" y="196" font-size="10.5" fill="#047857">인벤토리 합류 — 0회 스킬은 로그에 흔적이 없으므로 목록 쪽에서만 나온다</text>
+
+<!-- split -->
+<path d="M1240,152 L1240,244 L300,244 L300,286" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+<path d="M1240,244 L1080,244 L1080,286" stroke="#ea580c" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#ao)"/>
+
+<!-- ===== triggered panel ===== -->
+<rect x="40" y="290" width="520" height="240" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="58" y="314" font-size="15" font-weight="700" fill="#1e3a8a">✅ 최근 7일 트리거됨 · 7개 / 28</text>
+<text x="58" y="337" font-size="10.5" fill="#3b82f6">막대 = 호출 횟수</text>
+
+<g font-size="12">
+  <text x="58" y="360" fill="#0f172a">claude-blog-translate-ko</text><rect x="300" y="353" width="182" height="13" rx="3" fill="#2563eb"/><text x="492" y="360" fill="#1e3a8a" font-weight="700">13</text>
+  <text x="58" y="384" fill="#0f172a">handoff</text><rect x="300" y="377" width="84" height="13" rx="3" fill="#2563eb"/><text x="492" y="384" fill="#1e3a8a" font-weight="700">6</text>
+  <text x="58" y="408" fill="#0f172a">grill-me</text><rect x="300" y="401" width="56" height="13" rx="3" fill="#2563eb"/><text x="492" y="408" fill="#1e3a8a" font-weight="700">4</text>
+  <text x="58" y="432" fill="#0f172a">show-design-sample</text><rect x="300" y="425" width="42" height="13" rx="3" fill="#2563eb"/><text x="492" y="432" fill="#1e3a8a" font-weight="700">3</text>
+  <text x="58" y="456" fill="#0f172a">writing-plans</text><rect x="300" y="449" width="28" height="13" rx="3" fill="#2563eb"/><text x="492" y="456" fill="#1e3a8a" font-weight="700">2</text>
+  <text x="58" y="480" fill="#0f172a">groupchat-ai</text><rect x="300" y="473" width="14" height="13" rx="3" fill="#93c5fd"/><text x="492" y="480" fill="#1e3a8a" font-weight="700">1</text>
+  <text x="58" y="504" fill="#0f172a">explain</text><rect x="300" y="497" width="14" height="13" rx="3" fill="#93c5fd"/><text x="492" y="504" fill="#1e3a8a" font-weight="700">1</text>
+</g>
+
+<!-- legend -->
+<rect x="40" y="550" width="520" height="150" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="58" y="574" font-size="14" font-weight="700" fill="#0f172a">범례</text>
+<rect x="58" y="592" width="26" height="12" rx="3" fill="#2563eb"/><text x="94" y="598" font-size="11.5" fill="#334155">파랑 실선 — 이번 주 실제로 흐른 경로</text>
+<path d="M58,624 L84,624" stroke="#ea580c" stroke-width="2.5" stroke-dasharray="6 5"/><text x="94" y="624" font-size="11.5" fill="#334155">주황 점선 ✕ — 로그 전체에 호출 0회 (한 번도 안 씀)</text>
+<path d="M58,650 L84,650" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="6 5"/><text x="94" y="650" font-size="11.5" fill="#334155">회색 점선 — 예전엔 썼으나 7일간 0회 (휴면)</text>
+<text x="58" y="676" font-size="11.5" fill="#334155">🔁 상시 후보 = 이번 주 작업에도 걸릴 수 있었던 스킬 · ⏳ 도메인 대기 = 그 일 자체가 아직 안 옴</text>
+
+<!-- method / caveat -->
+<rect x="40" y="716" width="520" height="194" rx="10" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="58" y="740" font-size="14" font-weight="700" fill="#0f172a">이 숫자가 무효가 되는 조건</text>
+<text x="58" y="766" font-size="11.5" fill="#475569">· Claude Code 세션 로그만 셌다. Codex(~/.codex) 쪽 호출은</text>
+<text x="70" y="784" font-size="11.5" fill="#475569">  집계에 들어있지 않다 — Codex에서 돌린 스킬은 0으로 보인다.</text>
+<text x="58" y="808" font-size="11.5" fill="#475569">· 스킬 본문을 읽기만 하고 Skill 도구를 안 거친 경우는</text>
+<text x="70" y="826" font-size="11.5" fill="#475569">  &quot;트리거&quot;로 세지 않는다(참조는 있어도 호출은 0).</text>
+<text x="58" y="850" font-size="11.5" fill="#475569">· 로그 보존 기간이 짧아지면 all-time 0과 &quot;오래된 사용&quot;이</text>
+<text x="70" y="868" font-size="11.5" fill="#475569">  구분되지 않는다. 지금은 2,116개 파일 전수라 문제없다.</text>
+<text x="58" y="894" font-size="11.5" fill="#475569">· 플러그인 이름 없이 쓰인 동명 스킬(superpowers 등)은 제외했다.</text>
+
+<!-- ===== untriggered header ===== -->
+<rect x="600" y="290" width="960" height="42" rx="9" fill="#fff7ed" stroke="#ea580c" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="620" y="311" font-size="15" font-weight="700" fill="#9a3412">✕ 최근 7일 한 번도 트리거되지 않음 · 21개 / 28  (75%)</text>
+
+<path d="M840,332 L840,352 L836,352" stroke="#ea580c" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+<path d="M1330,332 L1330,352" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 5" fill="none"/>
+
+<!-- never used -->
+<rect x="600" y="352" width="470" height="558" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="618" y="376" font-size="13.5" font-weight="700" fill="#9a3412">한 번도 호출된 적 없음 · 13개</text>
+<text x="618" y="394" font-size="10.5" fill="#c2410c">전체 로그 통틀어 0회</text>
+
+<g>
+<rect x="614" y="406" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="421" font-size="12.5" font-weight="700" fill="#0f172a">agent-ready-audit</text><text x="626" y="436" font-size="10.5" fill="#64748b">레포의 AI 에이전트 준비도를 점수로 진단</text><rect x="968" y="415" width="76" height="18" rx="9" fill="#fef3c7"/><text x="978" y="425" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="614" y="448" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="463" font-size="12.5" font-weight="700" fill="#0f172a">capability-audit</text><text x="626" y="478" font-size="10.5" fill="#64748b">내 agentic AI 활용 역량을 1~100점 채점</text><rect x="968" y="457" width="76" height="18" rx="9" fill="#fef3c7"/><text x="978" y="467" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="614" y="490" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="505" font-size="12.5" font-weight="700" fill="#0f172a">design-workflow</text><text x="626" y="520" font-size="10.5" fill="#64748b">UI 작업을 방향·근거·계약·리뷰로 라우팅</text><rect x="968" y="499" width="76" height="18" rx="9" fill="#fef3c7"/><text x="978" y="509" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="614" y="532" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="547" font-size="12.5" font-weight="700" fill="#0f172a">runbook-logger</text><text x="626" y="562" font-size="10.5" fill="#64748b">방금 푼 에러를 트러블슈팅 런북에 기록</text><rect x="968" y="541" width="76" height="18" rx="9" fill="#fef3c7"/><text x="978" y="551" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="614" y="574" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="589" font-size="12.5" font-weight="700" fill="#0f172a">to-issues</text><text x="626" y="604" font-size="10.5" fill="#64748b">플랜을 독립적으로 집을 수 있는 이슈로 분할</text><rect x="968" y="583" width="76" height="18" rx="9" fill="#fef3c7"/><text x="978" y="593" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="614" y="616" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="631" font-size="12.5" font-weight="700" fill="#0f172a">groupchat-debug</text><text x="626" y="646" font-size="10.5" fill="#64748b">사내 traceback을 air-gap 밖에서 원격 진단</text><rect x="968" y="625" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="635" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="658" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="673" font-size="12.5" font-weight="700" fill="#0f172a">internal-sso-oidc</text><text x="626" y="688" font-size="10.5" fill="#64748b">사내 OIDC SSO를 헥사고날 백엔드에 연동</text><rect x="968" y="667" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="677" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="700" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="715" font-size="12.5" font-weight="700" fill="#0f172a">git-guardrails-codex</text><text x="626" y="730" font-size="10.5" fill="#64748b">Codex용 위험 Git 명령 차단 훅 설치</text><rect x="968" y="709" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="719" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="742" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="757" font-size="12.5" font-weight="700" fill="#0f172a">obsidian-vault</text><text x="626" y="772" font-size="10.5" fill="#64748b">Obsidian 볼트 노트 검색·생성·위키링크 정리</text><rect x="968" y="751" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="761" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="784" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="799" font-size="12.5" font-weight="700" fill="#0f172a">tutor-setup</text><text x="626" y="814" font-size="10.5" fill="#64748b">문서·코드베이스를 StudyVault로 변환</text><rect x="968" y="793" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="803" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="826" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="841" font-size="12.5" font-weight="700" fill="#0f172a">tutor</text><text x="626" y="856" font-size="10.5" fill="#64748b">StudyVault 퀴즈·약점 드릴 학습 진행</text><rect x="968" y="835" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="845" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="614" y="868" width="442" height="38" rx="6" fill="#fff" stroke="#fed7aa"/><text x="626" y="883" font-size="12.5" font-weight="700" fill="#0f172a">claude-youtube-to-blog · web-artifacts-builder</text><text x="626" y="898" font-size="10.5" fill="#64748b">유튜브→한글 포스트 / React·shadcn artifact 제작</text><rect x="968" y="877" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="978" y="887" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+</g>
+
+<!-- dormant -->
+<rect x="1090" y="352" width="470" height="390" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="1108" y="376" font-size="13.5" font-weight="700" fill="#334155">휴면 — 예전엔 썼는데 7일간 0회 · 8개</text>
+<text x="1108" y="394" font-size="10.5" fill="#64748b">괄호 = 마지막 호출일</text>
+
+<g>
+<rect x="1104" y="406" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="421" font-size="12.5" font-weight="700" fill="#0f172a">review <tspan font-weight="400" fill="#94a3b8">(07-31)</tspan></text><text x="1116" y="436" font-size="10.5" fill="#64748b">기준점 이후 변경을 표준·스펙 두 축 병렬 리뷰</text><rect x="1458" y="415" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="425" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="448" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="463" font-size="12.5" font-weight="700" fill="#0f172a">design-rules <tspan font-weight="400" fill="#94a3b8">(08-12)</tspan></text><text x="1116" y="478" font-size="10.5" fill="#64748b">확립된 디자인 시스템 안에서 UI 구현 결정</text><rect x="1458" y="457" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="467" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="490" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="505" font-size="12.5" font-weight="700" fill="#0f172a">token-waste-audit <tspan font-weight="400" fill="#94a3b8">(08-12)</tspan></text><text x="1116" y="520" font-size="10.5" fill="#64748b">세션 JSONL 전수 분석으로 토큰 낭비 진단</text><rect x="1458" y="499" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="509" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="532" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="547" font-size="12.5" font-weight="700" fill="#0f172a">systematic-debugging <tspan font-weight="400" fill="#94a3b8">(08-07)</tspan></text><text x="1116" y="562" font-size="10.5" fill="#64748b">버그·테스트 실패를 고치기 전 체계적 진단</text><rect x="1458" y="541" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="551" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="574" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="589" font-size="12.5" font-weight="700" fill="#0f172a">brainstorming <tspan font-weight="400" fill="#94a3b8">(08-07)</tspan></text><text x="1116" y="604" font-size="10.5" fill="#64748b">접근이 안 정해진 기능을 인터뷰로 설계 문서화</text><rect x="1458" y="583" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="593" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="616" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="631" font-size="12.5" font-weight="700" fill="#0f172a">writing-claude-md <tspan font-weight="400" fill="#94a3b8">(08-05)</tspan></text><text x="1116" y="646" font-size="10.5" fill="#64748b">CLAUDE.md·AGENTS.md 신규 작성·정리</text><rect x="1458" y="625" width="76" height="18" rx="9" fill="#fef3c7"/><text x="1468" y="635" font-size="9.5" fill="#92400e">🔁 상시 후보</text>
+<rect x="1104" y="658" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="673" font-size="12.5" font-weight="700" fill="#0f172a">close-session <tspan font-weight="400" fill="#94a3b8">(08-12)</tspan></text><text x="1116" y="688" font-size="10.5" fill="#64748b">세션 종료 표시 — 자동 핸드오프 훅 잠재우기</text><rect x="1458" y="667" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="1468" y="677" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+<rect x="1104" y="700" width="442" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/><text x="1116" y="715" font-size="12.5" font-weight="700" fill="#0f172a">pr-demo-video <tspan font-weight="400" fill="#94a3b8">(07-24)</tspan></text><text x="1116" y="730" font-size="10.5" fill="#64748b">기능 시연을 GIF·영상으로 녹화해 PR에 첨부</text><rect x="1458" y="709" width="76" height="18" rx="9" fill="#f1f5f9"/><text x="1468" y="719" font-size="9.5" fill="#475569">⏳ 도메인 대기</text>
+</g>
+
+<!-- what differs -->
+<rect x="1090" y="758" width="470" height="152" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+<text x="1108" y="782" font-size="13.5" font-weight="700" fill="#92400e">무엇이 다른가</text>
+<text x="1108" y="806" font-size="11.5" fill="#78350f">⏳ 도메인 대기 10개 — 안 불린 게 정상. 사내 장애도,</text>
+<text x="1120" y="824" font-size="11.5" fill="#78350f">   유튜브 글도, 볼트 작업도 이번 주엔 없었다.</text>
+<text x="1108" y="850" font-size="11.5" fill="#78350f">🔁 상시 후보 11개 — 걸릴 상황이 있었는데 안 걸렸다.</text>
+<text x="1120" y="868" font-size="11.5" fill="#78350f">   이쪽이 진짜 신호다: 트리거 문구나 습관을 의심하라.</text>
+<text x="1108" y="894" font-size="11.5" fill="#78350f">전체 21개 중 13개는 로그 통틀어 단 한 번도 0회다.</text>
+
+<!-- recommendation strip -->
+<rect x="40" y="940" width="1520" height="106" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+<text x="62" y="968" font-size="15" font-weight="700" fill="#1e3a8a">▶ 결론</text>
+<text x="130" y="968" font-size="13.5" fill="#1e40af">28개 중 7개(25%)만 이번 주에 돌았고, 호출의 절반은 claude-blog-translate-ko 하나에 몰려 있다.</text>
+<text x="62" y="998" font-size="12.5" fill="#1e40af">가장 큰 갭 두 개 — ① 이번 주 UI 작업이 실제로 있었는데(show-design-sample 3회) design-rules·design-workflow는 0회. ② main에 20커밋이 들어갔는데 review·systematic-debugging·runbook-logger는 0회.</text>
+<text x="62" y="1024" font-size="12.5" fill="#1e40af">→ 이 5개는 &quot;쓸 일이 없었다&quot;로 설명되지 않는다. 스킬을 지우기 전에 description의 트리거 문구부터 고쳐라. 나머지 10개(⏳)는 지표가 아니라 대기 상태이니 건드리지 말 것.</text>
+</svg>
+</body></html>

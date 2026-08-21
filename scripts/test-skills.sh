@@ -16,8 +16,8 @@ fail() { printf '✗ %s\n' "$*" >&2; exit 1; }
 pass() { printf '✓ %s\n' "$*"; }
 
 skill_count=$(find "$SKILLS" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')
-[ "$skill_count" -eq 27 ] || fail "expected 27 skills, found $skill_count"
-pass "27 packaged skills"
+[ "$skill_count" -eq 19 ] || fail "expected 19 skills, found $skill_count"
+pass "19 packaged skills"
 
 for script in $(find "$SKILLS" -type f -name '*.sh' -print); do
   case "$(sed -n '1p' "$script")" in
@@ -64,7 +64,6 @@ if missing:
 PY
 pass "packaged Markdown references"
 
-
 mkdir -p "$TEST_ROOT/projects" "$TEST_ROOT/history"
 scan="$TEST_ROOT/scan.json"
 audit="$TEST_ROOT/audit.json"
@@ -80,7 +79,7 @@ import json
 import sys
 
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-expected = {"hooks": 11, "agents": 4, "skills": 27}
+expected = {"hooks": 11, "agents": 4, "skills": 19}
 assert data["A3_hygiene"]["installed"] == expected, data["A3_hygiene"]["installed"]
 assert not any("waste_scan.py not found" in error for error in data["errors"]), data["errors"]
 PY
