@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Turn a confirmed spec, PRD, brainstorming doc, or agreed requirements into an ordered, self-contained implementation plan that a fresh session can execute without the planning conversation. Use whenever work needs more than one or two steps and the approach is already settled — "이거 계획 세워줘", "플랜 짜줘", "구현 계획", "이 스펙대로 진행하자", "write a plan for this", or right after brainstorming produces a design doc. Use it before touching code, not after. Do not use when the approach itself is still unsettled (that is brainstorming) or when the goal is tracker tickets rather than an execution plan (that is to-issues).
+description: Turn a confirmed spec, PRD, design doc, or agreed requirements into an ordered, self-contained implementation plan that a fresh session can execute without the planning conversation. Use whenever work needs more than one or two steps and the approach is already settled — "이거 계획 세워줘", "플랜 짜줘", "구현 계획", "이 스펙대로 진행하자", "write a plan for this", or right after grill-me settles a spec. Use it before touching code, not after. Do not use when the approach itself is still unsettled or the requirements are not yet agreed — that is grill-me.
 ---
 
 # Writing Plans
@@ -51,7 +51,7 @@ The split is load-bearing, so the division has to be exact:
 
 ## Scope Check
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
+If the spec covers multiple independent subsystems, it should have been broken into sub-project specs while the spec was being settled. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
 ## File Structure
 
