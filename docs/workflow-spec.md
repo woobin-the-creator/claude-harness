@@ -608,9 +608,23 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 
 ### 스킬 28개
 
-파이프라인에 직접 물린 것: `brainstorming` · `writing-plans` · `systematic-debugging` ·
+파이프라인에 직접 물린 것: `grill-me` · `brainstorming` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `review` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff`.
+`grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
+
+2026-08-21, `grill-me`를 **"스펙 초안 먼저, 빈칸만 인터뷰"** 구조로 다시 썼다. 근거는 실측이다 —
+세션 로그의 `/grill-me` 호출 27건(2026-08-03~08-21)을 전수로 봤다. 규정된 의식이 지켜지지 않았다:
+질문 예산 5는 실제 중앙값 2~3으로 한 번도 안 찼고, 마무리 assumptions 블록은 **26세션 중 6회**,
+`AskUserQuestion`은 **1회**만 쓰였다(사용자는 26세션 내내 `A`/`B` 한 글자를 손으로 쳤다).
+반면 **질문 자체의 품질은 높았다** — 선택지·대가·다운스트림·추천을 표로 주는 형태는 잘 작동했다.
+그래서 고친 것은 무엇을 묻느냐가 아니라 **언제·무엇을 근거로 묻느냐**다:
+① 묻기 전에 사실을 채우고(위임) ② 한 화면짜리 스펙 초안을 먼저 올린 뒤 ③ 정말 미결인 빈칸만 묻고
+④ 결정 원장을 매 라운드 갱신한다. 질문 개수는 예산이 아니라 **초안 품질의 신호**로 재정의했다 —
+빈칸이 6개를 넘으면 조사가 덜 된 것이다. 실측에서 반복 관측됐으나 규정이 없던 셋(사용자의 되묻기,
+시각적 선택지는 렌더가 서술을 이긴다, "나머지는 추천대로" 이탈구)도 조문화했다.
+**§3에 새 규칙을 만들지 않았다** — 훅·에이전트에 걸리는 하네스 규칙이 아니라 스킬 내부 규율이고,
+채울 `무효화 조건`이 "실측 27건"뿐이라 §0이 요구하는 등급에 못 미친다. 서사는 `home/HARNESS-LOG.md` #25.
 `design-rules`는 `design-workflow`의 backward-compatible concrete-UI entry이고,
 `show-design-sample`은 복수 시안 격리 프리뷰·공유가 필요할 때만 쓰는 preview/delivery branch다.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).

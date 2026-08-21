@@ -3,3 +3,6 @@
 *.orig
 *.bak-*
 .claude/agent-memory-local/
+
+# skill-creator A/B 평가 산출물 (실행마다 새로 생성)
+experiments/*/blind/

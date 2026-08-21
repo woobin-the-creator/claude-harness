@@ -1,0 +1,73 @@
+{
+  "variant": "variant-A",
+  "expectations": [
+    {
+      "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+      "passed": true,
+      "evidence": "statusline/ctx-warn-statusline.sh:50-51, ctx-warn-statusline.sh:56-62, woobin-harness/hooks/ctx-handoff-stop.sh:24, 43~46행까지 줄번호 단위로 인용했고 실제 파일을 읽어 대조한 결과 전부 정확했다."
+    },
+    {
+      "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+      "passed": true,
+      "evidence": "'만드는 것'/'동작 계약'/'손대는 자리' 3개 섹션으로 무엇을·어떻게·어느 파일(신규 훅 파일명 ctx-handoff-guard.sh 포함, hooks.json 배선, test-hooks.sh fixture, plugin.json 버전까지)을 명시했다."
+    },
+    {
+      "text": "사용자에게 던진 미결 항목이 6개 이하다",
+      "passed": true,
+      "evidence": "[?1][?2][?3] 3개."
+    },
+    {
+      "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+      "passed": true,
+      "evidence": "3개 항목 × 2개 옵션 = 6개 전부 '다운스트림:' 문장이 붙어 있다(예: ?2-B '확실히 붙잡지만, 핸드오프 문서가 부실하면 다음 세션이 되묻는 비용이 그대로 생긴다')."
+    },
+    {
+      "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+      "passed": true,
+      "evidence": "?1/?2/?3 모두 '추천: B' 하나씩만 제시."
+    },
+    {
+      "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다",
+      "passed": true,
+      "evidence": "'하지 않는 것' 섹션에서 CLI 커맨드·상태줄 색상 재설계·IDLE_* 손잡이를 명시적으로 범위 밖 처리했다."
+    },
+    {
+      "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+      "passed": true,
+      "evidence": "'결정 원장' 표에 '기각한 것 — 이유' 열로 3개 결정 전부 사유가 남아 있다."
+    },
+    {
+      "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다",
+      "passed": true,
+      "evidence": "표에 각 행마다 '(사용자 선택)' 또는 '(추천안 기본 확정)' 태그를 달아 항목별로 구분했다 — 만점 조건 충족."
+    },
+    {
+      "text": "레포를 읽으면 알 수 있는 사실을 사용자에게 되묻지 않았다",
+      "passed": true,
+      "evidence": "임계값·파일 존재·현재 동작을 전부 조사된 사실로 서술했고 되묻는 질문이 없다."
+    },
+    {
+      "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다(대략 80행 이하)",
+      "passed": true,
+      "evidence": "실제 파일 45행."
+    },
+    {
+      "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+      "passed": true,
+      "evidence": "말미에 '[선택 툴로 띄울 항목]'으로 ?1/?2/?3 각각의 선택지를 재정리했다."
+    },
+    {
+      "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+      "passed": true,
+      "evidence": "반말체 대화형 문장으로 일관, 메타 서술 없음."
+    },
+    {
+      "text": "ctx-warn-statusline.sh(또는 임계값 200k/300k)를 실제로 찾아 인용했다",
+      "passed": true,
+      "evidence": "WARN/DANGER 변수와 줄번호(50-51, 56-62)까지 정확히 인용."
+    }
+  ],
+  "passed_count": 13,
+  "total": 13,
+  "config": "with_skill"
+}

@@ -1,0 +1,73 @@
+{
+  "variant": "variant-B",
+  "expectations": [
+    {
+      "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+      "passed": true,
+      "evidence": "`claude-hooks.json:60-70`(matcher 확인, 실제 파일에서 PostToolUse matcher가 'Write' 하나뿐임을 확인함), `plan-saved-session-boundary.sh:46,49`, `known_marketplaces.json`(source가 이 워크트리가 아닌 /Volumes/LinuxVM/... 임을 확인, 실제로도 일치), jq 설치 여부(`/usr/bin/jq` 확인)까지 5개 이상 구체 인용."
+    },
+    {
+      "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+      "passed": true,
+      "evidence": "'## 만드는 것 / ## 동작 계약 / ## 손대는 자리 / ## 하지 않는 것' 구조로 목표·수정 계약·대상 파일(경로:행 단위)·범위 제외를 명시적으로 분리해 서술한다."
+    },
+    {
+      "text": "사용자에게 던진 미결 항목이 6개 이하다",
+      "passed": true,
+      "evidence": "[?1][?2][?3] 3개(연쇄로 열릴 수 있는 [?4]는 이번 라운드에 묻지 않고 다음 라운드로 명시적으로 미룸)."
+    },
+    {
+      "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+      "passed": true,
+      "evidence": "[?1][?2][?3] 모두 '다운스트림:' 줄로 옵션별 결과를 서술한다."
+    },
+    {
+      "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+      "passed": true,
+      "evidence": "[?1][?2][?3] 각각 '추천:' 한 줄로 하나씩 제시된다."
+    },
+    {
+      "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+      "passed": true,
+      "evidence": "'## 하지 않는 것' 절에서 '설치본 diff 백포트는 별도 병합 작업', 'plan-session-boundary-guard.sh 등 다른 훅 점검은 범위 밖'이라고 명시적으로 분리했다."
+    },
+    {
+      "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+      "passed": true,
+      "evidence": "'결정 원장' 표의 '기각한 것 — 이유' 열에 4개 결정 모두 대안과 이유가 기록돼 있다(예: Q2에서 'Write 툴로 저장'을 Auto Mode 지시 실측 근거로 기각)."
+    },
+    {
+      "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+      "passed": true,
+      "evidence": "표 각 행에 '— 사용자 선택' / '— 기본값 확정'이 인라인으로 표기되고, 서두에 '사용자가 직접 고른 건 [?1] 하나뿐이고 나머지는 기본값 확정'이라고 다시 요약한다 — 만점 기준 충족."
+    },
+    {
+      "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+      "passed": true,
+      "evidence": "묻는 3개 항목([?1] 실제 저장 경로 모양, [?2] Write/Bash 저장 수단, [?3] 마켓플레이스 인지 여부)은 모두 사용자의 과거 세션 행동에 관한 것으로 레포에서 확인 불가능하다. 반대로 marketplace source 경로·jq 설치·matcher 값·캐시에 이미 fix가 있다는 사실은 스스로 확인해 '조사로 확인한 사실'에 못박아뒀다(직접 확인 결과 캐시 1.10.0에 실제로 fix가 반영돼 있어 정확함)."
+    },
+    {
+      "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+      "passed": true,
+      "evidence": "turn1 전체 51행."
+    },
+    {
+      "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+      "passed": true,
+      "evidence": "말미의 '[선택 툴로 띄울 항목]'이 [?1][?2][?3]을 A/B/C 선택지로 다시 요약해 명확하다."
+    },
+    {
+      "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+      "passed": true,
+      "evidence": "'먼저 레포를 뒤져서...', '[?1]은 B로 접수' 등 사용자에게 직접 보고하는 어투를 유지한다."
+    },
+    {
+      "text": "plan-saved-session-boundary.sh의 경로 정규식 `/docs/(superpowers|woobin_plan)/plans/` 를 찾아 사실로 제시했다",
+      "passed": true,
+      "evidence": "turn1에서 '발화 조건은 `/docs/(superpowers|woobin_plan)/plans/*.md` 정규식'이라고 명시하며 실제 46행과 일치한다."
+    }
+  ],
+  "passed_count": 13,
+  "total": 13,
+  "config": "with_skill"
+}
