@@ -1,0 +1,73 @@
+{
+  "variant": "variant-B",
+  "expectations": [
+    {
+      "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+      "passed": true,
+      "evidence": "statusline/ctx-warn-statusline.sh, woobin-harness/hooks/ctx-handoff-stop.sh, docs/workflow-spec.md, idle-handoff-stop.sh, idle-return-guard.sh를 인용(줄번호는 없지만 파일 경로 5개, 기준 충족)."
+    },
+    {
+      "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+      "passed": true,
+      "evidence": "행동(포맷 변경, 짝 훅 추가, 변수 통합)은 서술되지만 '어느 파일'은 ctx-warn-statusline.sh·docs/workflow-spec.md 정도만 명명되고, 신규 훅 파일명·hooks.json 배선·test-hooks.sh·plugin.json 버전은 turn2에서야 등장 — variant-A 대비 파일 단위 커버리지가 얕다."
+    },
+    {
+      "text": "사용자에게 던진 미결 항목이 6개 이하다",
+      "passed": true,
+      "evidence": "Q1 1개뿐."
+    },
+    {
+      "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+      "passed": true,
+      "evidence": "Q1의 옵션1/옵션2 각각 '→' 다운스트림 문장이 붙어 있다. 다만 실질적 결정점은 Q1 하나뿐이라 커버리지가 variant-A(3개 항목×2옵션)보다 좁다."
+    },
+    {
+      "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+      "passed": true,
+      "evidence": "Q1에 '추천: 옵션 2' 하나."
+    },
+    {
+      "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다",
+      "passed": true,
+      "evidence": "3개 요청 범위 안에서만 서술, 별도 범위외 섹션은 없지만 스코프 이탈도 없음."
+    },
+    {
+      "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+      "passed": true,
+      "evidence": "'반려한 대안' 섹션에 3개 대안(3변수 유지·완전 차단·별도 상수)과 각 사유가 남아 있다."
+    },
+    {
+      "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다",
+      "passed": true,
+      "evidence": "여는 문장에서 'Q1은 옵션 2, 나머지 기본값은 그대로'라고 구분하지만, 이어지는 '확정된 결정 1~4' 목록 자체에는 항목별 (사용자 선택)/(기본값) 태그가 없어 variant-A만큼 명시적이지 않다 — 만점 조건 미충족, 기본 충족은 함."
+    },
+    {
+      "text": "레포를 읽으면 알 수 있는 사실을 사용자에게 되묻지 않았다",
+      "passed": true,
+      "evidence": "임계값·구조적 원인을 전부 조사된 사실로 제시, 되묻는 질문 없음."
+    },
+    {
+      "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다(대략 80행 이하)",
+      "passed": true,
+      "evidence": "실제 파일 27행."
+    },
+    {
+      "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+      "passed": true,
+      "evidence": "'Q1/1.'로 명확히 표시하고 기본값 목록엔 '이견 없으면 알려줘'로 마무리."
+    },
+    {
+      "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+      "passed": true,
+      "evidence": "대화체로 일관됨."
+    },
+    {
+      "text": "ctx-warn-statusline.sh(또는 임계값 200k/300k)를 실제로 찾아 인용했다",
+      "passed": true,
+      "evidence": "CTX_WARN_THRESHOLD(200000)·CTX_DANGER_THRESHOLD(300000)를 정확히 인용."
+    }
+  ],
+  "passed_count": 13,
+  "total": 13,
+  "config": "old_skill"
+}

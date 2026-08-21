@@ -1,0 +1,588 @@
+{
+  "metadata": {
+    "skill_name": "grill-me",
+    "skill_path": "woobin-harness/skills/grill-me",
+    "executor_model": "claude-sonnet (R3 훅이 서브에이전트 모델을 고정)",
+    "timestamp": "2026-08-21T07:45:00Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 1,
+    "baseline_note": "without_skill = 구본 grill-me(스냅샷). 스킬 없음이 아니라 이전 버전이다.",
+    "blind": "채점자는 variant-A/B 익명 라벨만 봤고 매핑은 eval마다 다르게 섞었다"
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "eval-0-ctx-threshold-config",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 13,
+        "failed": 0,
+        "total": 13,
+        "time_seconds": 371.2,
+        "tokens": 94642,
+        "tool_calls": 28,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "statusline/ctx-warn-statusline.sh:50-51, ctx-warn-statusline.sh:56-62, woobin-harness/hooks/ctx-handoff-stop.sh:24, 43~46행까지 줄번호 단위로 인용했고 실제 파일을 읽어 대조한 결과 전부 정확했다."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": true,
+          "evidence": "'만드는 것'/'동작 계약'/'손대는 자리' 3개 섹션으로 무엇을·어떻게·어느 파일(신규 훅 파일명 ctx-handoff-guard.sh 포함, hooks.json 배선, test-hooks.sh fixture, plugin.json 버전까지)을 명시했다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "[?1][?2][?3] 3개."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "3개 항목 × 2개 옵션 = 6개 전부 '다운스트림:' 문장이 붙어 있다(예: ?2-B '확실히 붙잡지만, 핸드오프 문서가 부실하면 다음 세션이 되묻는 비용이 그대로 생긴다')."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "?1/?2/?3 모두 '추천: B' 하나씩만 제시."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다",
+          "passed": true,
+          "evidence": "'하지 않는 것' 섹션에서 CLI 커맨드·상태줄 색상 재설계·IDLE_* 손잡이를 명시적으로 범위 밖 처리했다."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": true,
+          "evidence": "'결정 원장' 표에 '기각한 것 — 이유' 열로 3개 결정 전부 사유가 남아 있다."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다",
+          "passed": true,
+          "evidence": "표에 각 행마다 '(사용자 선택)' 또는 '(추천안 기본 확정)' 태그를 달아 항목별로 구분했다 — 만점 조건 충족."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실을 사용자에게 되묻지 않았다",
+          "passed": true,
+          "evidence": "임계값·파일 존재·현재 동작을 전부 조사된 사실로 서술했고 되묻는 질문이 없다."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다(대략 80행 이하)",
+          "passed": true,
+          "evidence": "실제 파일 45행."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "말미에 '[선택 툴로 띄울 항목]'으로 ?1/?2/?3 각각의 선택지를 재정리했다."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "반말체 대화형 문장으로 일관, 메타 서술 없음."
+        },
+        {
+          "text": "ctx-warn-statusline.sh(또는 임계값 200k/300k)를 실제로 찾아 인용했다",
+          "passed": true,
+          "evidence": "WARN/DANGER 변수와 줄번호(50-51, 56-62)까지 정확히 인용."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (clear)"
+      ]
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "eval-0-ctx-threshold-config",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 13,
+        "failed": 0,
+        "total": 13,
+        "time_seconds": 323.9,
+        "tokens": 79763,
+        "tool_calls": 19,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "statusline/ctx-warn-statusline.sh, woobin-harness/hooks/ctx-handoff-stop.sh, docs/workflow-spec.md, idle-handoff-stop.sh, idle-return-guard.sh를 인용(줄번호는 없지만 파일 경로 5개, 기준 충족)."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": true,
+          "evidence": "행동(포맷 변경, 짝 훅 추가, 변수 통합)은 서술되지만 '어느 파일'은 ctx-warn-statusline.sh·docs/workflow-spec.md 정도만 명명되고, 신규 훅 파일명·hooks.json 배선·test-hooks.sh·plugin.json 버전은 turn2에서야 등장 — variant-A 대비 파일 단위 커버리지가 얕다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "Q1 1개뿐."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "Q1의 옵션1/옵션2 각각 '→' 다운스트림 문장이 붙어 있다. 다만 실질적 결정점은 Q1 하나뿐이라 커버리지가 variant-A(3개 항목×2옵션)보다 좁다."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "Q1에 '추천: 옵션 2' 하나."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다",
+          "passed": true,
+          "evidence": "3개 요청 범위 안에서만 서술, 별도 범위외 섹션은 없지만 스코프 이탈도 없음."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": true,
+          "evidence": "'반려한 대안' 섹션에 3개 대안(3변수 유지·완전 차단·별도 상수)과 각 사유가 남아 있다."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다",
+          "passed": true,
+          "evidence": "여는 문장에서 'Q1은 옵션 2, 나머지 기본값은 그대로'라고 구분하지만, 이어지는 '확정된 결정 1~4' 목록 자체에는 항목별 (사용자 선택)/(기본값) 태그가 없어 variant-A만큼 명시적이지 않다 — 만점 조건 미충족, 기본 충족은 함."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실을 사용자에게 되묻지 않았다",
+          "passed": true,
+          "evidence": "임계값·구조적 원인을 전부 조사된 사실로 제시, 되묻는 질문 없음."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다(대략 80행 이하)",
+          "passed": true,
+          "evidence": "실제 파일 27행."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "'Q1/1.'로 명확히 표시하고 기본값 목록엔 '이견 없으면 알려줘'로 마무리."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "대화체로 일관됨."
+        },
+        {
+          "text": "ctx-warn-statusline.sh(또는 임계값 200k/300k)를 실제로 찾아 인용했다",
+          "passed": true,
+          "evidence": "CTX_WARN_THRESHOLD(200000)·CTX_DANGER_THRESHOLD(300000)를 정확히 인용."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (clear)"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "eval-1-plan-hook-not-firing",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 13,
+        "failed": 0,
+        "total": 13,
+        "time_seconds": 456.3,
+        "tokens": 97005,
+        "tool_calls": 17,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "`claude-hooks.json:60-70`(matcher 확인, 실제 파일에서 PostToolUse matcher가 'Write' 하나뿐임을 확인함), `plan-saved-session-boundary.sh:46,49`, `known_marketplaces.json`(source가 이 워크트리가 아닌 /Volumes/LinuxVM/... 임을 확인, 실제로도 일치), jq 설치 여부(`/usr/bin/jq` 확인)까지 5개 이상 구체 인용."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": true,
+          "evidence": "'## 만드는 것 / ## 동작 계약 / ## 손대는 자리 / ## 하지 않는 것' 구조로 목표·수정 계약·대상 파일(경로:행 단위)·범위 제외를 명시적으로 분리해 서술한다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "[?1][?2][?3] 3개(연쇄로 열릴 수 있는 [?4]는 이번 라운드에 묻지 않고 다음 라운드로 명시적으로 미룸)."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "[?1][?2][?3] 모두 '다운스트림:' 줄로 옵션별 결과를 서술한다."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "[?1][?2][?3] 각각 '추천:' 한 줄로 하나씩 제시된다."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+          "passed": true,
+          "evidence": "'## 하지 않는 것' 절에서 '설치본 diff 백포트는 별도 병합 작업', 'plan-session-boundary-guard.sh 등 다른 훅 점검은 범위 밖'이라고 명시적으로 분리했다."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": true,
+          "evidence": "'결정 원장' 표의 '기각한 것 — 이유' 열에 4개 결정 모두 대안과 이유가 기록돼 있다(예: Q2에서 'Write 툴로 저장'을 Auto Mode 지시 실측 근거로 기각)."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+          "passed": true,
+          "evidence": "표 각 행에 '— 사용자 선택' / '— 기본값 확정'이 인라인으로 표기되고, 서두에 '사용자가 직접 고른 건 [?1] 하나뿐이고 나머지는 기본값 확정'이라고 다시 요약한다 — 만점 기준 충족."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+          "passed": true,
+          "evidence": "묻는 3개 항목([?1] 실제 저장 경로 모양, [?2] Write/Bash 저장 수단, [?3] 마켓플레이스 인지 여부)은 모두 사용자의 과거 세션 행동에 관한 것으로 레포에서 확인 불가능하다. 반대로 marketplace source 경로·jq 설치·matcher 값·캐시에 이미 fix가 있다는 사실은 스스로 확인해 '조사로 확인한 사실'에 못박아뒀다(직접 확인 결과 캐시 1.10.0에 실제로 fix가 반영돼 있어 정확함)."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+          "passed": true,
+          "evidence": "turn1 전체 51행."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "말미의 '[선택 툴로 띄울 항목]'이 [?1][?2][?3]을 A/B/C 선택지로 다시 요약해 명확하다."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "'먼저 레포를 뒤져서...', '[?1]은 B로 접수' 등 사용자에게 직접 보고하는 어투를 유지한다."
+        },
+        {
+          "text": "plan-saved-session-boundary.sh의 경로 정규식 `/docs/(superpowers|woobin_plan)/plans/` 를 찾아 사실로 제시했다",
+          "passed": true,
+          "evidence": "turn1에서 '발화 조건은 `/docs/(superpowers|woobin_plan)/plans/*.md` 정규식'이라고 명시하며 실제 46행과 일치한다."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (slight)"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "eval-1-plan-hook-not-firing",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.923,
+        "passed": 12,
+        "failed": 1,
+        "total": 13,
+        "time_seconds": 522.4,
+        "tokens": 111624,
+        "tool_calls": 21,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "turn1이 `plan-saved-session-boundary.sh:46,49`, `writing-plans/SKILL.md`, `.claude-plugin/plugin.json`/`.codex-plugin/plugin.json`, 커밋 `2392e8b`를 구체 인용하며, 이 커밋이 실제로 main에 존재하고 prepare/new-work에는 없다는 것(git rev-list 확인 결과 main만 1개 앞섬)까지 정확히 맞았다."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": true,
+          "evidence": "'할 일 초안' 4항목(cherry-pick 2392e8b 반영, plugin.json 재동기화, test-hooks.sh 픽스처 보강, workflow-spec.md 갱신)이 대상 파일과 결과 동작을 명시하지만, B의 '동작 계약/손대는 자리' 같은 명시적 스펙 포맷은 없어 구조가 느슨하다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "Q1/Q2/Q3 3개."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "Q1~Q3 모두 '다운스트림:' 줄로 각 옵션의 결과 차이를 명시한다."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "Q1~Q3 각각 '추천:' 한 줄로 옵션 하나씩만 제시한다."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+          "passed": true,
+          "evidence": "훅 복구·버전 동기화·문서/테스트 갱신 범위를 벗어나는 기능 추가는 없다. 다만 B처럼 '하지 않는 것' 절로 경계를 명시하진 않는다."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": true,
+          "evidence": "'기각한 대안' 절에 Q1①·Q2①·Q3②를 각각 이유와 함께 명시하고, 플랜 하단에도 'Rejected Alternatives' 절을 별도로 남긴다."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+          "passed": true,
+          "evidence": "'Q1 → ② 사용자 선택', 'Q2 → ② 기본값 확정 (추천안대로)', 'Q3 → ① 기본값 확정 (추천안대로)'로 항목별 구분이 명시적이다 — 만점 기준 충족."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+          "passed": false,
+          "evidence": "Q1('이미 1.10.0을 쓰는 세션에서도 다시 안 떴는지')을 묻기 전에 `~/.claude/plugins/cache/woobin-harness/woobin-harness/` 캐시를 확인하지 않았다 — 실제로는 1.10.0이 이미 캐시에 있고(13:15 갱신, 2392e8b와 동일 시각) 그 안에 fix가 적용돼 있음을 직접 diff로 확인할 수 있었는데(실제로 B는 이를 확인했다) A는 이 검증 없이 사용자 기억에만 의존해 물었다. 또한 turn1·turn2에서 반복 주장한 'claude=1.9.0, codex=1.11.0 드리프트'는 실제 HEAD(둘 다 1.9.0)와 확인 가능한 사실이 아닌 것으로 보인다."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+          "passed": true,
+          "evidence": "turn1 전체 29행."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "Q1/Q2/Q3에 ①/② 선택지가 명확히 번호로 제시된다."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "'~해주세요', '확정했습니다' 등 사용자에게 직접 말하는 어투이며 플랜 문서 자체도 실제 저장물로 제시된다."
+        },
+        {
+          "text": "plan-saved-session-boundary.sh의 경로 정규식 `/docs/(superpowers|woobin_plan)/plans/` 를 찾아 사실로 제시했다",
+          "passed": true,
+          "evidence": "turn1 4행에서 `/docs/(superpowers|woobin_plan)/plans/.*\\.md$` 정규식을 그대로 인용하며, 실제 파일(46행)과 일치한다."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (slight)"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "eval-2-doc-drift-with-constraint",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 13,
+        "failed": 0,
+        "total": 13,
+        "time_seconds": 416.4,
+        "tokens": 88298,
+        "tool_calls": 25,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "README.md:39, README.md:11·12·110, docs/workflow.html:404, scripts/check-harness-docs.sh:49, scripts/test-skills.sh:23·98, scripts/validate-codex.sh:144, claude-hooks.json:75, hooks.json:22 등 10개 이상의 실재 경로·줄번호를 인용했고, 직접 재현 결과(sh scripts/test-skills.sh → '✗ expected 44 skills, found 28') 전부 실제 레포 상태와 정확히 일치했다."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": true,
+          "evidence": "'## 만드는 것', '## 동작 계약'(1·2·3 번호 매김), '## 손대는 자리'(check-harness-docs.sh:49, :33-43, test-skills.sh:22-24·98, validate-codex.sh:144-145 등 파일:줄 단위)로 무엇을·어떻게·어디를 명시했다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "[?1], [?2] 두 개뿐이다."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "[?1]/[?2] 각 옵션마다 '다운스트림:'이라는 라벨을 붙여 명시적으로 서술했다(예: 'A. 동적 카운트로 전환 — 다운스트림: 이 두 파일은... 다시는 손 안 대도 된다')."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "[?1]에 '추천은 A다', [?2]에 '추천은 A다'로 각각 하나씩 제시했다."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+          "passed": true,
+          "evidence": "'## 하지 않는 것' 절에서 CI/pre-commit 신설, workflow-spec.md 큐레이션 절 전량화, CLAUDE.md 검증 체크리스트 갱신 등을 '발견했지만 이번 스코프 밖'으로 명시적으로 분리했다."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": true,
+          "evidence": "'## 결정 원장' 표의 '기각한 것 — 이유' 열에 'A(동적 카운트 전환) — 카나리아 성격을 잃고 싶지 않다는 판단으로 기각', 'B(README 문구를 표 형식으로 통일) — 문서 톤을 바꾸지 않는 쪽을 우선'으로 명시했다."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+          "passed": true,
+          "evidence": "결정 원장 표에 '(사용자가 직접 선택)'과 '(미결이었으나 \"나머지는 추천대로\"로 기본 확정 — 사용자가 직접 고른 게 아님)'으로 사용자 선택과 기본값 확정을 명시적으로 구분했다 — 만점 조건 그대로 충족."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+          "passed": true,
+          "evidence": "실측 스킬 수(28), 하드코딩 값(44), 실패 메시지까지 직접 실행해 확인한 뒤 서술했고 사용자에게 되묻지 않았다."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+          "passed": true,
+          "evidence": "turn1.md는 59행으로 기준(80행) 이내다."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "말미의 '[선택 툴로 띄울 항목]'에서 질문1·질문2와 각각의 A/B 선택지를 다시 한번 명료하게 나열했다."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "1인칭으로 사용자에게 직접 조사 결과를 말하고 끝에 실제 질문으로 마무리한다. ## 헤더·표를 쓰지만 여전히 사용자에게 보내는 대화이며, 이 사용자의 CLAUDE.md 자체가 '표를 냈으면 산문 반복 안 함'을 선호한다고 명시하는 것과도 부합한다."
+        },
+        {
+          "text": "사용자의 3번 제약(\"훅을 새로 만드는 건 꺼려짐\")이 스펙 또는 선택지에 명시적으로 반영됐다",
+          "passed": true,
+          "evidence": "'동작 계약' 3번 '새 훅 안 만듦 — ... 새 훅 파일도, 새 이벤트 등록도 없다'와 '## 하지 않는 것'의 '새 Claude Code / Codex 훅 생성 (요청 3번에서 명시적으로 거부됨)'으로 두 번 명시했다."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (clear)"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "eval-2-doc-drift-with-constraint",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.846,
+        "passed": 11,
+        "failed": 2,
+        "total": 13,
+        "time_seconds": 416.9,
+        "tokens": 81407,
+        "tool_calls": 14,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+          "passed": true,
+          "evidence": "scripts/check-harness-docs.sh, woobin-harness/hooks/harness-doc-sync-guard.sh, claude-hooks.json, hooks.json 4개 실재 경로를 인용했고 인용 내용 자체는 사실과 맞았다(단, 조사 범위가 얕아 실제 드리프트는 놓쳤다 — 아래 항목 2 참조)."
+        },
+        {
+          "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+          "passed": false,
+          "evidence": "turn1의 결론이 '1·2번은 이미 해결돼 있다'였기 때문에 스펙 자체가 없다. 옵션2에 대해서만 '워크플로우 파일을 새로 쓰고 기존 훅을 지운다'는 한 문장 요약이 있을 뿐, '만드는 것/동작 계약/손대는 자리' 같은 구조화된 스펙이 없다. 직접 확인 결과 지금도 sh scripts/test-skills.sh가 '✗ expected 44 skills, found 28'로 실패하는데 이 실제 드리프트는 turn1에 전혀 등장하지 않아 다뤄야 할 진짜 작업이 스펙에서 빠졌다."
+        },
+        {
+          "text": "사용자에게 던진 미결 항목이 6개 이하다",
+          "passed": true,
+          "evidence": "Q1/2 하나(옵션 1 vs 2)뿐이다."
+        },
+        {
+          "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+          "passed": true,
+          "evidence": "옵션1 '바로 다음 스킬 추가부터 그대로 작동합니다', 옵션2 '하네스 훅 개수가 11→10으로 줄고, 세션 내 알림 대신 PR 체크로 바뀝니다'로 각각 다운스트림 서술이 있다."
+        },
+        {
+          "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+          "passed": true,
+          "evidence": "'추천: 1번.' 하나만 제시했다."
+        },
+        {
+          "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+          "passed": true,
+          "evidence": "CI 이관은 사용자가 요청하지 않은 것이지만 몰래 넣지 않고 '선택 가능한 옵션2'로 투명하게 제시했다."
+        },
+        {
+          "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+          "passed": false,
+          "evidence": "turn2는 '2번으로 갈게요'로 시작해 바로 가정 목록으로 넘어갈 뿐, 기각된 옵션1(기존 훅 유지)에 대한 명시적 기각 이유 기록(원장/표)이 없다. 또한 turn1에는 없던 'Q2'를 turn2에서 갑자기 언급하며 스스로 답하는데('Q2였던 질문: ...') 이 Q2가 turn1 어디에도 사용자에게 제시된 적이 없어 트레이서빌리티가 약하다."
+        },
+        {
+          "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+          "passed": true,
+          "evidence": "'2번으로 갈게요'는 사용자의 명시적 선택으로, 'Q2... 추천대로 갑니다'는 추천 확정으로 구분되긴 하나, 뒤이은 '진행할 가정들' 목록은 어떤 게 사용자 선택이고 어떤 게 AI 기본값인지 표나 라벨로 정리돼 있지 않아 B만큼 명확하지 않다."
+        },
+        {
+          "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+          "passed": true,
+          "evidence": "훅 존재 여부·와이어링 등을 사용자에게 되묻지 않고 직접 조사해 서술했다."
+        },
+        {
+          "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+          "passed": true,
+          "evidence": "turn1.md는 22행이다."
+        },
+        {
+          "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+          "passed": true,
+          "evidence": "'어느 쪽으로 갈까요?'로 단일하고 명확한 질문으로 끝난다."
+        },
+        {
+          "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+          "passed": true,
+          "evidence": "해요체의 대화형 문장으로 사용자에게 직접 말을 거는 형태이고, 메타 리포트 서식(3인칭 요약 등)이 아니다."
+        },
+        {
+          "text": "사용자의 3번 제약(\"훅을 새로 만드는 건 꺼려짐\")이 스펙 또는 선택지에 명시적으로 반영됐다",
+          "passed": true,
+          "evidence": "'그런데 3번(\"훅을 새로 만들기 싫다\")이 애매해지는 지점이 있어요'라고 명시적으로 짚고, 두 옵션 모두 새 훅을 만들지 않는 방향으로 구성했다."
+        }
+      ],
+      "notes": [
+        "익명 채점 종합 판정: 신본 우세 (clear)"
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 414.616,
+        "stddev": 34.793,
+        "min": 371.154,
+        "max": 456.324
+      },
+      "tokens": {
+        "mean": 93315,
+        "stddev": 3676.38,
+        "min": 88298,
+        "max": 97005
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.923,
+        "stddev": 0.063,
+        "min": 0.846,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 421.024,
+        "stddev": 81.092,
+        "min": 323.853,
+        "max": 522.357
+      },
+      "tokens": {
+        "mean": 90931.333,
+        "stddev": 14647.31,
+        "min": 79763,
+        "max": 111624
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.077",
+      "time_seconds": "-6.4",
+      "tokens": "+2384"
+    }
+  },
+  "notes": [
+    "종합 판정 3/3 신본 우세 (clear, slight, clear). 체크리스트 점수는 39/39 vs 37/39로 근소하다 — 실제 차이는 형식이 아니라 '무엇을 사용자 결정으로 올리는가'에서 났다.",
+    "13개 채점 항목 중 11개가 양쪽 모두 통과해 변별력이 없었다(eval-0은 13/13 완전 동점). 다음 반복에서 항목을 판단 품질 쪽으로 다시 써야 한다.",
+    "신본의 유일한 실질 약점은 마무리다 — eval-1에서 사용자가 '나머지는 추천대로'라고 한 뒤에도 원장만 내고 재차 물어, 구본이 저장한 완결 플랜을 못 냈다.",
+    "AskUserQuestion 도입 효과는 이번 벤치마크로 측정되지 않았다 — 서브에이전트가 질문 툴을 호출할 수 없어 양쪽 다 본문에 선택지를 적게 했다(gh issue #20).",
+    "eval-2에서 신본은 레포의 실제 44 vs 28 스킬 개수 드리프트를 스스로 찾아냈고, 구본은 '이미 해결됨'이라고 결론냈다."
+  ]
+}

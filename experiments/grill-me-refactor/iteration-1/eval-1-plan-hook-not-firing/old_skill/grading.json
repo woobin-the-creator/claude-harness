@@ -1,0 +1,73 @@
+{
+  "variant": "variant-A",
+  "expectations": [
+    {
+      "text": "질문하기 전에 레포 사실을 조사했다 — turn1이 실제 파일 경로를 2개 이상 구체적으로 인용한다",
+      "passed": true,
+      "evidence": "turn1이 `plan-saved-session-boundary.sh:46,49`, `writing-plans/SKILL.md`, `.claude-plugin/plugin.json`/`.codex-plugin/plugin.json`, 커밋 `2392e8b`를 구체 인용하며, 이 커밋이 실제로 main에 존재하고 prepare/new-work에는 없다는 것(git rev-list 확인 결과 main만 1개 앞섬)까지 정확히 맞았다."
+    },
+    {
+      "text": "turn1에 구체적 스펙 초안이 있다 — 무엇을 만들지·어떤 동작이 될지·어느 파일을 건드릴지가 서술된다",
+      "passed": true,
+      "evidence": "'할 일 초안' 4항목(cherry-pick 2392e8b 반영, plugin.json 재동기화, test-hooks.sh 픽스처 보강, workflow-spec.md 갱신)이 대상 파일과 결과 동작을 명시하지만, B의 '동작 계약/손대는 자리' 같은 명시적 스펙 포맷은 없어 구조가 느슨하다."
+    },
+    {
+      "text": "사용자에게 던진 미결 항목이 6개 이하다",
+      "passed": true,
+      "evidence": "Q1/Q2/Q3 3개."
+    },
+    {
+      "text": "각 선택지마다 그 선택이 다운스트림에서 무엇을 바꾸는지 한 줄 이상 서술된다",
+      "passed": true,
+      "evidence": "Q1~Q3 모두 '다운스트림:' 줄로 각 옵션의 결과 차이를 명시한다."
+    },
+    {
+      "text": "각 미결 항목마다 추천안이 정확히 하나 제시된다",
+      "passed": true,
+      "evidence": "Q1~Q3 각각 '추천:' 한 줄로 옵션 하나씩만 제시한다."
+    },
+    {
+      "text": "요청에 없던 기능을 스펙에 몰래 추가하지 않았다 — 추가 제안이 있다면 범위 밖으로 분리해 표시했다",
+      "passed": true,
+      "evidence": "훅 복구·버전 동기화·문서/테스트 갱신 범위를 벗어나는 기능 추가는 없다. 다만 B처럼 '하지 않는 것' 절로 경계를 명시하진 않는다."
+    },
+    {
+      "text": "turn2에 기각한 대안과 그 기각 이유가 남는다",
+      "passed": true,
+      "evidence": "'기각한 대안' 절에 Q1①·Q2①·Q3②를 각각 이유와 함께 명시하고, 플랜 하단에도 'Rejected Alternatives' 절을 별도로 남긴다."
+    },
+    {
+      "text": "turn2에서 '나머지는 추천대로' 이후 확정된 항목이 무엇으로 확정됐는지 명시된다 (사용자 선택 vs 기본값 확정 구분이면 만점)",
+      "passed": true,
+      "evidence": "'Q1 → ② 사용자 선택', 'Q2 → ② 기본값 확정 (추천안대로)', 'Q3 → ① 기본값 확정 (추천안대로)'로 항목별 구분이 명시적이다 — 만점 기준 충족."
+    },
+    {
+      "text": "레포를 읽으면 알 수 있는 사실(임계값·파일 존재·현재 동작)을 사용자에게 되묻지 않았다",
+      "passed": false,
+      "evidence": "Q1('이미 1.10.0을 쓰는 세션에서도 다시 안 떴는지')을 묻기 전에 `~/.claude/plugins/cache/woobin-harness/woobin-harness/` 캐시를 확인하지 않았다 — 실제로는 1.10.0이 이미 캐시에 있고(13:15 갱신, 2392e8b와 동일 시각) 그 안에 fix가 적용돼 있음을 직접 diff로 확인할 수 있었는데(실제로 B는 이를 확인했다) A는 이 검증 없이 사용자 기억에만 의존해 물었다. 또한 turn1·turn2에서 반복 주장한 'claude=1.9.0, codex=1.11.0 드리프트'는 실제 HEAD(둘 다 1.9.0)와 확인 가능한 사실이 아닌 것으로 보인다."
+    },
+    {
+      "text": "turn1이 한 화면에서 읽고 반응할 수 있는 분량이다 (대략 80행 이하)",
+      "passed": true,
+      "evidence": "turn1 전체 29행."
+    },
+    {
+      "text": "turn1을 읽은 사용자가 자기가 무엇을 답해야 하는지 모호하지 않다",
+      "passed": true,
+      "evidence": "Q1/Q2/Q3에 ①/② 선택지가 명확히 번호로 제시된다."
+    },
+    {
+      "text": "turn1·turn2가 사용자에게 실제로 보낼 메시지 형태다 — 메타 리포트가 아니다",
+      "passed": true,
+      "evidence": "'~해주세요', '확정했습니다' 등 사용자에게 직접 말하는 어투이며 플랜 문서 자체도 실제 저장물로 제시된다."
+    },
+    {
+      "text": "plan-saved-session-boundary.sh의 경로 정규식 `/docs/(superpowers|woobin_plan)/plans/` 를 찾아 사실로 제시했다",
+      "passed": true,
+      "evidence": "turn1 4행에서 `/docs/(superpowers|woobin_plan)/plans/.*\\.md$` 정규식을 그대로 인용하며, 실제 파일(46행)과 일치한다."
+    }
+  ],
+  "passed_count": 12,
+  "total": 13,
+  "config": "old_skill"
+}

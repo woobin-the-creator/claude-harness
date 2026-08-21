@@ -1,76 +1,159 @@
 ---
 name: grill-me
-description: A relentless but focused interview to sharpen a plan or design — asks only the questions whose answers would change what gets built, within a fixed question budget (default 5). Use when the user wants to stress-test a plan or design, mentions "grill me", or asks to 계획을 검증/그릴/따져봐 달라고 할 때.
+description: 요구사항을 실행 가능한 스펙으로 굳힌다 — 레포 사실을 먼저 조사해 스펙 초안을 한 화면으로 내고, 정말 미결인 빈칸만 선택지로 인터뷰한 뒤, 기각한 대안과 그 이유까지 담은 결정 원장을 남긴다. 사용자가 "grill me", "계획을 검증/그릴/따져봐", "스펙 구체화", "요구사항 정리하자", "어떻게 만들지 먼저 정하자"라고 하거나, 여러 항목이 든 요청을 던지며 구현 전에 합의부터 하자고 할 때 사용한다. 접근 자체가 아직 안 정해진 그린필드 아이디어는 brainstorming을 쓴다.
 ---
 
-Interview me about this plan until we reach a shared understanding. Then stop.
+# 스펙 초안을 먼저 내고, 빈칸만 인터뷰한다
 
-## What to ask
+이 스킬은 방향이 뒤집혀 있다. **내가 사용자를 심문하지 않는다 — 내가 스펙 초안을 테이블에 올리고, 사용자가 그걸 심문한다.**
 
-Ask a question **only if a different answer would produce different work** — a different data model, a different failure mode, a different module boundary, or a different user-visible behaviour.
+추상적인 질문에 답하는 것보다 구체적인 문서에서 틀린 곳을 짚는 게 사람에게 훨씬 싸다. 그리고 사용자는 대개 한두 번 답하고 다음 일로 넘어간다 — 그 시점에 손에 남는 게 있어야 한다.
 
-Before asking anything, apply this test:
+흐름은 넷이다: **① 사실을 채운다 → ② 초안을 낸다 → ③ 빈칸만 묻는다 → ④ 원장을 갱신한다.**
 
-> If I asked this and got either answer, would I write different code?
+---
 
-- **No** → do not ask. Choose the sensible default and record it as an assumption for the closing block.
-- **Yes** → ask it.
+## ① 묻기 전에 사실을 채운다
 
-Never spend a question on something already determined:
+사용자의 주의는 이 세션에서 가장 비싼 자원이다. 레포가 이미 답을 갖고 있는 질문에 그걸 쓰면 안 된다.
 
-- Anything a *fact* in the environment settles — naming conventions, file layout, existing schemas, library versions, test patterns. Look it up (filesystem, git history, docs, tools) rather than asking.
-- Anything where one option is conventional and the other is merely possible. Take the convention.
-- Anything cheaply reversible. Pick one; I will say so if I disagree.
+코드 조사는 **읽기 전용 탐색 서브에이전트에 위임한다**(Claude Code `Explore`, Codex `explorer`). 한 번 보내고, 무엇을 알아와야 하는지 구체적으로 적어 보낸다:
 
-The *decisions* are mine, but only the ones that are actually decisions.
+- 이 요청이 닿는 파일과 그 안의 **현재** 동작 — `경로:행`으로
+- 이미 같은 일을 하는 곳 — 초안이 따라야 할 모양(명명, 스키마, 테스트 패턴, 에러 처리)
+- 이미 결정돼 있는 것 — `CLAUDE.md`/`AGENTS.md`, 설계 문서, 과거 결정 원장
 
-## How many to ask
+직접 읽는 건 활성 `CLAUDE.md`/`AGENTS.md` 정책이 허용하는 경우만이다(대개 파일 3개 이하, 방금 한 편집 확인, 그대로 베껴야 하는 스타일).
 
-Default budget: **5 questions**. If I passed a number as an argument, use that as the budget instead.
+레포가 아닌 것을 다룰 때도 규칙은 같다 — **사실은 내가 찾고, 결정은 사용자가 한다.**
 
-Order by impact. The question that constrains the most downstream decisions goes first — resolve what other decisions depend on before the decisions that depend on it.
+## ② 스펙 초안 — 한 화면
 
-Number each one so I can see the budget burning down: `Q2/5`.
+초안은 요청의 요약이 아니라 **약속**이다. 모든 줄이 사용자가 손가락으로 짚고 "틀렸다"고 말할 수 있을 만큼 반증 가능해야 한다.
 
-Stop when the budget is spent, or earlier if every remaining question fails the test above. **A short grilling is a good grilling** — do not pad the budget to fill it.
+사용자의 요청은 대개 이미 `1. 2. 3.` 번호 목록으로 온다. **그 번호를 유지해라** — 자기 목록의 3번이 어떻게 해석됐는지 한눈에 대조할 수 있다.
 
-If you genuinely hit the budget with load-bearing questions still unanswered, say so and ask whether to extend it. Do not silently continue past the budget.
+크기는 변경에 맞춘다. 두 줄짜리 변경엔 두 줄짜리 스펙이면 충분하다.
 
-## How to ask
+```
+## 만드는 것
+<사용자에게 보이는 변화, 1~3문장>
 
-One question at a time. Wait for my answer before the next one — asking several at once is bewildering.
+## 동작 계약
+1. <사용자 목록의 1번> — <X하면 Y한다. 관찰 가능한 문장으로>
+2. ...
 
-For each question:
+## 손대는 자리
+- `path/to/file.ts:120` — <무엇을>
 
-1. State the question.
-2. Give two or three concrete options, not an open-ended prompt.
-3. In one line, say what each choice changes downstream. This is the question's justification for taking a slot in the budget — if you cannot write this line, the question fails the test and should not be asked.
-4. Give exactly one recommendation, with the reason for it.
+## 하지 않는 것
+- <범위 밖. 있으면 좋지만 이번엔 아닌 것>
 
-## How to finish
+## 미결
+[?1] <한 줄 질문> — 잠정: <추천안>
+```
 
-When the budget is spent, report every default you took in a single block, in the language we have been conversing in:
+두 가지를 지켜라:
 
-> **Assumptions I am proceeding on** — tell me if any are wrong:
-> - `<assumption>` — `<why this default>`
+- **초안은 요청을 넓히지 않는다.** 사용자가 말한 것 + 그게 성립하려면 반드시 필요한 것만 담는다. 있으면 좋을 것은 전부 "하지 않는 것"으로 내려라. 모델이 스펙을 쓰면 기능이 늘어나는 게 기본 실패 모드고, 늘어난 기능은 사용자가 승인한 적 없는데 구현 세션에선 승인된 것처럼 보인다.
+- **미결에도 잠정안을 적는다.** 사용자가 "다 좋아"라고만 해도 초안이 그대로 실행 가능해야 한다.
 
-Include only the ones I could plausibly disagree with. Do not pad the block with trivia to look thorough.
+## ③ 무엇이 빈칸이 되나
 
-Then stop and wait. Do not start the work until I confirm we have reached a shared understanding.
+> 어느 쪽으로 답해도 같은 코드를 쓴다면, 그건 빈칸이 아니다.
 
-## Handing off to writing-plans
+- 레포·문서·git이 답하는 것 → 찾아라. ①에서 이미 했어야 한다
+- 한쪽이 관례이고 다른 쪽은 "가능"일 뿐인 것 → 관례를 택하고 원장의 **가정**에 적어라
+- 싸게 되돌릴 수 있는 것 → 하나 골라라. 사용자가 아니면 말한다
 
-This applies only when the grilled thing is work about to be built. If I was stress-testing a decision that is already made, or a doc, or an argument, stop at the block above and skip this section.
+빈칸 개수는 예산이 아니라 **초안 품질의 신호**다. 실측 중앙값은 2~3개였다. 여섯 개를 넘으면 조사가 덜 됐거나 스스로 정할 수 있는 걸 미룬 것이다 — ①로 돌아가 절반을 스스로 답해라.
 
-Once I confirm, **continue into writing-plans in this same session.** Do not tell me to `/clear` first. The only mandatory boundary in this workflow is after the plan is saved, when implementation starts.
+### 반대 방향으로도 틀린다
 
-Two conditions make that safe, and you must hold both:
+위 필터는 **너무 많이 묻는 것**만 막는다. **물어야 할 것을 안 묻는 것**은 못 막고, 실측에서 실제로 이쪽이 났다 — 사용자가 "더 확실하게 붙잡아주는 수단이 필요하다"고 명시한 요구에 대해, 스스로 "이건 한 스텝만 늦출 뿐"이라고 인정한 약한 방법을 골라 놓고 묻지 않았다.
 
-1. **Delegate every codebase survey to the read-only explorer subagent** (Claude Code: `Explore`; Codex: `explorer`). The measured cost of planning-after-designing was not the interview sitting in context — it was 45 grep/sed calls run in the main loop (`home/HARNESS-LOG.md` #11, #15 in this harness repo). Read directly only in the three cases the active `CLAUDE.md`/`AGENTS.md` policy allows: three files or fewer, verifying an edit you just made, or copying a style you must reproduce verbatim.
-2. **Carry the grill's output forward in writing, not in memory.** Whatever I settled, the assumptions block, and — most importantly — **each option I rejected with the reason** must reach the plan document's rejected-alternatives section. If it only lives in this conversation, the implementation session proposes it again.
+그래서 위 필터보다 **먼저** 걸리는 조건을 하나 둔다:
 
-Write a separate spec doc at `docs/woobin_plan/specs/YYYY-MM-DD-<topic>-design.md` only when the design is large enough to outlive this plan, or when I ask. For a three-or-four-decision feature the plan's own rejected-alternatives section is enough, and a spec doc is duplication.
+> 선택지들 사이의 트레이드오프가 크고 그 대가를 사용자가 치른다면, 다른 어떤 이유로도 스스로 정하지 마라. **빈칸이다.**
 
-If the survey turns out to need heavy direct reading anyway and context climbs past roughly 200k, stop, save the spec, and hand me a `/clear` — that is the fallback, not the default.
+트레이드오프가 크다는 건 한쪽을 고르면 다른 쪽에서 **되돌리기 어려운 것을 잃는다**는 뜻이다 — 강제력 대 유연성, 안전 대 속도, 지금의 단순함 대 나중의 확장성, 자동화 대 통제권. 어느 쪽이 옳은지는 코드가 아니라 **사용자가 무엇을 더 아프게 느끼는가**로 갈리고, 그건 레포 어디에도 안 적혀 있다.
 
-For output format and readability, follow the rules of the currently active output style.
+특히 **사용자가 입 밖에 낸 요구를 충족하는 방법이 여럿이면 무조건 빈칸이다.** 그 항목을 말했다는 것 자체가 거기에 신경 쓰고 있다는 신호다. 네가 하나를 골라 버리면 사용자는 자기가 요구한 것이 **어떤 방식으로** 이뤄지는지 볼 기회를 잃는다.
+
+"관례가 있다"와 "싸게 되돌릴 수 있다"는 이 조건을 무효화하지 못한다. 관례는 트레이드오프를 해소한 게 아니라 **과거의 누군가가 이미 한쪽을 골라둔 것**이고, 이번 사용자가 같은 선택을 할 이유는 없다.
+
+이 조건으로 빈칸이 여섯을 넘으면, 줄일 것은 이쪽이 아니라 **다른 종류의 빈칸**이다. 조사로 없앨 수 있는 걸 더 없애라.
+
+### 묻는 방법
+
+순서는 **다른 빈칸의 답을 바꾸는 것부터**다. `[?2]`의 선택지가 `[?1]`의 답에 따라 달라진다면 `[?2]`는 다음 라운드다.
+
+각 빈칸마다 산문으로 셋을 낸다:
+
+1. 구체적인 선택지 2~3개 (열린 질문 금지)
+2. 각 선택지가 **다운스트림에서 무엇을 바꾸는지** 한 줄 — 이 줄을 못 쓰면 빈칸이 아니다. 지워라
+3. 추천 하나와 그 이유
+
+그다음 **고르기만** 툴로 받는다. 구조화된 선택 툴(Claude Code의 `AskUserQuestion`)이 있으면 그걸로 띄운다 — 서로 독립인 빈칸은 한 번에 최대 4개까지 묶어 왕복을 줄인다. 그 툴이 없는 런타임(Codex 등)이면 산문에 A/B/C를 달아 두고 사용자가 글자로 답한다.
+
+**산문을 툴 안으로 밀어 넣지 마라.** 선택지 label은 1~5단어라, 대가와 다운스트림을 거기 넣으면 증발한다. 실측에서 값이 가장 컸던 게 그 두 줄이다. 툴은 클릭을 받는 자리지 설명하는 자리가 아니다.
+
+### 사용자가 되물으면
+
+"A는 어떤 식으로 해결되는 거야?", "B의 컨셉이 ~ 이런 거야?" — 실측에서 반복된 반응이다. 답하고 같은 빈칸을 다시 물어라. 되묻기는 사용자의 실수가 아니라 **선택지가 덜 구체적이었다는 신호**다. 다음 선택지의 다운스트림 줄을 더 날카롭게 써라.
+
+### 눈으로 볼 문제는 보여줘라
+
+빈칸이 "어떻게 보이나"에 관한 것이면 서술이 렌더를 못 이긴다. 요구받기 전에 제안해라 — `show-design-sample`로 후보를 띄우고 그중에서 고르게 한다. 실측에서 사용자가 세 번 직접 요구했다("a, b, c 버튼을 프리뷰 페이지 위에 시안으로 하나씩 보여줘").
+
+### 빠져나갈 문
+
+사용자가 "나머지는 추천대로"라고 하면 즉시 끝낸다. 남은 빈칸을 전부 추천안으로 확정하되, 원장에는 **사용자가 고른 것이 아니라 기본값으로 확정된 것**으로 구분해 적어라. 그 구분이 사라지면 나중에 뒤집을 때 무엇을 재검토해야 하는지 알 수 없다.
+
+## ④ 결정 원장
+
+**매 라운드 끝에 갱신한다.** 마지막에 한 번 쓰는 물건이 아니다 — 대화가 중간에 다른 데로 새는 게 정상이고, 언제 끊겨도 남아 있어야 한다.
+
+```
+## 결정 원장 — <주제>
+
+| # | 결정 | 고른 것 | 기각한 것 — 이유 |
+|---|------|---------|------------------|
+| 1 |      |         |                  |
+
+**가정** — 내가 기본값으로 정한 것. 틀리면 말해라
+- `<가정>` — `<왜 이 기본값인지>`
+
+**미결**
+- `[?N]` <남은 것>
+```
+
+기각한 대안과 **그 이유**가 원장의 핵심이다. 이유 없이 "B 기각"만 적으면 다음 세션이 B를 다시 제안하고 사용자가 같은 설명을 또 한다. 가정에는 사용자가 이견을 낼 만한 것만 넣어라 — 그럴듯해 보이려고 자명한 것으로 채우면 진짜 가정이 묻힌다.
+
+원장은 대화 안에 산다. 파일로 떨구는 건 세 경우다: 사용자가 요청할 때, 이 설계가 이번 플랜보다 오래 살 때, 다른 세션에 넘길 때 → `docs/woobin_plan/specs/YYYY-MM-DD-<topic>-design.md`. 결정 서너 개짜리면 파일은 중복이다. 플랜의 "기각한 대안" 절이 같은 일을 한다.
+
+**원장이 원본이고 플랜의 기각-대안 절은 옮겨 적은 것이다.** 두 곳이 다른 말을 하기 시작하면 원장이 이긴다.
+
+미결이 비면 최종 원장을 낸다. 그다음은 **사용자가 합의를 이미 말했는지**로 갈린다.
+
+- **아직 안 말했으면 멈추고 기다린다.** 구현을 시작하지 않는다.
+- **이미 말했으면 멈추지 마라.** "나머지는 추천대로", "그걸로 가자", "좋아" 는 전부 합의 표명이다. 원장을 확정하고 바로 다음 단계로 넘어가라 — 만들 작업이면 아래 writing-plans까지 이어서 끝낸다.
+
+실측에서 이걸 틀렸다. 사용자가 "나머지는 추천대로 가자"라고 한 **뒤인데도** 원장만 내고 "이대로 진행할까요"를 다시 물어, 사용자가 방금 없앤 왕복을 되살렸다. **확인을 한 번 더 받는 건 안전한 기본값이 아니다** — 이미 준 답을 다시 요구하는 것이고, 그 사이 사용자는 이 대화를 떠난다.
+
+---
+
+## writing-plans로 넘기기
+
+다룬 것이 **이제 만들 작업일 때만** 해당한다. 이미 내려진 결정이나 문서·논증을 따진 거였으면 원장에서 끝낸다.
+
+사용자가 확인하면 **같은 세션에서 writing-plans로 이어간다.** `/clear`를 먼저 시키지 마라. 이 워크플로우의 유일한 필수 경계는 플랜이 저장된 뒤 구현이 시작될 때다.
+
+두 조건을 동시에 지켜야 그게 안전하다:
+
+1. **코드 조사는 전부 탐색 서브에이전트에 위임한다.** 설계-후-플래닝의 실측 비용은 인터뷰가 컨텍스트에 앉아 있어서가 아니라 메인 루프에서 돈 grep·sed 45회였다(`home/HARNESS-LOG.md` #11, #15).
+2. **원장을 글로 넘긴다.** 기억으로 넘기지 마라. 특히 기각한 선택지와 그 이유가 플랜 문서에 도달해야 한다.
+
+조사가 결국 직접 읽기를 크게 요구해 컨텍스트가 200k를 넘으면, 멈추고 원장을 파일로 저장한 뒤 `/clear`를 건넨다 — 그건 폴백이지 기본값이 아니다.
+
+출력 형식과 가독성은 현재 활성 output style의 규칙을 따른다.
