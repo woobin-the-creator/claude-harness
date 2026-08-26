@@ -8,7 +8,7 @@ Claude Code와 Codex에서 **직접 만든 하네스만** 공유하는 레포. �
 
 공통 스킬은 같은 `woobin-harness/skills/`를 Claude Code와 Codex 플러그인이 함께 나른다. 런타임 계약이 다른 훅과 에이전트만 얇은 호환 레이어로 분리한다.
 
-- Claude Code: `/plugin install`이 스킬 44개·에이전트 4개·훅 11개를 붙인다.
+- Claude Code: `/plugin install`이 스킬 44개·에이전트 4개·훅 12개를 붙인다.
 - Codex: 플러그인이 스킬 44개와 검증된 훅 4개를 붙이고, `bootstrap-codex.sh`가 커스텀 에이전트 4개와 전역 `AGENTS.md`를 설치한다.
 
 심링크 방식(`~/.claude`를 통째로 또는 항목별로 링크)이 흔한 관행이지만, 설정 파일을 심링크하면 알려진 문제가 셋 있다 — 전부 anthropics/claude-code에 버그로 등록됐고 **봇이 닫았을 뿐 수정 근거는 없다**:
@@ -30,9 +30,9 @@ claude-harness/
 ├── woobin-harness/                   ← 플러그인 본체
 │   ├── .claude-plugin/plugin.json
 │   ├── .codex-plugin/plugin.json
-│   ├── hooks/claude-hooks.json       Claude Code 훅 11개
+│   ├── hooks/claude-hooks.json       Claude Code 훅 12개
 │   ├── hooks/hooks.json              Codex가 자동 발견하는 안전한 훅 4개
-│   ├── hooks/*.sh                    11개 (공유 훅 스크립트)
+│   ├── hooks/*.sh                    12개 (공유 훅 스크립트)
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
