@@ -64,7 +64,7 @@ if codex_names != expected_codex:
 if "asyncRewake" in json.dumps(codex):
     raise SystemExit("Codex hooks must not use unsupported asyncRewake")
 PY
-pass "Claude 11-hook and Codex 4-hook wiring"
+pass "Claude 12-hook and Codex 4-hook wiring"
 
 python3 - "$ROOT" <<'PY'
 import glob
