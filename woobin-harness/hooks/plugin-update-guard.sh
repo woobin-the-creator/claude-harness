@@ -18,12 +18,14 @@
 set -u
 cat >/dev/null   # stdin을 비운다. 이 훅은 session_id를 쓰지 않는다.
 
+home="${HOME:-}"
+[ -n "$home" ] || exit 0
 command -v jq >/dev/null 2>&1 || exit 0
 
 plugin="woobin-harness"
 key="$plugin@$plugin"
-known="$HOME/.claude/plugins/known_marketplaces.json"
-installed="$HOME/.claude/plugins/installed_plugins.json"
+known="$home/.claude/plugins/known_marketplaces.json"
+installed="$home/.claude/plugins/installed_plugins.json"
 [ -r "$known" ] && [ -r "$installed" ] || exit 0
 
 src=$(jq -r --arg m "$plugin" '.[$m].installLocation // empty' "$known" 2>/dev/null)
@@ -34,18 +36,23 @@ inst_sha=$(jq -r --arg k "$key" '.plugins[$k][0].gitCommitSha // empty' "$instal
 src_ver=$(jq -r '.version // empty' "$src/$plugin/.claude-plugin/plugin.json" 2>/dev/null)
 
 detail=""
+headline=""
 if [ -n "$inst_ver" ] && [ -n "$src_ver" ] && [ "$inst_ver" != "$src_ver" ]; then
   detail="설치본 $inst_ver · 레포 $src_ver"
+  headline="⚠ woobin-harness 설치본과 레포의 version 이 다르다 — ${detail}. 어느 쪽이 최신인지는 이 훅이 판단하지 않는다(캐시에 이미 굳은 번호일 수 있다)."
 elif [ -n "$inst_sha" ]; then
-  behind=$(git -C "$src" rev-list --count "$inst_sha..HEAD" 2>/dev/null)
+  behind=$(git -C "$src" rev-list --count "$inst_sha..HEAD" -- "$plugin" 2>/dev/null)
   case "$behind" in
     ''|0|*[!0-9]*) ;;
-    *) detail="같은 버전($inst_ver)인데 설치본이 소스보다 ${behind}커밋 뒤" ;;
+    *)
+      detail="같은 버전($inst_ver)인데 설치본이 소스보다 ${behind}커밋 뒤"
+      headline="⚠ woobin-harness 설치본이 레포보다 뒤처져 있다 — ${detail}."
+      ;;
   esac
 fi
 [ -n "$detail" ] || exit 0
 
-ctx="⚠ woobin-harness 설치본이 레포보다 뒤처져 있다 — ${detail}. 지금 세션에는 옛 스킬·훅·에이전트가 로드돼 있다. 레포 변경을 반영하려면: (1) woobin-harness/.claude-plugin/plugin.json 과 .codex-plugin/plugin.json 의 version 을 올린다 — 올릴 번호가 ~/.claude/plugins/cache/woobin-harness/woobin-harness/ 에 이미 있으면 그 번호는 막히므로 캐시를 먼저 확인한다. (2) claude plugin marketplace update woobin-harness. (3) claude plugin update woobin-harness@woobin-harness — 짧은 이름은 not found 로 실패한다. (4) Claude Code 재시작."
+ctx="${headline} 지금 세션에는 옛 스킬·훅·에이전트가 로드돼 있을 수 있다. 레포 변경을 반영하려면: (1) woobin-harness/.claude-plugin/plugin.json 과 .codex-plugin/plugin.json 의 version 을 올린다 — 올릴 번호가 ~/.claude/plugins/cache/woobin-harness/woobin-harness/ 에 이미 있으면 그 번호는 막히므로 캐시를 먼저 확인한다. (2) claude plugin marketplace update woobin-harness. (3) claude plugin update woobin-harness@woobin-harness — 짧은 이름은 not found 로 실패한다. (4) Claude Code 재시작."
 
 jq -cn --arg ctx "$ctx" \
   '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}'

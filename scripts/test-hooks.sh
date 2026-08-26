@@ -212,7 +212,7 @@ git -C "$pug_src" init -q
 git -C "$pug_src" -c user.email=t@t -c user.name=t add -A
 git -C "$pug_src" -c user.email=t@t -c user.name=t commit -qm first
 pug_first=$(git -C "$pug_src" rev-parse HEAD)
-printf 'second\n' >"$pug_src/second.txt"
+printf 'second\n' >"$pug_src/woobin-harness/second.txt"
 git -C "$pug_src" -c user.email=t@t -c user.name=t add -A
 git -C "$pug_src" -c user.email=t@t -c user.name=t commit -qm second
 
@@ -239,7 +239,7 @@ assert_json "$out" '.hookSpecificOutput.additionalContext | contains("1.12.0") a
 pug_installed "1.13.0" "$pug_first"
 out=$(printf '%s' '{"session_id":"pug-b"}' \
   | HOME="$TEST_HOME" "$HOOKS/plugin-update-guard.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("1")' \
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("커밋 뒤")' \
   "plugin-update-guard: commit drift not reported"
 
 # (c) 버전도 커밋도 같으면 조용하다.
