@@ -29,6 +29,7 @@ Subagent (general-purpose):
     | Buildability | Could an engineer follow this plan without getting stuck? |
     | Split integrity | Task numbers in the overview's table match the actual `task-N.md` files; no task body leaked into the overview |
     | Self-containment | No references to a planning conversation; every file path is absolute or repo-relative; every task names a real completion-check command |
+    | Language | Plan documents are written in English. Verbatim strings — error messages, file contents, commands, user-facing copy — are quoted in their original language, not translated. |
 
     ## Calibration
 

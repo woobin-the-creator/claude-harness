@@ -82,13 +82,15 @@ def scan_transcripts(projects_dir, days):
         "skill_calls": {},
         "tool_by_lane": {"main": {}, "sidechain": {}},
     }
-    for path in glob.glob(os.path.join(projects_dir, "*", "*.jsonl")):
+    for path in glob.glob(os.path.join(projects_dir, "**", "*.jsonl"), recursive=True):
         try:
             if os.path.getmtime(path) < cutoff:
                 continue
         except OSError:
             continue
         acc["files"] += 1
+        rel_parts = os.path.relpath(path, projects_dir).split(os.sep)
+        file_is_sidechain = len(rel_parts) >= 4 and rel_parts[2] == "subagents"
         with open(path, errors="replace") as f:
             for line in f:
                 line = line.strip()
@@ -98,7 +100,7 @@ def scan_transcripts(projects_dir, days):
                     d = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                side = bool(d.get("isSidechain"))
+                side = bool(d.get("isSidechain")) or file_is_sidechain
                 lane = "sidechain" if side else "main"
                 msg = d.get("message") or {}
                 content = msg.get("content")

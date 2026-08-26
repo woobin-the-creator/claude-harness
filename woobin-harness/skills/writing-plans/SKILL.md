@@ -35,6 +35,23 @@ Write it split from the start rather than writing one big file and splitting it 
 
 **Keep `00-overview.md` under 400 lines / 15,000 characters.** It is the one file that every request in the implementation session carries.
 
+### Language
+
+**Write plan documents in English** — both `00-overview.md` and every `task-N.md`.
+Their reader is a fresh implementation session, not a person: the overview is
+re-billed as a cache read on every request for the rest of that session, and
+Korean costs roughly two to three times as many tokens per character.
+
+This applies to the plan documents only. Keep the decision ledger, the
+conversation, skill bodies, and hook comments in the language the user is
+working in — those have a human reader, and `grill-me` depends on the user
+being able to point at a ledger line and say it is wrong.
+
+Quote verbatim strings exactly as they appear in the source, whatever language
+they are in: error messages, file contents, commit messages, user-facing copy,
+and the exact commands to run. Do not translate them into English — the
+implementer has to match them character for character.
+
 ### Append-only
 
 Treat saved plans as append-only: never update, delete, move, or overwrite an existing plan file. If the target directory already exists, pick a distinct slug or ask the user first.
@@ -220,7 +237,7 @@ Never fan out a subagent per task, and never tell the implementer to verify its 
 
 End the response with a copyable kickoff prompt, because the handoff only pays off if the user can start the next session without composing anything. Anything they have to fill in themselves is a place the handoff breaks.
 
-Make a fenced ` ```text ` block the **final content of the response** — nothing after it. Match the user's language. Follow the selected host file's kickoff format, and substitute the real model, effort, mode number, and absolute plan path. Leave no angle-bracket placeholders.
+Make a fenced ` ```text ` block the **final content of the response** — nothing after it. Match the user's language — the kickoff block is read by a person, unlike the plan documents themselves. Follow the selected host file's kickoff format, and substitute the real model, effort, mode number, and absolute plan path. Leave no angle-bracket placeholders.
 
 Do not mix hosts: no Claude model names or `/effort` commands in a Codex kickoff, and no Codex model slugs or `-c model_reasoning_effort=…` in a Claude Code kickoff. A kickoff that names the wrong runtime is worse than none — it gets pasted and fails in a way the user has to debug.
 

@@ -510,7 +510,7 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 채택 이유는 근거의 강도가 아니라 **적용 범위**다. 이 하네스는 서브에이전트에 한국어 프롬프트를 넘기고
 (`plan-implementer`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
-(`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain`·`handoff`). 원본이 지적한 대로
+(`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain-in-html`·`handoff`). 원본이 지적한 대로
 다단 에이전트 환경에서는 품질 저하가 **단계마다 누적**되고, 그 손실이 산출물 자체의 완성도로 넘어간다.
 E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문에 각 단계가 앞 단계의 한국어를 **입력으로만**
 받으므로, 누적을 끊을 지점이 각 단계의 출력밖에 없다.
@@ -562,11 +562,58 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 ---
 
+### R18 — 설치본이 소스보다 뒤처지면 세션 시작에 알린다
+
+**문제** 플러그인 설치본은 `~/.claude/plugins/cache/<mp>/<plugin>/<version>/`에 버전별로 굳은
+복사본이다. 레포를 고쳐도 `version`을 안 올리거나 `plugin update`를 안 돌리면 설치본은 옛날
+그대로 돈다. 2026-08-08(스킬 추가 후 version 누락)과 2026-08-19(레포 1.5.0 · 설치본 1.6.0으로
+번호가 역전돼 갱신이 막힘) 두 번 났다. `CLAUDE.md`가 확인 명령을 적어 두는 방식으로만 대응했는데,
+사람이 기억해서 쳐야 하는 검사는 안 쳐진다 — 그 실패 형태는 §4의 "게이트가 9일간 죽어 있었다"와 같다.
+
+**기전** `plugin-update-guard.sh` (SessionStart) — `known_marketplaces.json`에서 소스 경로를,
+`installed_plugins.json`에서 설치 버전과 `gitCommitSha`를 읽어 소스의 `plugin.json`과 대조한다.
+버전이 다르면 어느 쪽이 최신인지 단언하지 않고 "다르다"고만 알린다(2026-08-19처럼 번호가 역전될
+수 있어서다). 버전이 같은데 설치 커밋이 `woobin-harness/` 경로 기준으로 소스 HEAD보다 뒤면 그때만
+"뒤처졌다"고 단언하고 갱신 절차를 additionalContext로 준다. 읽기 전용이고 fetch하지 않는다 —
+이미 로컬에 있는 커밋만 센다. 차단하지 않는다.
+
+**대가** 소스가 로컬 디렉터리 마켓플레이스일 때만 의미가 있다. github 소스로 설치한 플러그인은
+`installLocation`이 클론 경로라 커밋 비교는 되지만 사용자가 그 클론을 직접 갱신하지 않으면 항상
+"뒤처짐"으로 보일 수 있다. 그래서 이 훅은 `woobin-harness` 한 플러그인만 본다. 커밋 카운트를
+`woobin-harness/` 경로로 한정한 것도 같은 이유다 — 한정하지 않으면 `docs/`·`history/` 같은
+무관한 커밋에도 매 세션 경고가 떠서 경고 피로로 무시된다.
+
+**무효화 조건** — (1) Claude Code가 `~/.claude/plugins/` 레이아웃(두 JSON 파일의 키 구조)을 바꾸면
+훅은 조용히 `exit 0`으로 빠진다. 이때는 훅이 죽은 게 아니라 **판단 불가**로 빠지는 것이라 티가
+안 난다. 레이아웃 변경을 발견하면 `scripts/test-hooks.sh`의 fixture부터 고쳐라. (2) 설치본 갱신이
+사람 개입 없이 자동으로 되도록 바뀌면 이 규칙은 불필요해진다.
+
+### R19 — 플랜 산출물은 영어로 쓴다
+
+**문제** 플랜 문서의 독자는 사람이 아니라 새 구현 세션이다. `00-overview.md`는 그 세션의 **모든**
+요청에 캐시 리드로 재청구된다(1,650행 플랜이 48k 토큰으로 측정돼 세션 floor를 93~122k까지 올렸다 —
+`home/HARNESS-LOG.md`). 한국어는 토크나이저에서 글자당 2~3배 비싸므로, 같은 내용이 같은 위치에서
+반복 청구되는 문서일수록 언어 선택의 누적 비용이 크다.
+
+**기전** `writing-plans`가 `00-overview.md`와 `task-N.md`를 영어로 쓴다. 원문 그대로 인용해야 하는
+문자열(에러 메시지, 파일 내용, 실행 명령, 사용자에게 보이는 문구)은 원어 그대로 둔다 — 구현자가
+글자 단위로 맞춰야 하는 것들이다.
+
+**대가** 사용자가 플랜 문서를 직접 읽을 때 모국어가 아니다. 그래서 범위를 플랜 문서로 한정한다 —
+결정 원장·킥오프 블록·스킬 본문·훅 주석은 사람이 읽으므로 사용자 언어를 유지한다. 특히 원장은
+사용자가 한 줄씩 짚어 반증하는 게 존재 이유다(`grill-me` §32).
+
+**무효화 조건** — (1) 한국어 토큰 비용이 영어와 비슷해지면(토크나이저 개선) 근거의 절반이 사라진다.
+(2) 사용자가 플랜 문서를 직접 읽고 검토하는 것이 주된 사용 방식이 되면 독자 전제가 뒤집힌다.
+(3) 플랜을 분할 저장하는 방식이 바뀌어 overview가 매 요청에 실리지 않게 되면 누적 비용 근거가 없어진다.
+
+---
+
 ## 4. 구성요소 인벤토리
 
 공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
 
-### 훅 11개
+### 훅 12개
 
 | 파일 | 이벤트 | 발화 조건 | 개입 형태 | 규칙 |
 |------|--------|-----------|-----------|------|
@@ -579,10 +626,11 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 | `sdd-orchestrator-edit-guard.sh` | PreToolUse:Edit\|Write\|MultiEdit | [A] SDD 원장 존재 / [B] ctx ≥150k **AND** 편집 ≥15회 | deny 1회 → 재시도 통과 | — |
 | `subagent-model-default.sh` | PreToolUse:Agent\|Task | model 미지정 | `updatedInput` 주입 | R3 |
 | `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커. 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R15 |
+| `plugin-update-guard.sh` | SessionStart | 설치본 version ≠ 소스 version, 또는 같은 version인데 설치본 커밋이 소스보다 뒤 | additionalContext로 갱신 절차 4단계 안내. 차단하지 않음 | R18 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
 
-Codex는 이 11개 중 `sdd-kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 4개만 연결한다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
+Codex는 이 12개 중 `sdd-kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 4개만 연결한다. `plugin-update-guard.sh`는 Claude Code의 `~/.claude/plugins/` 레이아웃에만 의존하는 Claude 전용 훅이라 Codex에 연결하지 않는다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
@@ -617,11 +665,16 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 19개
+### 스킬 20개
+
+2026-08-26, 기존 인포그래픽 스킬을 `explain-in-html`로 개명하고 독자 눈높이에 맞춘 텍스트 설명
+스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
+프롬프트 충돌이 나서 이름을 갈랐다).
 
 파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
-`close-session` · `token-waste-audit` · `handoff`.
+`close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
+데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).
 `grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
 
 2026-08-21, `grill-me`를 **"스펙 초안 먼저, 빈칸만 인터뷰"** 구조로 다시 썼다. 근거는 실측이다 —

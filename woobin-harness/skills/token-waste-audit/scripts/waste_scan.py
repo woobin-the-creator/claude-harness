@@ -96,8 +96,10 @@ def scan(projects_dir, days=None):
         proj = rel[0]
         if len(rel) >= 4 and rel[2] == 'subagents':   # <proj>/<sessionId>/subagents/agent-*.jsonl
             sid = rel[1][:8] + '/' + os.path.basename(fp)[:14]
+            file_is_sidechain = True
         else:
             sid = os.path.basename(fp)[:8]
+            file_is_sidechain = False
         reqs = {}; order = []
         reads = defaultdict(int); read_ids = {}; tool_results = {}
         tools = {}
@@ -121,7 +123,7 @@ def scan(projects_dir, days=None):
                     if rid not in reqs:
                         order.append(rid)
                         req_agent[rid] = (d.get('attributionAgent') or 'unknown-agent') \
-                            if d.get('isSidechain') else None
+                            if (d.get('isSidechain') or file_is_sidechain) else None
                     reqs[rid] = (parse_ts(d.get('timestamp', '')), model, u)
                 for b in (m.get('content') or []):
                     if isinstance(b, dict) and b.get('type') == 'tool_use':

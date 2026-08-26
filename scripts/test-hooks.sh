@@ -203,4 +203,56 @@ assert_silent "$out" "stop-warning-ack-guard acknowledged response"
 [ ! -e "$TEST_ROOT/codex-state/hooks/.stale-branch-pending/stale-ack" ] || fail "stop-warning-ack-guard: acknowledged marker not removed"
 pass "stale-branch + stop-warning block/ack/loop guard"
 
-printf 'All 11 shared hook scripts passed deterministic fixtures.\n'
+# plugin-update-guard: 버전 드리프트 / 커밋 드리프트 / 정상 / 판단불가 네 갈래.
+pug_src="$TEST_ROOT/pug-src"
+mkdir -p "$pug_src/woobin-harness/.claude-plugin" "$TEST_HOME/.claude/plugins"
+printf '{"name":"woobin-harness","version":"1.13.0"}\n' \
+  >"$pug_src/woobin-harness/.claude-plugin/plugin.json"
+git -C "$pug_src" init -q
+git -C "$pug_src" -c user.email=t@t -c user.name=t add -A
+git -C "$pug_src" -c user.email=t@t -c user.name=t commit -qm first
+pug_first=$(git -C "$pug_src" rev-parse HEAD)
+printf 'second\n' >"$pug_src/woobin-harness/second.txt"
+git -C "$pug_src" -c user.email=t@t -c user.name=t add -A
+git -C "$pug_src" -c user.email=t@t -c user.name=t commit -qm second
+
+cat >"$TEST_HOME/.claude/plugins/known_marketplaces.json" <<PUGMP
+{"woobin-harness":{"installLocation":"$pug_src"}}
+PUGMP
+
+pug_installed() {
+  cat >"$TEST_HOME/.claude/plugins/installed_plugins.json" <<PUGIP
+{"plugins":{"woobin-harness@woobin-harness":[{"version":"$1","gitCommitSha":"$2"}]}}
+PUGIP
+}
+
+# (a) 버전이 다르면 경고한다.
+pug_installed "1.12.0" "$(git -C "$pug_src" rev-parse HEAD)"
+out=$(printf '%s' '{"session_id":"pug-a"}' \
+  | HOME="$TEST_HOME" "$HOOKS/plugin-update-guard.sh")
+assert_json "$out" '.hookSpecificOutput.hookEventName == "SessionStart"' \
+  "plugin-update-guard: missing SessionStart output"
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("1.12.0") and contains("1.13.0")' \
+  "plugin-update-guard: version drift not reported"
+
+# (b) 버전은 같은데 커밋이 뒤처지면 경고한다.
+pug_installed "1.13.0" "$pug_first"
+out=$(printf '%s' '{"session_id":"pug-b"}' \
+  | HOME="$TEST_HOME" "$HOOKS/plugin-update-guard.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("커밋 뒤")' \
+  "plugin-update-guard: commit drift not reported"
+
+# (c) 버전도 커밋도 같으면 조용하다.
+pug_installed "1.13.0" "$(git -C "$pug_src" rev-parse HEAD)"
+out=$(printf '%s' '{"session_id":"pug-c"}' \
+  | HOME="$TEST_HOME" "$HOOKS/plugin-update-guard.sh")
+assert_silent "$out" "plugin-update-guard: healthy install must stay silent"
+
+# (d) 상태 파일이 없으면 조용히 빠진다 (fail-open).
+out=$(printf '%s' '{"session_id":"pug-d"}' \
+  | HOME="$TEST_ROOT/no-such-home" "$HOOKS/plugin-update-guard.sh")
+assert_silent "$out" "plugin-update-guard: missing state must be silent"
+
+pass "plugin-update-guard drift/healthy/absent branches"
+
+printf 'All 12 shared hook scripts passed deterministic fixtures.\n'

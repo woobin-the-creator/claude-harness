@@ -35,6 +35,9 @@ python3 "$SKILL_DIR/scripts/collect.py" --days <N> --out /tmp/capability-<날짜
 JSON을 읽고 `errors` 배열을 먼저 확인해라. 비어 있지 않으면 그 지표는 `null`이고,
 루브릭 규칙 3(= 50점 처리 + `부분 측정` 표시)이 적용된다.
 
+2026-08-26 이전 리포트는 서브에이전트 비용을 메인 lane에 합산했다. 그 이전 점수와
+sidechain_cost_ratio를 직접 비교하지 마라 — 분모가 다르다.
+
 ### 2. 채점
 
 `rubric-v1.md`(디렉터리 안 최신 `rubric-v*.md`)를 읽고 **그대로** 적용한다.

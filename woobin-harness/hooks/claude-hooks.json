@@ -122,6 +122,16 @@
             "statusMessage": "stale-branch 점검 중..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/plugin-update-guard.sh",
+            "timeout": 10,
+            "statusMessage": "플러그인 설치본 최신 여부 점검 중..."
+          }
+        ]
       }
     ]
   }

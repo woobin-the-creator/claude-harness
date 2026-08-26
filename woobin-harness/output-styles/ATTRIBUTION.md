@@ -21,7 +21,7 @@
 | 붙인 블록 | 고른 이유 |
 |---|---|
 | 희귀 어휘 자제 | 원본 README가 오푸스·페이블 사용자에게 권한 항목이다. 이 하네스의 기본 모델이 Opus 5다 |
-| 모든 한국어 산출물에 적용 | 보고문뿐 아니라 `claude-blog-translate-ko` · `claude-youtube-to-blog` · `explain` 이 뱉는 한국어 산출물까지 규율 대상으로 삼는다 |
+| 모든 한국어 산출물에 적용 | 보고문뿐 아니라 `claude-blog-translate-ko` · `claude-youtube-to-blog` · `explain-in-html` 이 뱉는 한국어 산출물까지 규율 대상으로 삼는다 |
 | 출력 직전 자기 점검 | 지침이 길어서 앞부분 조항이 흘려지는 것을 막는다. 대가는 사고 토큰 증가다 |
 
 **일부러 안 붙인 것**

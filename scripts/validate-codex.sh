@@ -64,7 +64,7 @@ if codex_names != expected_codex:
 if "asyncRewake" in json.dumps(codex):
     raise SystemExit("Codex hooks must not use unsupported asyncRewake")
 PY
-pass "Claude 11-hook and Codex 4-hook wiring"
+pass "Claude 12-hook and Codex 4-hook wiring"
 
 python3 - "$ROOT" <<'PY'
 import glob
@@ -141,8 +141,8 @@ if command -v codex >/dev/null 2>&1; then
   cache="$tmp/codex-home/plugins/cache/woobin-harness/woobin-harness/$plugin_version"
   [ -f "$cache/hooks/hooks.json" ] || fail "Codex cache에 hooks/hooks.json이 없다"
   [ -f "$cache/scripts/codex-apply-patch-adapter.sh" ] || fail "Codex cache에 apply_patch adapter가 없다"
-  [ "$(find "$cache/skills" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')" -eq 19 ] \
-    || fail "Codex cache가 스킬 19개를 모두 포함하지 않는다"
+  [ "$(find "$cache/skills" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')" -eq 20 ] \
+    || fail "Codex cache가 스킬 20개를 모두 포함하지 않는다"
 
   prompt_dump="$tmp/codex-home/prompt-input.json"
   (cd "$ROOT" && CODEX_HOME="$tmp/codex-home" codex debug prompt-input 'component discovery probe') >"$prompt_dump"
