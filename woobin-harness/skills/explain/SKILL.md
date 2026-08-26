@@ -1,54 +1,83 @@
 ---
 name: explain
-description: 대화에서 논의한 개념·구조·결정·트레이드오프를 데이터 플로우 인포그래픽(HTML+inline SVG)으로 시각화하고, Playwright로 PNG 렌더 후 브랜치 커밋 SHA 기반 raw URL로 GitHub issue에 임베드한다. Use when 사용자가 /explain을 호출하거나, 방금 논의한 내용을 "그림/인포그래픽/시각화해서 gh issue에 올려달라"고 할 때.
+description: Write a self-contained explanation of a result, decision, status, cause, or next step for a reader who may lack thread or project context. Use when the reader asks for a simpler explanation, says they did not understand, or when the answer must survive outside this conversation. Korean triggers — "더 쉽게 설명해줘", "초등학생 수준으로", "무슨 말인지 모르겠어", "상위 맥락부터", "쉽게 풀어줘".
 ---
 
-# explain
+# Explain
 
-방금 대화에서 다룬 개념·결정을 **데이터 플로우 인포그래픽**으로 그려 gh issue에 임베드한다.
+Write the final user-facing answer so it stands on its own at the reader's
+demonstrated level of familiarity. Restore missing context only where it helps
+the reader understand the answer or act on it.
 
-## 핵심 디자인 규칙 (사용자 취향 — 어기지 말 것)
+## Calibrate the reader's starting point
 
-1. **텍스트를 박스에 담기만 하지 말 것.** 반드시 노드를 화살표로 연결한 **흐름(파이프라인)**으로 그린다. "보기 좋은 텍스트 박스 나열"은 실패다.
-2. **비교/선택이면 후보를 나란히.** 공통 소스에서 **분기 → (각 경로) → 합류** 구조로 두고, *차이 나는 구간만* 배지로 강조한다(예: "무변경 ✓" vs "수정 ⚠️"). 한 후보만 그리면 비교가 안 된다.
-3. **색 규약**: 추천/현재 흐름 = 파랑 실선, 대안/미구현 = 회색 점선, 주의/미연결 = 주황 점선 + ✕, 데이터 저장소 = 초록 탱크(🛢), 화면/결과 = 옅은 파랑.
-4. 하단에 **범례 + 추천 strip**(결론 한 줄). 우측/하단에 "무엇이 다른가" 요약을 곁들이면 좋다.
-5. 언어는 **한국어**, 결론(추천)을 명시. 이모지로 노드 성격 표시(🏭 외부, 🔌 포트, ⚙️ usecase, 🖥️ 화면 등).
-6. inline `<svg viewBox>`, arrowhead는 `<marker markerUnits="userSpaceOnUse">`, 텍스트는 `dominant-baseline:middle`. 한글 폰트 `-apple-system,"Apple SD Gothic Neo","Noto Sans KR"`.
+Infer the lowest missing layer from the user's wording and prior feedback. Do
+not ask a calibration question when the prompt already gives a usable signal.
 
-좋은 예시 출력물: `history/lotsource-vs-repository.html` (이 skill이 처음 만들어진 레포에 있으면 참고).
+- **Direct** — The reader uses the relevant identifiers and domain vocabulary
+  confidently. Answer first; define only thread-local names.
+- **Situated** — The reader knows the domain but not this project or thread.
+  Briefly establish the system's purpose and the named components' roles before
+  explaining the result.
+- **Foundation-first** — The reader asks for a simple explanation, lacks the
+  underlying background, or did not understand the previous answer. Start with
+  purpose and actors, then introduce the mechanism and the exact identifiers.
 
-## 워크플로
+Default to situated when there is no reliable signal. A request for more
+context asks for a higher-level frame; a request for simpler language asks for
+fewer assumed prerequisites.
 
-1. **시각화 대상 확정** — 직전 대화에서 핵심 흐름/결정을 추린다. 노드(단계)와 화살표(데이터 이동), 분기/합류, 미구현 경로를 식별.
-2. **HTML 작성** — `history/<slug>.html`. 위 디자인 규칙대로 inline SVG. `width`/`viewBox` 고정.
-3. **PNG 렌더** — 로드된 스킬 디렉터리의 [scripts/render.cjs](scripts/render.cjs)를 절대 경로로 해석해 `node <render.cjs> <html> <png> <width> <height>`로 실행한다(시스템 Chrome 채널, deviceScaleFactor 2). `~/.claude/skills`를 가정하지 않는다.
-4. **눈으로 확인** — 렌더된 PNG를 호스트의 이미지 보기 기능으로 열어 한글 깨짐·겹침·잘림을 점검한다. 문제 있으면 좌표를 고쳐 재렌더한다.
-5. **자산 커밋** — `docs/<slug>-viz` 브랜치 생성 → html·png 커밋 → push. main은 건드리지 않는다. 레포의 co-author 규칙이 있을 때만 실제 작성 주체를 따른다.
-6. **raw URL 구성** — `git rev-parse HEAD`로 SHA. `https://raw.githubusercontent.com/<owner>/<repo>/<SHA>/history/<slug>.png` (SHA 고정 = 브랜치 지워도 영구).
-7. **public 확인** — `gh repo view --json visibility`. **private면 raw URL이 issue에서 안 보인다** → 사용자에게 알리고 멈춘다.
-8. **issue 생성** — `gh issue create --title ... --body-file`. 본문 = 이미지 임베드 + 핵심 결론/비교표 + HTML 원본 링크.
-9. **정리·보고** — 임시 body 파일 삭제, issue URL과 raw URL HTTP 200을 보고. 브랜치를 main에 머지(PR)할지 물어본다.
+**If an explanation did not land, change its entry point and vocabulary rather
+than repeating it with more detail.** Restating the same frame at greater
+length is the common failure — the reader did not need more words, they needed
+a different starting layer.
 
-## 배포 명령 모음
+## Make the answer self-contained
 
-```bash
-# 5~6
-git checkout -b docs/<slug>-viz
-git add history/<slug>.html history/<slug>.png
-git commit -q -m "docs(history): <제목> 시각화"
-git push -q -u origin docs/<slug>-viz
-SHA=$(git rev-parse HEAD)
-# 7~8
-gh repo view --json visibility,nameWithOwner
-gh issue create --title "<제목>" --body-file <(...)   # 또는 임시 .md 파일
-```
+- Lead with the outcome or central point. Name the subject before using "it",
+  "this", or "the change".
+- Define unfamiliar acronyms, local labels, files, or options on first use when
+  the name alone would not orient a new reader.
+- Supply the minimum background and causal chain that shows why the result
+  matters and how the conclusion follows.
+- Separate verified facts and completed work from assumptions, proposals,
+  limitations, and pending work. Include evidence when it affects confidence.
+- Preserve exact identifiers when they let the reader verify or continue the
+  work, but introduce them after the conceptual model when the reader needs
+  that foundation first.
+- Do not replay the conversation, the tool calls, or the search process unless
+  that history is itself the subject.
 
-이미지 마크다운: `![<alt>](https://raw.githubusercontent.com/<owner>/<repo>/<SHA>/history/<slug>.png)`
+For a foundation-first explanation: establish the purpose, introduce the few
+necessary actors, show the event as simple causal steps, and finish with the
+current state. Use an analogy or a compact mapping table only when it makes a
+relationship materially clearer, and map it back to the real system.
 
-## 주의
+## Use proportionate structure
 
-- 임베드 이미지는 **반드시 커밋 SHA URL** (브랜치명 URL은 브랜치 삭제 시 깨짐). 본문 내 HTML 소스 링크는 브랜치 경로라도 무방하되, main 머지를 권한다.
-- 렌더는 `channel: 'chrome'`으로 시스템 Chrome을 쓴다(브라우저 다운로드 불필요). 없으면 `npx playwright install chromium`.
-- gh issue는 raw HTML/CSS를 sanitize하므로 HTML을 본문에 직접 넣지 않는다 — 항상 이미지로 임베드한다.
-- 실제 실행 주체와 다른 모델/제품을 `Co-Authored-By`로 고정 기재하지 않는다.
+Keep a short, single-topic answer to one or two paragraphs. For multiple
+workstreams, decisions, or mixed completion states, use descriptive headings
+and organize by subject rather than by conversation chronology. Integrate
+status, verification, limitations, and remaining work instead of repeating the
+same facts in an overview and again in detail.
+
+End with the concrete next action and its owner, or state that no action
+remains. Distinguish states with different consequences — created versus
+committed, committed versus pushed, an open pull request versus a merged one.
+Never invent a clean state, a verification result, a blocker, or a next step to
+make the ending sound decisive.
+
+## Handle missing context
+
+Never invent context to make an answer feel complete. If an unresolved detail
+would materially change the answer, name the exact gap and ask only for what is
+needed. Otherwise state the bounded assumption and continue.
+
+Before sending, cold-read the answer as if it had been pasted into a fresh
+thread. Revise if the subject, a local term, the conclusion, the evidence, the
+current state, or the next action would be unclear there — or if the answer
+assumes a prerequisite the reader has not shown.
+
+Output formatting and answer density follow the active output style and the
+global `CLAUDE.md` density rules. This skill decides **which layer to start
+from**, not how long the answer is.

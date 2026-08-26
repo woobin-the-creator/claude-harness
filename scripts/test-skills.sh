@@ -16,8 +16,8 @@ fail() { printf '✗ %s\n' "$*" >&2; exit 1; }
 pass() { printf '✓ %s\n' "$*"; }
 
 skill_count=$(find "$SKILLS" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')
-[ "$skill_count" -eq 19 ] || fail "expected 19 skills, found $skill_count"
-pass "19 packaged skills"
+[ "$skill_count" -eq 20 ] || fail "expected 20 skills, found $skill_count"
+pass "20 packaged skills"
 
 for script in $(find "$SKILLS" -type f -name '*.sh' -print); do
   case "$(sed -n '1p' "$script")" in
@@ -79,7 +79,7 @@ import json
 import sys
 
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-expected = {"hooks": 12, "agents": 4, "skills": 19}
+expected = {"hooks": 12, "agents": 4, "skills": 20}
 assert data["A3_hygiene"]["installed"] == expected, data["A3_hygiene"]["installed"]
 assert not any("waste_scan.py not found" in error for error in data["errors"]), data["errors"]
 PY
@@ -137,12 +137,89 @@ grep -q '<p>fixture body</p>' "$TEST_ROOT/blog/posts/fixture-post.html" \
 node --check "$TEST_ROOT/blog/posts/assets/posts.js" >/dev/null
 pass "YouTube post assembler idempotence"
 
+# 세션 귀속: 서브에이전트 트랜스크립트가 sidechain 으로 잡히는지.
+attr_root="$TEST_ROOT/attr/projects/proj-a"
+mkdir -p "$attr_root/sess0001/subagents"
+attr_usage='{"input_tokens":1000,"output_tokens":500,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}'
+printf '%s\n' \
+  "{\"type\":\"assistant\",\"requestId\":\"r-main\",\"timestamp\":\"2026-08-26T00:00:00Z\",\"message\":{\"model\":\"claude-opus-5\",\"usage\":$attr_usage,\"content\":[{\"type\":\"tool_use\",\"id\":\"t1\",\"name\":\"Read\",\"input\":{\"file_path\":\"/x\"}}]}}" \
+  >"$TEST_ROOT/attr/projects/proj-a/sess0001.jsonl"
+printf '%s\n' \
+  "{\"type\":\"assistant\",\"requestId\":\"r-sub\",\"timestamp\":\"2026-08-26T00:01:00Z\",\"message\":{\"model\":\"claude-sonnet-5\",\"usage\":$attr_usage,\"content\":[{\"type\":\"tool_use\",\"id\":\"t2\",\"name\":\"Grep\",\"input\":{\"pattern\":\"y\"}}]}}" \
+  >"$attr_root/sess0001/subagents/agent-abcdef01.jsonl"
+
+attr_out="$TEST_ROOT/attr/waste.json"
+python3 "$ROOT/woobin-harness/skills/token-waste-audit/scripts/waste_scan.py" \
+  --projects-dir "$TEST_ROOT/attr/projects" --out "$attr_out" >/dev/null \
+  || fail "waste_scan.py failed on the attribution fixture"
+
+python3 - "$attr_out" <<'ATTRPY' || fail "waste_scan.py attributes a subagent transcript to the main lane"
+import json, sys
+r = json.load(open(sys.argv[1]))
+lanes = r.get("cost_by_lane") or {}
+side = sum((lanes.get("sidechain") or {}).values())
+main = sum((lanes.get("main") or {}).values())
+assert side > 0, f"sidechain lane is empty; main={main}"
+assert r.get("file_count") == 2, f"expected 2 transcripts, got {r.get('file_count')}"
+ATTRPY
+
+attr_collect="$TEST_ROOT/attr/collect.json"
+python3 "$ROOT/woobin-harness/skills/capability-audit/scripts/collect.py" \
+  --repo "$ROOT" --projects-dir "$TEST_ROOT/attr/projects" --days 3650 \
+  --out "$attr_collect" >/dev/null 2>&1 \
+  || fail "collect.py failed on the attribution fixture"
+
+python3 - "$attr_collect" <<'ATTRPY2' || fail "collect.py never reads subagents/*.jsonl"
+import json, sys
+r = json.load(open(sys.argv[1]))
+blob = json.dumps(r)
+assert "Grep" in blob, "the subagent's Grep call is absent from collect.py output"
+ATTRPY2
+
+pass "subagent transcripts are attributed to the sidechain lane"
+
+# contact-sheet.sh: 3장을 가로로 이어 붙인 단일 PNG만 내보낸다.
+sh -n "$ROOT/woobin-harness/skills/pr-demo-video/scripts/contact-sheet.sh" \
+  || fail "contact-sheet.sh has a syntax error"
+[ -x "$ROOT/woobin-harness/skills/pr-demo-video/scripts/contact-sheet.sh" ] \
+  || fail "contact-sheet.sh is not executable"
+
+if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+  cs_dir="$TEST_ROOT/contact-sheet"
+  mkdir -p "$cs_dir"
+  for cs_n in 1 2 3; do
+    ffmpeg -nostdin -hide_banner -loglevel error -y \
+      -f lavfi -i "color=c=black:s=64x48:d=1" -frames:v 1 "$cs_dir/f$cs_n.png"
+  done
+  "$ROOT/woobin-harness/skills/pr-demo-video/scripts/contact-sheet.sh" \
+    "$cs_dir/f1.png" "$cs_dir/f2.png" "$cs_dir/f3.png" "$cs_dir/out.png" >/dev/null \
+    || fail "contact-sheet.sh failed on three equal-sized frames"
+  cs_dim=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height \
+             -of csv=p=0:s=x -i "$cs_dir/out.png")
+  [ "$cs_dim" = "192x48" ] || fail "contact sheet is not triple-width: $cs_dim"
+
+  # 기존 출력을 덮어쓰지 않는다.
+  if "$ROOT/woobin-harness/skills/pr-demo-video/scripts/contact-sheet.sh" \
+       "$cs_dir/f1.png" "$cs_dir/f2.png" "$cs_dir/f3.png" "$cs_dir/out.png" >/dev/null 2>&1; then
+    fail "contact-sheet.sh overwrote an existing output"
+  fi
+
+  # .png 가 아닌 출력은 거부한다.
+  if "$ROOT/woobin-harness/skills/pr-demo-video/scripts/contact-sheet.sh" \
+       "$cs_dir/f1.png" "$cs_dir/f2.png" "$cs_dir/f3.png" "$cs_dir/out.mp4" >/dev/null 2>&1; then
+    fail "contact-sheet.sh accepted a non-PNG output"
+  fi
+  pass "contact-sheet.sh stacks three frames and refuses unsafe outputs"
+else
+  printf 'ℹ contact-sheet.sh: ffmpeg/ffprobe unavailable; only syntax was checked.\n'
+fi
+
 # render.cjs needs project-provided Playwright plus a local Chrome channel. Its
 # syntax is covered above; report whether this machine can run the live renderer.
 if node -e "require.resolve('playwright', {paths:[process.cwd()]})" >/dev/null 2>&1; then
-  printf 'ℹ explain renderer: Playwright is resolvable; live Chrome launch remains environment-dependent.\n'
+  printf 'ℹ explain-in-html renderer: Playwright is resolvable; live Chrome launch remains environment-dependent.\n'
 else
-  printf 'ℹ explain renderer: optional Playwright dependency is not installed in this repo.\n'
+  printf 'ℹ explain-in-html renderer: optional Playwright dependency is not installed in this repo.\n'
 fi
 
 printf 'All network-free bundled skill fixtures passed.\n'

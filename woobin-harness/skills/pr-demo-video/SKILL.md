@@ -32,7 +32,15 @@ This is the default when the user wants to *see* the demo here, not (or in addit
 
 1. **Record** the feature in a real browser with Playwright. Mock just the deps the component needs (HTTP routes, `routeWebSocket`) so you don't have to boot a full backend. Use the app's *real* code path. See [REFERENCE.md](REFERENCE.md) for a ready template. **By default, make the pointer legible:** inject a synthetic mouse cursor + click ripples (recordVideo captures no cursor otherwise) so viewers see where each click lands, and zoom into small targets (icon buttons, toggles) so they read clearly — both helpers are in REFERENCE.md ("Show the mouse cursor + click ripples", "Zoom to emphasize a small target").
 2. **Convert** the `.webm` to `.mp4` (sharable) and a `.gif` (inline-renders) with ffmpeg + palette.
-3. **Verify** before claiming success: extract frames at key moments, then **delegate the looking to the `screenshot-verifier` agent** — hand it the frame paths plus what must be visible, and it returns a text verdict. Confirm the feature is visible, not a blank/error page. Don't `Read` the frames here: each one is ~170k chars, and once it's in this session every later request re-pays for it.
+3. **Verify** before claiming success. Extract a first, middle, and final frame, then stack them into **one** image:
+
+   ```bash
+   scripts/contact-sheet.sh FIRST MIDDLE FINAL OUTPUT.png
+   ```
+
+   The helper preflights `ffmpeg`/`ffprobe` and the `hstack` filter, requires three equal-sized regular files (no symlinks), refuses to overwrite an existing output, accepts only a lowercase `.png` output, and re-validates the result as a single-frame, triple-width `png_pipe` still before publishing it. It fails closed and cleans its temp media.
+
+   Hand **the contact sheet alone** to the `screenshot-verifier` agent — never the three separate frames — along with the shot list and what must be visible as text. It returns a text verdict. Confirm the feature is visible, not a blank/error page. Don't `Read` the sheet here: it is ~170k chars per frame's worth of pixels, and once it's in this session every later request re-pays for it. If stacking or verification fails, don't dispatch partial evidence or claim success.
 4. **Attach**: commit the GIF (repo convention path), push, build the `raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>` URL, and put `![desc](rawurl)` in a `gh pr comment`. Curl the raw URL for HTTP 200 to confirm it's reachable.
 5. **Clean up** any temp recording script; verify `git status` only has intended changes.
 
@@ -44,8 +52,11 @@ ffmpeg -i in.webm -movflags +faststart -pix_fmt yuv420p demo.mp4
 ffmpeg -i in.webm -vf "fps=12,scale=1000:-1:flags=lanczos,palettegen" pal.png
 ffmpeg -i in.webm -i pal.png -lavfi "fps=12,scale=1000:-1:flags=lanczos[x];[x][1:v]paletteuse" demo.gif
 
-# verify a frame
-ffmpeg -ss 4 -i in.webm -frames:v 1 frame.png   # then hand frame.png to screenshot-verifier — don't Read it here
+# extract three frames, then stack them into one sheet for the verifier
+ffmpeg -ss 1  -i in.webm -frames:v 1 f1.png
+ffmpeg -ss 4  -i in.webm -frames:v 1 f2.png
+ffmpeg -sseof -1 -i in.webm -frames:v 1 f3.png
+scripts/contact-sheet.sh f1.png f2.png f3.png sheet.png   # hand sheet.png to screenshot-verifier
 
 # attach (public repo)
 git add docs/demo/feature.gif && git commit -m "docs(demo): feature demo gif" && git push

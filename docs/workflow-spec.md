@@ -510,7 +510,7 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 채택 이유는 근거의 강도가 아니라 **적용 범위**다. 이 하네스는 서브에이전트에 한국어 프롬프트를 넘기고
 (`plan-implementer`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
-(`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain`·`handoff`). 원본이 지적한 대로
+(`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain-in-html`·`handoff`). 원본이 지적한 대로
 다단 에이전트 환경에서는 품질 저하가 **단계마다 누적**되고, 그 손실이 산출물 자체의 완성도로 넘어간다.
 E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문에 각 단계가 앞 단계의 한국어를 **입력으로만**
 받으므로, 누적을 끊을 지점이 각 단계의 출력밖에 없다.
@@ -588,6 +588,25 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 안 난다. 레이아웃 변경을 발견하면 `scripts/test-hooks.sh`의 fixture부터 고쳐라. (2) 설치본 갱신이
 사람 개입 없이 자동으로 되도록 바뀌면 이 규칙은 불필요해진다.
 
+### R19 플랜 산출물은 영어로 쓴다
+
+**문제** 플랜 문서의 독자는 사람이 아니라 새 구현 세션이다. `00-overview.md`는 그 세션의 **모든**
+요청에 캐시 리드로 재청구된다(1,650행 플랜이 48k 토큰으로 측정돼 세션 floor를 93~122k까지 올렸다 —
+`home/HARNESS-LOG.md`). 한국어는 토크나이저에서 글자당 2~3배 비싸므로, 같은 내용이 같은 위치에서
+반복 청구되는 문서일수록 언어 선택의 누적 비용이 크다.
+
+**기전** `writing-plans`가 `00-overview.md`와 `task-N.md`를 영어로 쓴다. 원문 그대로 인용해야 하는
+문자열(에러 메시지, 파일 내용, 실행 명령, 사용자에게 보이는 문구)은 원어 그대로 둔다 — 구현자가
+글자 단위로 맞춰야 하는 것들이다.
+
+**대가** 사용자가 플랜 문서를 직접 읽을 때 모국어가 아니다. 그래서 범위를 플랜 문서로 한정한다 —
+결정 원장·킥오프 블록·스킬 본문·훅 주석은 사람이 읽으므로 사용자 언어를 유지한다. 특히 원장은
+사용자가 한 줄씩 짚어 반증하는 게 존재 이유다(`grill-me` §32).
+
+**무효화 조건** — (1) 한국어 토큰 비용이 영어와 비슷해지면(토크나이저 개선) 근거의 절반이 사라진다.
+(2) 사용자가 플랜 문서를 직접 읽고 검토하는 것이 주된 사용 방식이 되면 독자 전제가 뒤집힌다.
+(3) 플랜을 분할 저장하는 방식이 바뀌어 overview가 매 요청에 실리지 않게 되면 누적 비용 근거가 없어진다.
+
 ---
 
 ## 4. 구성요소 인벤토리
@@ -646,7 +665,11 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 19개
+### 스킬 20개
+
+2026-08-26, 기존 인포그래픽 스킬을 `explain-in-html`로 개명하고 독자 눈높이에 맞춘 텍스트 설명
+스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
+프롬프트 충돌이 나서 이름을 갈랐다).
 
 파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
