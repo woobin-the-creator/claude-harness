@@ -166,14 +166,14 @@ ATTRPY
 attr_collect="$TEST_ROOT/attr/collect.json"
 python3 "$ROOT/woobin-harness/skills/capability-audit/scripts/collect.py" \
   --repo "$ROOT" --projects-dir "$TEST_ROOT/attr/projects" --days 3650 \
-  --out "$attr_collect" >/dev/null 2>&1 \
+  --out "$attr_collect" >/dev/null \
   || fail "collect.py failed on the attribution fixture"
 
 python3 - "$attr_collect" <<'ATTRPY2' || fail "collect.py never reads subagents/*.jsonl"
 import json, sys
 r = json.load(open(sys.argv[1]))
-blob = json.dumps(r)
-assert "Grep" in blob, "the subagent's Grep call is absent from collect.py output"
+sidechain = r.get("raw", {}).get("tool_by_lane", {}).get("sidechain", {})
+assert "Grep" in sidechain, "the subagent's Grep call is not attributed to the sidechain lane"
 ATTRPY2
 
 pass "subagent transcripts are attributed to the sidechain lane"

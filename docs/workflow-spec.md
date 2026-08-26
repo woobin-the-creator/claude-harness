@@ -588,7 +588,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 안 난다. 레이아웃 변경을 발견하면 `scripts/test-hooks.sh`의 fixture부터 고쳐라. (2) 설치본 갱신이
 사람 개입 없이 자동으로 되도록 바뀌면 이 규칙은 불필요해진다.
 
-### R19 플랜 산출물은 영어로 쓴다
+### R19 — 플랜 산출물은 영어로 쓴다
 
 **문제** 플랜 문서의 독자는 사람이 아니라 새 구현 세션이다. `00-overview.md`는 그 세션의 **모든**
 요청에 캐시 리드로 재청구된다(1,650행 플랜이 48k 토큰으로 측정돼 세션 floor를 93~122k까지 올렸다 —
@@ -673,7 +673,8 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 
 파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
-`close-session` · `token-waste-audit` · `handoff`.
+`close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
+데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).
 `grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
 
 2026-08-21, `grill-me`를 **"스펙 초안 먼저, 빈칸만 인터뷰"** 구조로 다시 썼다. 근거는 실측이다 —
