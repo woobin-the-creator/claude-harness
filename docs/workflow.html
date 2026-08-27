@@ -193,7 +193,7 @@
   <li class="boundary">
     <div class="boundary-card">
       <h3>◆ 필수 세션 경계</h3>
-      <p>이 세션을 <b>종료</b>하고 모드에 맞는 플래그로 다시 띄운다. <code>/effort</code>는 쓰지 않는다 — settings.json에 영구 저장돼서 되돌리기를 사람이 기억해야 한다.</p>
+      <p>게이트가 1개 이상이면 — 이 세션을 <b>종료</b>하고 모드에 맞는 플래그로 다시 띄운다. <code>/effort</code>는 쓰지 않는다 — settings.json에 영구 저장돼서 되돌리기를 사람이 기억해야 한다. 게이트가 0개면 이 세션이 그대로 구현까지 굴린다. 종료하지 않는다.</p>
 <pre><code>claude --effort medium --model sonnet
 <span class="cmt"># 첫 프롬프트 (한 줄)</span>
 docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 ②b</code></pre>
@@ -272,7 +272,7 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
     <div class="mode-h"><span class="mode-n">②b</span><span class="mode-t">절약 · 위임</span><span class="badge">기본</span></div>
     <p class="when">같은 조건인데 <b>레이어 3개 이상이거나 자리를 비울</b> 때.</p>
     <div class="cmd">claude --effort medium --model sonnet</div>
-    <p class="cost">레이어당 <code>plan-implementer</code> 1개, 직렬. 컨텍스트를 <b>복제하므로</b> 레이어 수만큼 프리픽스를 산다 — 대신 끝까지 자동.</p>
+    <p class="cost">레이어당 <code>plan-implementer-sonnet-medium</code> 1개, 직렬. 컨텍스트를 <b>복제하므로</b> 레이어 수만큼 프리픽스를 산다 — 대신 끝까지 자동.</p>
   </div>
 
   <div class="mode">
@@ -319,7 +319,7 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   </div>
   <div class="rule info">
     <h4>ℹ 확인이 필요하면 서브에이전트는 못 묻는다</h4>
-    <p><code>AskUserQuestion</code>은 <b>모든</b> 서브에이전트에서 제거된다. 그래서 <code>plan-implementer</code>는 게이트에서 <b>멈추고 보고</b>하고, 플랜 작성 자체는 절대 위임하지 않는다.</p>
+    <p><code>AskUserQuestion</code>은 <b>모든</b> 서브에이전트에서 제거된다. 그래서 <code>plan-implementer-*</code>는 게이트에서 <b>멈추고 보고</b>하고, 플랜 작성 자체는 절대 위임하지 않는다. 그래서 게이트가 하나라도 있으면 무인 실행 대상에서 빠진다 — 무인에서 그건 중단이 아니라 정지다.</p>
   </div>
   <div class="rule info">
     <h4>ℹ 설치본 최신 여부</h4>
@@ -354,9 +354,9 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
     </tr>
     <tr>
       <td>레이어 하나 구현 (모드 ②b·①)</td>
-      <td><code>plan-implementer</code></td>
+      <td><code>plan-implementer-sonnet-medium</code> / <code>-sonnet-xhigh</code> / <code>-opus-xhigh</code></td>
       <td>25행 요약</td>
-      <td>모드 ②a·③ — 메인 루프가 직접</td>
+      <td>모드 ②a — 메인 루프가 직접</td>
     </tr>
     <tr>
       <td>구현 결과 검토</td>
@@ -418,7 +418,7 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   <code>woobin-harness/skills/</code>를 Claude Code와 Codex가 함께 읽는다.</li>
   <li><b>Codex 훅 5개</b>
   플랜 킥오프, kick-off 진입·이탈, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
-  <li><b>Codex 에이전트 4개</b>
+  <li><b>Codex 에이전트 6개</b>
   플러그인 밖의 <code>codex/agents/*.toml</code>을 <code>bootstrap-codex.sh</code>가 설치한다.</li>
   <li><b>호스트별 구현 모드</b>
   Claude Code는 <code>plan-exec-modes.md</code>, Codex는 <code>plan-exec-modes-codex.md</code>가 모델·effort·에이전트 이름을 각각 소유한다.</li>
