@@ -157,6 +157,14 @@
 
   <li class="step">
     <div class="step-card">
+      <h3>진입 <span class="tag">kick-off</span></h3>
+      <p><b>외울 트리거는 이것 하나다.</b> <code>/kick-off</code>가 레포 상태를 보고 어느 단계부터 시작할지 정하고, 아래 분기 중 하나로 넘긴다. 상태는 <code>.claude/kickoff.local.md</code>에 남아 다음 세션이 이어받는다.</p>
+      <p class="why">사람만 부를 수 있게 막아뒀다(<code>disable-model-invocation</code>) — 모델이 알아서 켜는 프론트도어는 비슷한 스킬에 밀려 안 켜진다. 실제로 <code>brainstorming</code>이 3일 246세션에서 발동 0회로 삭제됐다. 난이도는 판정하지 않는다: <code>/kick-off</code>를 쳤다는 것 자체가 사용자의 판정이다.</p>
+    </div>
+  </li>
+
+  <li class="step">
+    <div class="step-card">
       <h3>인터뷰 <span class="tag">grill-me</span></h3>
       <p><b>스펙 초안이 먼저다.</b> 사실을 조사해 한 화면짜리 스펙을 내고, 정말 미결인 <b>빈칸만</b> 선택지로 묻는다. 매 라운드 <b>결정 원장</b>을 갱신한다.</p>
       <p class="why">방향이 뒤집혀 있다 — 사용자가 추상적 질문에 답하는 게 아니라 구체적 초안에서 틀린 곳을 짚는다. 실측 27건에서 사용자는 대개 한두 번 답하고 다음 일로 넘어갔고, 마무리 assumptions 블록은 26세션 중 <b>6번만</b> 나왔다. 원장을 매 라운드 갱신하면 대화가 새도 그 시점까지가 남는다. 원장이 커지거나 이번 플랜보다 오래 살 설계면 <code>docs/woobin_plan/specs/</code>로 떨군다 — 결정 3~4개짜리면 플랜의 "기각한 대안" 절이 같은 일을 한다.</p>
@@ -406,10 +414,10 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
 <h2><span class="num">07</span>Codex 호환 레이어</h2>
 <p class="sub">스킬은 하나, 런타임 계약만 분리한다.</p>
 <ul class="anti">
-  <li><b>공통 스킬 20개</b>
+  <li><b>공통 스킬 21개</b>
   <code>woobin-harness/skills/</code>를 Claude Code와 Codex가 함께 읽는다.</li>
-  <li><b>Codex 훅 4개</b>
-  플랜 킥오프, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
+  <li><b>Codex 훅 5개</b>
+  플랜 킥오프, kick-off 진입·이탈, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
   <li><b>Codex 에이전트 4개</b>
   플러그인 밖의 <code>codex/agents/*.toml</code>을 <code>bootstrap-codex.sh</code>가 설치한다.</li>
   <li><b>호스트별 구현 모드</b>

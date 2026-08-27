@@ -1,0 +1,5 @@
+interface:
+  display_name: "Kick Off"
+  short_description: "이 하네스의 워크플로우로 들어가는 단일 진입점"
+policy:
+  allow_implicit_invocation: false
