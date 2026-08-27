@@ -416,8 +416,8 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
 <ul class="anti">
   <li><b>공통 스킬 21개</b>
   <code>woobin-harness/skills/</code>를 Claude Code와 Codex가 함께 읽는다.</li>
-  <li><b>Codex 훅 4개</b>
-  플랜 킥오프, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
+  <li><b>Codex 훅 5개</b>
+  플랜 킥오프, kick-off 진입·이탈, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
   <li><b>Codex 에이전트 4개</b>
   플러그인 밖의 <code>codex/agents/*.toml</code>을 <code>bootstrap-codex.sh</code>가 설치한다.</li>
   <li><b>호스트별 구현 모드</b>

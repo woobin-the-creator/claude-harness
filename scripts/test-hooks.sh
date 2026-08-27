@@ -255,4 +255,27 @@ assert_silent "$out" "plugin-update-guard: missing state must be silent"
 
 pass "plugin-update-guard drift/healthy/absent branches"
 
+# kickoff-guard: keyword opens the door, a filename mention does not, drift warns once.
+kick_root="$TEST_ROOT/kickoff-project"
+mkdir -p "$kick_root/.claude"
+kick_state="$kick_root/.claude/kickoff.local.md"   # 아직 없는 경로 — 앞의 두 단언은 상태 파일 없이 돈다
+out=$(printf '%s' '{"session_id":"kickoff-a","prompt":"킥오프 해줘"}' \
+  | CLAUDE_PLUGIN_ROOT="$ROOT/woobin-harness" KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
+assert_json "$out" '.hookSpecificOutput.hookEventName == "UserPromptSubmit" and (.hookSpecificOutput.additionalContext | contains("skills/kick-off/SKILL.md"))' "kickoff-guard: keyword did not open"
+out=$(printf '%s' '{"session_id":"kickoff-a","prompt":"sdd-kickoff-guard.sh 고쳐줘"}' \
+  | CLAUDE_PLUGIN_ROOT="$ROOT/woobin-harness" KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
+assert_silent "$out" "kickoff-guard: filename mention must not fire"
+printf -- '---\nactive: true\nstage: spec\ntopic: fixture\n---\nfixture\n' >"$kick_state"
+out=$(printf '%s' '{"session_id":"kickoff-b","prompt":"이제 구현 시작해줘"}' \
+  | KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
+assert_json "$out" '(.hookSpecificOutput.additionalContext | contains("이탈 알림"))' "kickoff-guard: drift did not warn"
+out=$(printf '%s' '{"session_id":"kickoff-b","prompt":"이제 구현 시작해줘"}' \
+  | KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
+assert_silent "$out" "kickoff-guard drift once-only"
+printf -- '---\nactive: false\nstage: spec\n---\nfixture\n' >"$kick_state"
+out=$(printf '%s' '{"session_id":"kickoff-c","prompt":"이제 구현 시작해줘"}' \
+  | KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
+assert_silent "$out" "kickoff-guard: inactive state must be silent"
+pass "kickoff-guard keyword/drift/once"
+
 printf 'All 12 shared hook scripts passed deterministic fixtures.\n'

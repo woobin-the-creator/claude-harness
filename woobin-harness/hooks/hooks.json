@@ -11,6 +11,16 @@
             "statusMessage": "구현 플랜 크기 점검 중..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/kickoff-guard.sh\"",
+            "timeout": 10,
+            "statusMessage": "kick-off 진입·이탈 점검 중..."
+          }
+        ]
       }
     ],
     "PostToolUse": [

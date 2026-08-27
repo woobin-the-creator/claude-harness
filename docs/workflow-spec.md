@@ -615,7 +615,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
 
-### 훅 12개
+### 훅 13개
 
 | 파일 | 이벤트 | 발화 조건 | 개입 형태 | 규칙 |
 |------|--------|-----------|-----------|------|
@@ -631,8 +631,9 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 | `plugin-update-guard.sh` | SessionStart | 설치본 version ≠ 소스 version, 또는 같은 version인데 설치본 커밋이 소스보다 뒤 | additionalContext로 갱신 절차 4단계 안내. 차단하지 않음 | R18 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
+| `kickoff-guard.sh` | UserPromptSubmit | [A] 킥오프 키워드(하이픈 파일명 제외) / [B] 상태 파일 `active: true` + `stage: spec\|plan` + 구현 의도 정규식 | additionalContext. [A]는 매번, [B]는 세션 1회 | R20 |
 
-Codex는 이 12개 중 `sdd-kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 4개만 연결한다. `plugin-update-guard.sh`는 Claude Code의 `~/.claude/plugins/` 레이아웃에만 의존하는 Claude 전용 훅이라 Codex에 연결하지 않는다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
+Codex는 이 13개 중 `sdd-kickoff-guard.sh`, `kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 5개만 연결한다. `plugin-update-guard.sh`는 Claude Code의 `~/.claude/plugins/` 레이아웃에만 의존하는 Claude 전용 훅이라 Codex에 연결하지 않는다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
@@ -643,6 +644,7 @@ CTX_HANDOFF_THRESHOLD=300000
 PLAN_BOUNDARY_CTX_THRESHOLD=120000   PLAN_SPLIT_MIN_LINES=500
 BULK_EDIT_CTX_THRESHOLD=150000       BULK_EDIT_COUNT_THRESHOLD=15
 SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
+KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_DRIFT_PATTERN
 ```
 
 `PLAN_DOCS_DIRS`는 **전환기 값**이다. `origin/main`은 `woobin_plan`인데 로컬 브랜치·워크트리 다수가
