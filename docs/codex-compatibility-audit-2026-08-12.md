@@ -6,6 +6,8 @@
 
 플러그인 패키징, 스킬 44개 발견, Codex 에이전트 4개 설치, 공유 훅 스크립트 11개의 결정론적 분기, Codex 안전 훅 4개 wiring은 모두 통과했다. Codex에서 지원하지 않는 구성요소는 조용히 오작동하지 않도록 미연결 또는 명시적 no-op/대체 스킬로 분리했다.
 
+**(2026-08-27 갱신)** 이 결론은 감사 당시(1.3.2, 스킬 44개) 스냅샷이다. 그 뒤 추가된 `kick-off` 스킬(1.15.0, 스킬 21개) 때문에 `./scripts/validate-codex.sh`는 **지금부터 영구적으로 실패한다** — 아래 "스킬 4개" 표의 `kick-off` 행 참고. 스크립트 파손이 아니라 의도된 제약이다.
+
 최초 자동 검증은 임시 `CODEX_HOME`에서 실행했다. 후속 마무리에서 실제 `~/.codex`에도 1.3.2를 설치했고, 플러그인 enabled 상태·전역 `AGENTS.md`·에이전트 4개·새 prompt input의 스킬 44개 노출을 다시 확인했다.
 
 ## 검증 결과
@@ -50,7 +52,7 @@
 | `buddy` | Claude Buddy MCP/플러그인 전용. Codex에 해당 MCP가 없으면 작동하지 않으며 description이 자동 호출을 제한한다. |
 | `git-guardrails-claude-code` | `.claude/settings.json` 전용. Codex에서는 `git-guardrails-codex`를 사용한다. |
 | `close-session` | Codex에 idle handoff가 없으므로 명시적 no-op. 세션 id를 추측하거나 Claude cleanup을 실행하지 않는다. |
-| `kick-off` | `SKILL.md`의 `disable-model-invocation: true`는 Claude Code 전용 프론트매터라 Codex 번들 검증기(`~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py`)가 무조건 `must be false`로 거부한다 — 레포 밖 외부 파일이라 수정 불가. `./scripts/validate-codex.sh`는 이 스킬 때문에 **항상 실패**하는 게 의도된 결과다. Codex 쪽 자동 발동 차단은 `agents/openai.yaml`의 `policy.allow_implicit_invocation: false`가 이미 실행 시점에 별도로 보장하므로 실질 동작에는 영향이 없다 — 검증기가 형식만 보고 거부하는 것이다. 필드를 지워 통과시키면 Claude Code에서 자동 발동이 되살아나 R20의 존재 이유(`brainstorming`이 `grill-me`와 겹쳐 246세션 발동 0회로 죽은 것)가 재현되므로 지우지 않는다.
+| `kick-off` (2026-08-27 추가) | `SKILL.md`의 `disable-model-invocation: true`는 Claude Code 전용 프론트매터라 Codex 번들 검증기(`~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py`)가 무조건 `must be false`로 거부한다 — 레포 밖 외부 파일이라 수정 불가. `./scripts/validate-codex.sh`는 이 스킬 때문에 **항상 실패**하는 게 의도된 결과다. Codex 쪽 자동 발동 차단은 `agents/openai.yaml`의 `policy.allow_implicit_invocation: false`가 이미 실행 시점에 별도로 보장하므로 실질 동작에는 영향이 없다 — 검증기가 형식만 보고 거부하는 것이다. 필드를 지워 통과시키면 Claude Code에서 자동 발동이 되살아나 R20의 존재 이유(`brainstorming`이 `grill-me`와 겹쳐 246세션 발동 0회로 죽은 것)가 재현되므로 지우지 않는다.
 
 ## 조건부/라이브 통합 미검증
 
