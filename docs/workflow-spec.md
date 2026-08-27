@@ -70,7 +70,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │         .claude/kickoff.local.md 에 적는다. 난이도는 판정하지 않는다
    │
    ├─(A) 기능 개발 ─────────────────────────────────────────────
-   │     grill-me 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장(필요하면 스펙 저장)
+   │     interview 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장(필요하면 스펙 저장)
    │        └ 훅 plan-session-boundary-guard 발화 (ctx ≥120k)
    │     ── 세션 경계 ① /clear ──
    │     writing-plans → docs/<plandir>/plans/<name>/ 에 분할 저장
@@ -603,7 +603,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 **대가** 사용자가 플랜 문서를 직접 읽을 때 모국어가 아니다. 그래서 범위를 플랜 문서로 한정한다 —
 결정 원장·킥오프 블록·스킬 본문·훅 주석은 사람이 읽으므로 사용자 언어를 유지한다. 특히 원장은
-사용자가 한 줄씩 짚어 반증하는 게 존재 이유다(`grill-me` §32).
+사용자가 한 줄씩 짚어 반증하는 게 존재 이유다(`interview` §32).
 
 **무효화 조건** — (1) 한국어 토큰 비용이 영어와 비슷해지면(토크나이저 개선) 근거의 절반이 사라진다.
 (2) 사용자가 플랜 문서를 직접 읽고 검토하는 것이 주된 사용 방식이 되면 독자 전제가 뒤집힌다.
@@ -709,18 +709,18 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 
 2026-08-27, 파이프라인의 단일 진입점 `kick-off`을 추가해 20 → 21이 됐다. 이 레포에서 처음으로
 `disable-model-invocation: true`를 쓰는 스킬이다(Codex 대응은 `agents/openai.yaml`의
-`policy.allow_implicit_invocation: false`) — 사람만 부를 수 있어서 `grill-me`와 트리거가 경쟁하지
+`policy.allow_implicit_invocation: false`) — 사람만 부를 수 있어서 `interview`와 트리거가 경쟁하지
 않는다. 본문은 위임만 하고 하위 스킬의 절차를 한 줄도 옮겨 적지 않는다. 규칙은 §3 R20.
 
 2026-08-26, 기존 인포그래픽 스킬을 `explain-in-html`로 개명하고 독자 눈높이에 맞춘 텍스트 설명
 스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
 프롬프트 충돌이 나서 이름을 갈랐다).
 
-파이프라인에 직접 물린 것: `kick-off` · `grill-me` · `writing-plans` · `systematic-debugging` ·
+파이프라인에 직접 물린 것: `kick-off` · `interview` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
 데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).
-`grill-me`는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
+`interview`(2026-08-27까지 `grill-me`)는 파이프라인의 **첫 단계**인데 2026-08-21까지 이 목록에 빠져 있었다(`docs/workflow.html`에는 있었다).
 
 2026-08-21, `grill-me`를 **"스펙 초안 먼저, 빈칸만 인터뷰"** 구조로 다시 썼다. 근거는 실측이다 —
 세션 로그의 `/grill-me` 호출 27건(2026-08-03~08-21)을 전수로 봤다. 규정된 의식이 지켜지지 않았다:
@@ -734,6 +734,21 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 시각적 선택지는 렌더가 서술을 이긴다, "나머지는 추천대로" 이탈구)도 조문화했다.
 **§3에 새 규칙을 만들지 않았다** — 훅·에이전트에 걸리는 하네스 규칙이 아니라 스킬 내부 규율이고,
 채울 `무효화 조건`이 "실측 27건"뿐이라 §0이 요구하는 등급에 못 미친다. 서사는 `home/HARNESS-LOG.md` #26.
+
+2026-08-27, 같은 스킬을 `interview`로 개명하고 규칙을 하나 더했다. 이름이 본문과 반대였다 — 본문
+3행이 이미 "내가 사용자를 심문하지 않는다"인데 이름만 08-21 재작성 전 물건이 남아 있었고, 공식
+`mattpocock-skills`의 `grilling`과 트리거 공간도 겹쳤다. 근거는 다시 실측이다 — `/grill-me` 호출을
+2026-08-03~08-27 전수로 봤다(31건). 이 중 **현재 본문이 실제로 로드된 건 6건**뿐이고(명시 호출 3 +
+자동 발동 3), 나머지는 구본이거나 캐시가 뒤처진 상태였다. 라운드 수는 1·5·1·1·1·1로 중앙값 1이라
+`deep-interview`류의 **세션 라운드 상한은 6건 중 0건에 걸린다** — 그래서 넣지 않았다. 유일한 5라운드
+세션의 원인은 다른 데 있었다: 같은 빈칸을 세 번 묻는 동안 **선택지 label이 세 번 다 동일**했고,
+사용자의 1·2라운드 답은 둘 다 "그 선택지의 대가를 설명해줘"였다. 규정이 없던 자리라 조문화했다 —
+되물음을 받으면 답한 내용을 선택지에 접어 넣어 **메뉴를 다시 구성하기 전에는 다시 묻지 않는다**.
+`plan-exec-modes.md`의 "PR 본문은 포인터만"에도 좁은 예외를 뚫었다 — 같은 파일이 머지 전 플랜
+디렉터리 삭제를 권장하므로, 사용자가 고른 적 없이 모델이 확정한 결정과 가정은 머지 후 소유자가
+0이 된다. 그것만 PR 본문에 직접 남긴다. **여기서도 §3에 규칙을 만들지 않았다** — 위와 같은 이유이고
+표본은 오히려 더 얇다(6건). 서사는 `home/HARNESS-LOG.md` #31.
+
 `design-rules`는 `design-workflow`의 backward-compatible concrete-UI entry이고,
 `show-design-sample`은 복수 시안 격리 프리뷰·공유가 필요할 때만 쓰는 preview/delivery branch다.
 나머지는 상황별(글쓰기, 사내, 진단, 세팅 등).
