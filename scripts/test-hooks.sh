@@ -278,4 +278,4 @@ out=$(printf '%s' '{"session_id":"kickoff-c","prompt":"이제 구현 시작해�
 assert_silent "$out" "kickoff-guard: inactive state must be silent"
 pass "kickoff-guard keyword/drift/once"
 
-printf 'All 12 shared hook scripts passed deterministic fixtures.\n'
+printf 'All 13 shared hook scripts passed deterministic fixtures.\n'
