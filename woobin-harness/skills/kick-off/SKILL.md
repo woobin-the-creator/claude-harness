@@ -18,7 +18,7 @@ disable-model-invocation: true
 |---|---|
 | 이 주제의 `docs/woobin_plan/plans/<slug>/00-overview.md` | 구현 — 그 경로를 그대로 쓴다 |
 | `docs/woobin_plan/specs/` 아래 확정 스펙 | `writing-plans` |
-| 둘 다 없음 | `grill-me` |
+| 둘 다 없음 | `interview` |
 
 3. 정한 것을 **한 줄로 선언**한다: `진입: <단계> · 경로: <이어질 스킬 이름들>`
    틀렸으면 사용자가 그 자리에서 잡는다.
@@ -26,7 +26,7 @@ disable-model-invocation: true
 
 ## 문 목록
 
-- 기능 개발 → `grill-me` → `writing-plans`
+- 기능 개발 → `interview` → `writing-plans`
 - 제품 UI·디자인 → `design-workflow`
 - 디버깅 → `systematic-debugging`
 
@@ -35,7 +35,7 @@ disable-model-invocation: true
 ## 난이도는 판정하지 않는다
 
 `/kick-off`가 눌렸다는 것 자체가 "이건 워크플로우를 태울 일이다"라는 사용자의 판정이다.
-크기에 맞춰 산출물을 줄이는 건 `grill-me`와 `writing-plans`가 각자 이미 한다.
+크기에 맞춰 산출물을 줄이는 건 `interview`와 `writing-plans`가 각자 이미 한다.
 
 ## 상태 파일
 
