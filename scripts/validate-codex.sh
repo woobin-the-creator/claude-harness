@@ -77,11 +77,13 @@ except ModuleNotFoundError:
 
 root = pathlib.Path(sys.argv[1])
 paths = sorted(glob.glob(str(root / "codex/agents/*.toml")))
-if len(paths) != 4:
-    raise SystemExit(f"expected 4 Codex agents, found {len(paths)}")
+if len(paths) != 6:
+    raise SystemExit(f"expected 6 Codex agents, found {len(paths)}")
 expected = {
     "explorer": {"model": "gpt-5.6-terra", "model_reasoning_effort": "low", "sandbox_mode": "read-only"},
-    "plan-implementer": {"model": "gpt-5.6", "model_reasoning_effort": "medium"},
+    "plan-implementer-terra-medium": {"model": "gpt-5.6-terra", "model_reasoning_effort": "medium"},
+    "plan-implementer-gpt56-medium": {"model": "gpt-5.6", "model_reasoning_effort": "medium"},
+    "plan-implementer-gpt56-xhigh": {"model": "gpt-5.6", "model_reasoning_effort": "xhigh"},
     "plan-reviewer": {"model": "gpt-5.6", "model_reasoning_effort": "high", "sandbox_mode": "read-only"},
     "screenshot-verifier": {"model": "gpt-5.6-terra", "model_reasoning_effort": "low", "sandbox_mode": "read-only"},
 }

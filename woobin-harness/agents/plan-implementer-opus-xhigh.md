@@ -1,6 +1,8 @@
 ---
-name: plan-implementer
-description: Implements one layer of a plan — a group of task-N.md files that must run in order — and reports back a short summary. Use when the orchestrator wants to stay lean instead of clearing between layers. Pass the task file paths in execution order plus the overview path; never paste task bodies into the prompt. Always pass model explicitly.
+name: plan-implementer-opus-xhigh
+description: Implements one layer of a high-stakes plan — migrations, prod-facing changes, UI that automated gates cannot check — and reports back a short summary. Mode ③. Pass the task file paths in execution order plus the overview path; never paste task bodies into the prompt. Model and effort are pinned here, so do not pass a model argument.
+model: opus
+effort: xhigh
 tools: Read, Write, Edit, Grep, Glob, Bash, TodoWrite, Skill
 memory: local
 maxTurns: 60
