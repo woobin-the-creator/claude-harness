@@ -8,8 +8,8 @@ Claude Code와 Codex에서 **직접 만든 하네스만** 공유하는 레포. �
 
 공통 스킬은 같은 `woobin-harness/skills/`를 Claude Code와 Codex 플러그인이 함께 나른다. 런타임 계약이 다른 훅과 에이전트만 얇은 호환 레이어로 분리한다.
 
-- Claude Code: `/plugin install`이 스킬 20개·에이전트 4개·훅 12개를 붙인다.
-- Codex: 플러그인이 스킬 20개와 검증된 훅 4개를 붙이고, `bootstrap-codex.sh`가 커스텀 에이전트 4개와 전역 `AGENTS.md`를 설치한다.
+- Claude Code: `/plugin install`이 스킬 21개·에이전트 4개·훅 12개를 붙인다.
+- Codex: 플러그인이 스킬 21개와 검증된 훅 4개를 붙이고, `bootstrap-codex.sh`가 커스텀 에이전트 4개와 전역 `AGENTS.md`를 설치한다.
 
 심링크 방식(`~/.claude`를 통째로 또는 항목별로 링크)이 흔한 관행이지만, 설정 파일을 심링크하면 알려진 문제가 셋 있다 — 전부 anthropics/claude-code에 버그로 등록됐고 **봇이 닫았을 뿐 수정 근거는 없다**:
 
@@ -36,7 +36,7 @@ claude-harness/
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── scripts/                      런타임 입력 어댑터
 │   ├── agents/*.md                   4개
-│   ├── skills/<name>/SKILL.md        20개
+│   ├── skills/<name>/SKILL.md        21개
 │   ├── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
 │   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
@@ -107,7 +107,7 @@ DRY_RUN=1 ./bootstrap-codex.sh
 ./scripts/check-harness-docs.sh
 ```
 
-`validate-codex.sh`는 위의 두 fixture를 다시 실행하고, 임시 `CODEX_HOME`에 플러그인을 설치한 뒤 실제 `codex debug prompt-input`에서 스킬 20개와 전역·프로젝트 `AGENTS.md`가 노출되는지까지 검사한다. 상세 결과와 의도적 미지원 목록은 [`docs/codex-compatibility-audit-2026-08-12.md`](docs/codex-compatibility-audit-2026-08-12.md)에 있다.
+`validate-codex.sh`는 위의 두 fixture를 다시 실행하고, 임시 `CODEX_HOME`에 플러그인을 설치한 뒤 실제 `codex debug prompt-input`에서 스킬 21개와 전역·프로젝트 `AGENTS.md`가 노출되는지까지 검사한다. 상세 결과와 의도적 미지원 목록은 [`docs/codex-compatibility-audit-2026-08-12.md`](docs/codex-compatibility-audit-2026-08-12.md)에 있다.
 
 Codex 훅은 설치 후 `/hooks` 신뢰 검토까지 해야 end-to-end 검증된다. 로컬 구조·입출력 검증은 플러그인·스킬 validator와 결정론적 fixture가 담당한다.
 

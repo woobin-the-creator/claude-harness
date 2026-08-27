@@ -66,6 +66,8 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
 
 ```
 요구사항
+   │   진입: /kick-off — 사용자가 외울 유일한 트리거. 아래 분기를 대신 고르고 상태를
+   │         .claude/kickoff.local.md 에 적는다. 난이도는 판정하지 않는다
    │
    ├─(A) 기능 개발 ─────────────────────────────────────────────
    │     grill-me 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장(필요하면 스펙 저장)
@@ -665,13 +667,18 @@ SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
 
 Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 20개
+### 스킬 21개
+
+2026-08-27, 파이프라인의 단일 진입점 `kick-off`을 추가해 20 → 21이 됐다. 이 레포에서 처음으로
+`disable-model-invocation: true`를 쓰는 스킬이다(Codex 대응은 `agents/openai.yaml`의
+`policy.allow_implicit_invocation: false`) — 사람만 부를 수 있어서 `grill-me`와 트리거가 경쟁하지
+않는다. 본문은 위임만 하고 하위 스킬의 절차를 한 줄도 옮겨 적지 않는다. 규칙은 §3 R20.
 
 2026-08-26, 기존 인포그래픽 스킬을 `explain-in-html`로 개명하고 독자 눈높이에 맞춘 텍스트 설명
 스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
 프롬프트 충돌이 나서 이름을 갈랐다).
 
-파이프라인에 직접 물린 것: `grill-me` · `writing-plans` · `systematic-debugging` ·
+파이프라인에 직접 물린 것: `kick-off` · `grill-me` · `writing-plans` · `systematic-debugging` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
 데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).

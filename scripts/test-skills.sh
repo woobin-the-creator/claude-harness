@@ -16,8 +16,8 @@ fail() { printf '✗ %s\n' "$*" >&2; exit 1; }
 pass() { printf '✓ %s\n' "$*"; }
 
 skill_count=$(find "$SKILLS" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print | wc -l | tr -d ' ')
-[ "$skill_count" -eq 20 ] || fail "expected 20 skills, found $skill_count"
-pass "20 packaged skills"
+[ "$skill_count" -eq 21 ] || fail "expected 21 skills, found $skill_count"
+pass "21 packaged skills"
 
 for script in $(find "$SKILLS" -type f -name '*.sh' -print); do
   case "$(sed -n '1p' "$script")" in
@@ -79,7 +79,7 @@ import json
 import sys
 
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-expected = {"hooks": 12, "agents": 4, "skills": 20}
+expected = {"hooks": 12, "agents": 4, "skills": 21}
 assert data["A3_hygiene"]["installed"] == expected, data["A3_hygiene"]["installed"]
 assert not any("waste_scan.py not found" in error for error in data["errors"]), data["errors"]
 PY
