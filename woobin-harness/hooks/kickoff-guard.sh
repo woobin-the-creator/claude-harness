@@ -55,7 +55,7 @@ esac
 grep -qE '^active:[[:space:]]*true[[:space:]]*$' "$STATE_FILE" || exit 0
 stage=$(sed -n 's/^stage:[[:space:]]*\([a-z][a-z]*\).*/\1/p' "$STATE_FILE" | head -1)
 case "$stage" in
-  spec) next="스펙을 굳히는 중입니다(\`grill-me\`). 결정 원장의 미결이 비기 전에는 코드로 넘어가지 마세요." ;;
+  spec) next="스펙을 굳히는 중입니다(\`interview\`). 결정 원장의 미결이 비기 전에는 코드로 넘어가지 마세요." ;;
   plan) next="플랜을 쓰는 중입니다(\`writing-plans\`). 플랜이 저장되기 전에는 코드로 넘어가지 마세요." ;;
   *) exit 0 ;;
 esac

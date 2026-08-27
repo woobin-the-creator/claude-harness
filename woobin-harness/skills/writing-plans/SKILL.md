@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Turn a confirmed spec, PRD, design doc, or agreed requirements into an ordered, self-contained implementation plan that a fresh session can execute without the planning conversation. Use whenever work needs more than one or two steps and the approach is already settled — "이거 계획 세워줘", "플랜 짜줘", "구현 계획", "이 스펙대로 진행하자", "write a plan for this", or right after grill-me settles a spec. Use it before touching code, not after. Do not use when the approach itself is still unsettled or the requirements are not yet agreed — that is grill-me.
+description: Turn a confirmed spec, PRD, design doc, or agreed requirements into an ordered, self-contained implementation plan that a fresh session can execute without the planning conversation. Use whenever work needs more than one or two steps and the approach is already settled — "이거 계획 세워줘", "플랜 짜줘", "구현 계획", "이 스펙대로 진행하자", "write a plan for this", or right after interview settles a spec. Use it before touching code, not after. Do not use when the approach itself is still unsettled or the requirements are not yet agreed — that is interview.
 ---
 
 # Writing Plans
@@ -44,7 +44,7 @@ Korean costs roughly two to three times as many tokens per character.
 
 This applies to the plan documents only. Keep the decision ledger, the
 conversation, skill bodies, and hook comments in the language the user is
-working in — those have a human reader, and `grill-me` depends on the user
+working in — those have a human reader, and `interview` depends on the user
 being able to point at a ledger line and say it is wrong.
 
 Quote verbatim strings exactly as they appear in the source, whatever language
