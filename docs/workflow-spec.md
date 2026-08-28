@@ -85,7 +85,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │
    ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, 선택적 DESIGN.md, 조건부 모듈)
    │                       └─ 복수 시안 격리 프리뷰·공유가 필요할 때만 show-design-sample
-   ├─(C) 디버깅 ────── repro-loop 스킬 (재현 루프를 먼저, 진단 기록을 산출물로)
+   ├─(C) 디버깅 ────── debug 스킬 (재현 루프를 먼저, 진단 기록을 산출물로)
    └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
 ```
 
@@ -707,13 +707,16 @@ Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifi
 
 ### 스킬 21개
 
-2026-08-28, `systematic-debugging`을 `repro-loop`으로 교체했다(개수 21 유지). 근거는 실측 둘이다 —
+2026-08-28, `systematic-debugging`을 `debug`로 교체했다(개수 21 유지). 근거는 실측 둘이다 —
 세션 JSONL 1,803개에서 발동 3회, 그리고 재현 산출물을 만든 16세션 중 15세션이 그 스킬을 **한 번도
 발동하지 않은** 세션이다(즉 "수정 전 재현"은 스킬이 만든 습관이 아니다). 본문 274줄 중 대부분이
 obra/superpowers 사본이었고 보조 파일 3개는 upstream과 바이트 동일이었다. 새 본문은 세 조항만
 남긴다 — red 가능한 루프 우선 · 다면적 재현을 런타임 진단 기록으로 · 실패는 다음 시도가 검증할 수
-있는 지시로 닫기. 이름을 가른 이유는 `explain`/`explain-in-html` 때와 같다: `mattpocock-skills:
-diagnosing-bugs`가 일반 버그 트리거 공간을 이미 갖고 있어 두 description이 경쟁하면 안 된다.
+있는 지시로 닫기. 본문은 영어다 — 상시 청구되는 문서에서 한국어의 토크나이저 비용을 피한다(R19와
+같은 근거, 기존 영어 스킬 6개와 같은 형식). 이름은 사용자가 `debug`로 정했다. `mattpocock-skills:
+diagnosing-bugs`가 트리거 문구로 "debug this"를 명시적으로 갖고 있어 `explain`/`explain-in-html` 때와
+같은 프롬프트 충돌 위험이 남는다 — description을 "이 하네스의 디버깅 문 · `kick-off`이 라우팅"으로만
+좁혀 완화했고, 실제 경쟁 여부는 다음 `capability-audit`에서 센다.
 **§3에 규칙을 만들지 않았다** — 표본이 두 달간 실제 디버깅 5건이라 §0이 요구하는 `무효화 조건`을
 채울 수 없다. 서사는 `home/HARNESS-LOG.md` #32.
 
@@ -726,7 +729,7 @@ diagnosing-bugs`가 일반 버그 트리거 공간을 이미 갖고 있어 두 d
 스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
 프롬프트 충돌이 나서 이름을 갈랐다).
 
-파이프라인에 직접 물린 것: `kick-off` · `interview` · `writing-plans` · `repro-loop` ·
+파이프라인에 직접 물린 것: `kick-off` · `interview` · `writing-plans` · `debug` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
 데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).

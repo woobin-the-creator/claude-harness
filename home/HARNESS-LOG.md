@@ -886,27 +886,33 @@ Skill 목록에 없을 수 있다. 그래서 `kickoff-guard.sh`는 이름 대신
 - 앵커링 완화 처방은 조기 가설 다양화다. 옛 본문의 "Form Single Hypothesis"는 반대 방향이었다.
   (다만 그 연구의 대상 모델이 Llama 3.2·Command R+라 Opus 5 외삽은 약하다 — 방향으로만 쓴다.)
 
-**수단** — `repro-loop` 56줄. 세 조항만 남겼다: ① red 가능·결정론적·빠른 루프를 먼저
+**수단** — `debug` 59줄(영어). 세 조항만 남겼다: ① red 가능·결정론적·빠른 루프를 먼저
 ② 재현은 다면적으로, 실행해서 런타임 진단 기록으로 ③ 실패는 사람 호출이 아니라 다음 시도가
 검증할 수 있는 지시로 닫기. 버린 것은 Red Flags 목록·Common Rationalizations 표·
 "your human partner's Signals" 절(원저자 이름을 sed 치환한 흔적)·Iron Law 잔재다.
+본문을 영어로 쓴 근거는 R19와 같다 — 상시 로드되는 문서에서 한국어는 토크나이저에서 2~3배
+비싸다. 이미 영어인 스킬이 6개(`writing-plans`·`explain`·`pr-demo-video`·`close-session`·
+`design-rules`·`git-guardrails-codex`) 있어 형식 이탈도 아니다.
 
 **Codex를 위해 자작을 골랐다** — `skills/`는 양쪽 런타임이 공유하는데 Codex에는 mattpocock
 플러그인이 없다. Claude만 `mattpocock-skills:diagnosing-bugs`로 보내면 Codex는 디버깅 문이
 사라지고 `kick-off` 문 목록이 런타임별로 갈린다. 벤더링은 거절했다 — 지금 지우는 것과 똑같은
 실패(얼어붙은 upstream 사본)를 다시 만든다.
 
-**이름을 가른 이유** — `mattpocock-skills:diagnosing-bugs`가 일반 버그 트리거 공간
-("broken/throwing/failing/slow")을 이미 갖고 있다. 두 description이 같은 공간에서 경쟁하면
-`explain`/`explain-in-html` 때와 같은 프롬프트 충돌이 난다(`workflow-spec` §4). 그래서 새
-description은 버그 트리거 단어를 쓰지 않고 "이 하네스의 디버깅 문 · `kick-off`이 라우팅"으로만
-자기를 규정한다.
+**이름 — 열어둔 위험** — 처음 판단은 `repro-loop`이었다. `mattpocock-skills:diagnosing-bugs`가
+일반 버그 트리거 공간("broken/throwing/failing/slow", 그리고 트리거 문구 "debug this")을 이미 갖고
+있어서, 두 description이 같은 공간에서 경쟁하면 `explain`/`explain-in-html` 때와 같은 프롬프트
+충돌이 나기 때문이다(`workflow-spec` §4). **사용자가 `debug`로 정했다** — 이름 자체는 그 공간
+한가운데다. 완화는 description 하나뿐이다: 버그 트리거 단어를 하나도 쓰지 않고 "이 하네스의 디버깅
+문 · `kick-off`이 라우팅"으로만 자기를 규정한다. 이게 충분한지는 **모른다** — 아래 재측정 항목에
+넣었다.
 
-**재측정 대상** — 다음 `capability-audit` 때 둘을 센다. (1) `repro-loop` 발동 횟수와, 발동
+**재측정 대상** — 다음 `capability-audit` 때 둘을 센다. (1) `debug` 발동 횟수와, 발동
 없이 재현 산출물을 만든 세션의 비율(지금 15/16). 그 비율이 그대로면 ①도 스캐폴드가 아니라
 기본값이라는 뜻이므로 ②③만 남긴다. (2) 실패 시도 뒤 "다음 시도가 검증할 수 있는 지시"로 닫힌
 비율 — PROBE의 조건을 실제로 충족하는지. 표본이 두 달간 실제 디버깅 5건뿐이라 다음 audit에서도
-얇을 수 있다. **얇으면 얇다고 적고 판정을 미룬다.**
+얇을 수 있다. **얇으면 얇다고 적고 판정을 미룬다.** (3) `debug`와
+`mattpocock-skills:diagnosing-bugs` 중 무엇이 떴는지 — 이름 충돌이 실제 문제인지 여기서 판정된다.
 
 ## 규율 (이 이력에서 반복 확인된 것)
 

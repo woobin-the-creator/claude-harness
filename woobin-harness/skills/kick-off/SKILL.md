@@ -28,7 +28,7 @@ disable-model-invocation: true
 
 - 기능 개발 → `interview` → `writing-plans`
 - 제품 UI·디자인 → `design-workflow`
-- 디버깅 → `repro-loop`
+- 디버깅 → `debug`
 
 **이름만 부른다.** 각 스킬이 무엇을 어떻게 하는지 여기서 설명하지 않는다 — 사본이 갈라진다.
 
