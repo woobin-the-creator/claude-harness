@@ -886,7 +886,7 @@ Skill 목록에 없을 수 있다. 그래서 `kickoff-guard.sh`는 이름 대신
 - 앵커링 완화 처방은 조기 가설 다양화다. 옛 본문의 "Form Single Hypothesis"는 반대 방향이었다.
   (다만 그 연구의 대상 모델이 Llama 3.2·Command R+라 Opus 5 외삽은 약하다 — 방향으로만 쓴다.)
 
-**수단** — `repro-loop` 55줄. 세 조항만 남겼다: ① red 가능·결정론적·빠른 루프를 먼저
+**수단** — `repro-loop` 56줄. 세 조항만 남겼다: ① red 가능·결정론적·빠른 루프를 먼저
 ② 재현은 다면적으로, 실행해서 런타임 진단 기록으로 ③ 실패는 사람 호출이 아니라 다음 시도가
 검증할 수 있는 지시로 닫기. 버린 것은 Red Flags 목록·Common Rationalizations 표·
 "your human partner's Signals" 절(원저자 이름을 sed 치환한 흔적)·Iron Law 잔재다.
