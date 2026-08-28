@@ -79,7 +79,7 @@ import json
 import sys
 
 data = json.load(open(sys.argv[1], encoding="utf-8"))
-expected = {"hooks": 13, "agents": 4, "skills": 21}
+expected = {"hooks": 13, "agents": 6, "skills": 21}
 assert data["A3_hygiene"]["installed"] == expected, data["A3_hygiene"]["installed"]
 assert not any("waste_scan.py not found" in error for error in data["errors"]), data["errors"]
 PY

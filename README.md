@@ -8,8 +8,8 @@ Claude Code와 Codex에서 **직접 만든 하네스만** 공유하는 레포. �
 
 공통 스킬은 같은 `woobin-harness/skills/`를 Claude Code와 Codex 플러그인이 함께 나른다. 런타임 계약이 다른 훅과 에이전트만 얇은 호환 레이어로 분리한다.
 
-- Claude Code: `/plugin install`이 스킬 21개·에이전트 4개·훅 13개를 붙인다.
-- Codex: 플러그인이 스킬 21개와 검증된 훅 5개를 붙이고, `bootstrap-codex.sh`가 커스텀 에이전트 4개와 전역 `AGENTS.md`를 설치한다.
+- Claude Code: `/plugin install`이 스킬 21개·에이전트 6개·훅 13개를 붙인다.
+- Codex: 플러그인이 스킬 21개와 검증된 훅 5개를 붙이고, `bootstrap-codex.sh`가 커스텀 에이전트 6개와 전역 `AGENTS.md`를 설치한다.
 
 심링크 방식(`~/.claude`를 통째로 또는 항목별로 링크)이 흔한 관행이지만, 설정 파일을 심링크하면 알려진 문제가 셋 있다 — 전부 anthropics/claude-code에 버그로 등록됐고 **봇이 닫았을 뿐 수정 근거는 없다**:
 
@@ -35,12 +35,12 @@ claude-harness/
 │   ├── hooks/*.sh                    13개 (공유 훅 스크립트)
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── scripts/                      런타임 입력 어댑터
-│   ├── agents/*.md                   4개
+│   ├── agents/*.md                   6개
 │   ├── skills/<name>/SKILL.md        21개
 │   ├── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
 │   ├── plan-exec-modes.md            Claude Code 구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
 │   └── plan-exec-modes-codex.md      Codex 모델·effort·에이전트 대응본
-├── codex/agents/*.toml               Codex 커스텀 에이전트 4개
+├── codex/agents/*.toml               Codex 커스텀 에이전트 6개
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── AGENTS.md                         Codex가 읽는 라우터 — CLAUDE.md를 정본으로 가리킨다
 ├── docs/workflow.html                사람이 보는 워크플로우 요약
@@ -101,6 +101,7 @@ Codex 플러그인만 레포 안에서 시험하려면 이 레포의 `.agents/pl
 claude plugin validate ./woobin-harness
 ./scripts/test-hooks.sh
 ./scripts/test-skills.sh
+./scripts/test-agents.sh
 ./scripts/validate-codex.sh
 DRY_RUN=1 ./bootstrap.sh
 DRY_RUN=1 ./bootstrap-codex.sh

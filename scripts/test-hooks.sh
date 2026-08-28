@@ -95,6 +95,23 @@ out=$(printf '%s' "{\"session_id\":\"plan-split-session\",\"tool_input\":{\"file
 assert_silent "$out" "plan-saved-session-boundary task-N.md silence"
 pass "plan-saved-session-boundary presplit overview/task branches"
 
+# plan-saved-session-boundary: 모드 파일이 있으면 게이트 라우팅과 리뷰어 지시가 나온다.
+modes_file="$TEST_ROOT/plan-exec-modes.md"
+printf '# modes\n' >"$modes_file"
+routed_overview="$plan_root/docs/woobin_plan/plans/2026-08-27-routed/00-overview.md"
+mkdir -p "$(dirname "$routed_overview")"
+printf '# Plan\n\n- task\n' >"$routed_overview"
+out=$(printf '%s' "{\"session_id\":\"plan-routed-session\",\"tool_input\":{\"file_path\":\"$routed_overview\"}}" \
+  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$modes_file" \
+      "$HOOKS/plan-saved-session-boundary.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("plan-document-reviewer-prompt.md")' \
+  "plan-saved-session-boundary: 리뷰어 지시가 없다"
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("게이트 0개") and contains("게이트 1개 이상")' \
+  "plan-saved-session-boundary: 게이트 라우팅 분기가 없다"
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("모드 ②a")' \
+  "plan-saved-session-boundary: ②a 킥오프가 없다"
+pass "plan-saved-session-boundary 게이트 라우팅 분기"
+
 # plan-session-boundary-guard: high-context plan-entry prompt emits once.
 plan_ctx_transcript="$TEST_ROOT/plan-context.jsonl"
 printf '%s\n' '{"type":"assistant","message":{"usage":{"input_tokens":130000,"cache_read_input_tokens":1000,"cache_creation_input_tokens":0}}}' >"$plan_ctx_transcript"
