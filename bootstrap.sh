@@ -79,7 +79,7 @@ say "  3) orca 훅: ~/.orca/agent-hooks/claude-hook.sh — orca를 설치하면 
 say "  4) gptaku 플러그인: /plugin 에서 gptaku-plugins 마켓플레이스를 추가"
 say "  5) Claude Code 재시작 후 확인:"
 say "       /plugin        → woobin-harness 가 enabled 인지"
-say "       /context       → Custom Agents 에 plan-implementer·plan-reviewer 가 보이는지"
+say "       /context       → Custom Agents 에 plan-implementer-sonnet-medium·plan-reviewer 가 보이는지"
 say "       /config        → Output Style 이 fluent-korean 인지 (플러그인 스타일은 재시작 후에 잡힌다)"
 say "       claude --debug → 훅이 매칭되는지 (플랜 문서를 하나 Write 해보면 가장 빠르다)"
 say

@@ -106,8 +106,10 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 
 ### R1 — 플랜 저장 후 세션 경계
 
-**기전** `plan-saved-session-boundary.sh` (PostToolUse:Write). `docs/(superpowers|woobin_plan)/plans/*.md`
-또는 분할 레이아웃의 `plans/*/00-overview.md` 저장을 감지 → `/exit` 후 `claude --effort <모드> --model <모드>` 재런치 지시 + 자기완결성 4항목 점검 요구.
+**기전** `plan-saved-session-boundary.sh` (PostToolUse:Write). 플랜 저장을 감지 → 자기완결성 4항목 점검
++ 플랜 문서 리뷰어 지시 + 게이트 수 라우팅. **경계를 실제로 넘는 것은 게이트가 1개 이상인 플랜뿐이다**
+(→ ②a: `/exit` 후 `claude --effort medium --model sonnet` 재런치). 게이트 0개면 그 세션이 그대로
+full-auto로 구현까지 굴린다 — 이 규칙의 적용 범위가 2026-08-27에 여기까지 좁혀졌다.
 프로젝트 `CLAUDE.md`에 같은 절이 있다(이중 소유 — §9-1 참조).
 주입 문구는 스킬 이름을 부르지 않고 "스펙·플래닝 대화"라고만 쓴다(2026-08-21) — 지운 스킬 이름이
 훅 문자열에 박혀 있으면 없는 스킬을 계속 권한다. [HARNESS-LOG #28]
@@ -125,6 +127,7 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 - 하네스가 세션 재시작 없이 컨텍스트를 선택적으로 리셋하는 수단을 제공
 - **compaction이 무손실이 됨** — 이 규칙의 정체는 "compaction이 할 일을 미리, 정보 손실 없이 하는 것"이다.
   compaction이 잃는 게 없어지면 규칙의 존재 이유가 사라진다
+- 게이트 있는 플랜의 비율이 충분히 낮아져 ②a 경로 자체가 안 쓰이게 됨 → 규칙이 죽은 코드가 된다
 
 ---
 
@@ -256,11 +259,13 @@ Glob, Grep, and Read"* — 메인이 직접 훑으라고 **지시**한다. 로�
 
 ---
 
-### R7 — effort·model은 런치 플래그로 고정
+### R7 — effort·model 소유자는 세션 런치 플래그와 구현자 frontmatter로 갈린다
 
-**기전** `plan-exec-modes.md` 공통 규칙. `claude --effort <level> --model <model>`.
-`/effort`는 쓰지 않는다 — interactive 세션에서 `effortLevel`에 **영구 저장**되어 되돌리기를 사람이
-기억해야 하고, startup에 적용되지 않는 미해결 버그가 있다(anthropics/claude-code#45453).
+**기전** `plan-exec-modes.md` 공통 규칙. 소유자가 둘이다 — **세션**은 `claude --effort <level> --model <model>`
+(②a와 플랜 세션 자신), **위임된 구현자**는 에이전트 정의 frontmatter다. `Agent` 호출에 effort 인자가
+없어서 다른 수단이 없고, full-auto에는 상속을 기댈 세션 재런치도 없다. 어느 쪽이든 **중간에 바꾸지 않는다**가
+불변의 핵심이다. `/effort`는 쓰지 않는다 — interactive 세션에서 `effortLevel`에 **영구 저장**되어
+되돌리기를 사람이 기억해야 하고, startup에 적용되지 않는 미해결 버그가 있다(anthropics/claude-code#45453).
 
 **근거** E7 — effort 값이 렌더된 프롬프트에 들어가므로 세션 중 변경은 캐시 프리픽스를 통째로 무효화한다.
 그리고 낮은 effort는 툴 호출을 병합·감소시킨다 → **턴 수를 직접 제어하는 게 effort다.**
@@ -273,6 +278,7 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 - E7이 거짓(effort가 프리픽스에 안 들어감) → 세션 중 변경 자유
 - 하네스가 턴 단위로 effort를 자동 조절
 - #45453이 수정되고 `/effort`가 세션 스코프가 됨 → `/effort`로 되돌아가도 된다
+- `Agent` 호출이 effort 인자를 받게 됨 → 변이체 3종을 하나로 되돌려라
 
 ---
 
@@ -511,7 +517,7 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 만족하지 않는 유일한 규칙이므로, 리뷰 시 ② 판정 대상으로 먼저 올려라. → §8 O18
 
 채택 이유는 근거의 강도가 아니라 **적용 범위**다. 이 하네스는 서브에이전트에 한국어 프롬프트를 넘기고
-(`plan-implementer`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
+(`plan-implementer-*`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
 (`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain-in-html`·`handoff`). 원본이 지적한 대로
 다단 에이전트 환경에서는 품질 저하가 **단계마다 누적**되고, 그 손실이 산출물 자체의 완성도로 넘어간다.
 E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문에 각 단계가 앞 단계의 한국어를 **입력으로만**
@@ -686,24 +692,31 @@ KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_
 `PLAN_DOCS_DIRS`는 **전환기 값**이다. `origin/main`은 `woobin_plan`인데 로컬 브랜치·워크트리 다수가
 아직 `superpowers`라 둘 다 매칭한다. 전 브랜치가 넘어가면 `woobin_plan`만 남긴다. → §8
 
-### 에이전트 4개
+### 에이전트 6개
 
 | 이름 | model | effort | maxTurns | memory | 특징 |
 |------|-------|--------|----------|--------|------|
 | `Explore` | haiku | low | — | — | 읽기 전용. 리포트 **20줄 상한**("Be concise"는 숫자가 없어 안 지켜진다) |
 | `screenshot-verifier` | sonnet | low | — | — | playwright 툴 보유. 이미지가 사는 **일회용 컨텍스트** |
-| `plan-implementer` | **없음(의도)** | **없음(의도)** | 60 | `local` | model 없음 → 훅이 sonnet 주입, 호출부가 명시 가능. effort 없음 → **세션 effort 상속**(모드 값이 그대로 적용) |
+| `plan-implementer-sonnet-xhigh` | sonnet | xhigh | 60 | `local` | 모드 ①. 트랙 단위 worktree 위임 |
+| `plan-implementer-sonnet-medium` | sonnet | medium | 60 | `local` | 모드 ②b. **대부분의 플랜이 여기다** |
+| `plan-implementer-opus-xhigh` | opus | xhigh | 60 | `local` | 모드 ③. 되돌리기 비싼 변경 |
 | `plan-reviewer` | opus | low | 30 | **없음(의도)** | memory를 넣으면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다 |
 
-**frontmatter의 부재가 의도인 곳이 3군데다.** 리뷰어가 "빠졌다"고 판단해 채우면 설계가 깨진다.
+**frontmatter의 부재가 의도인 곳이 1군데 남았다** — `plan-reviewer`의 `memory`. 리뷰어가 "빠졌다"고
+판단해 채우면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다.
+
+구현자 3종의 `model`·`effort`는 반대로 **반드시 채워져 있어야 한다.** `Agent` 호출에 effort 인자가
+없고 full-auto에는 세션 재런치가 없어서, frontmatter가 유일한 운반 수단이다. 파일명이 그 값을 한 번 더
+주장하므로 `scripts/test-agents.sh`가 둘의 일치를 기계로 센다(규율 6 — 이름을 두 번째 소유자로 두지 않는다).
 
 `maxTurns`는 폭주 방지 상한이지 튜닝 손잡이가 아니다. **미강제 버그 열려 있음**: anthropics/claude-code#41143.
 
-`plan-implementer`의 `memory: local`은 레포별·git 미추적. 레이어와 플랜을 넘는 **환경 지식**(어떤 러너를
+구현자 3종의 `memory: local`은 레포별·git 미추적. 레이어와 플랜을 넘는 **환경 지식**(어떤 러너를
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-Codex 대응본은 `codex/agents/*.toml` 4개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer`는 `gpt-5.6/medium`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
+Codex 대응본은 `codex/agents/*.toml` 6개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer-terra-medium`은 `gpt-5.6-terra/medium`, `plan-implementer-gpt56-medium`은 `gpt-5.6/medium`, `plan-implementer-gpt56-xhigh`는 `gpt-5.6/xhigh`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
 ### 스킬 21개
 
@@ -718,7 +731,7 @@ diagnosing-bugs`가 트리거 문구로 "debug this"를 명시적으로 갖고 �
 같은 프롬프트 충돌 위험이 남는다 — description을 "이 하네스의 디버깅 문 · `kick-off`이 라우팅"으로만
 좁혀 완화했고, 실제 경쟁 여부는 다음 `capability-audit`에서 센다.
 **§3에 규칙을 만들지 않았다** — 표본이 두 달간 실제 디버깅 5건이라 §0이 요구하는 `무효화 조건`을
-채울 수 없다. 서사는 `home/HARNESS-LOG.md` #32.
+채울 수 없다. 서사는 `home/HARNESS-LOG.md` #33.
 
 2026-08-27, 파이프라인의 단일 진입점 `kick-off`을 추가해 20 → 21이 됐다. 이 레포에서 처음으로
 `disable-model-invocation: true`를 쓰는 스킬이다(Codex 대응은 `agents/openai.yaml`의
@@ -830,12 +843,17 @@ mtime 캐시로 1초 갱신 부담 제거. claude-buddy **wrapper** 방식이라
 추천 근거는 overview의 순서 의존성이고, 그 판단은 **플랜을 방금 쓴 세션만 싸게 할 수 있다.**
 아래 표는 Claude Code 런치 값이며, Codex 대응은 각각 `gpt-5.6-terra/medium`, `gpt-5.6/medium`, `gpt-5.6/xhigh`를 쓴다.
 
-| 모드 | 런치 | 성립 조건 | 위임 |
-|------|------|-----------|------|
-| ① 속도 | `--effort xhigh --model sonnet` | 파일을 공유하지 않는 트랙 2개 이상. 트랙 1개면 ②보다 비싸기만 하다 | 트랙 단위 worktree, **순차 스폰** |
-| ②a 절약 | `--effort medium --model sonnet` | 의존 체인. **대부분의 플랜** | 없음. 레이어마다 `/clear` |
-| ②b 절약·무인 | `--effort medium --model sonnet` | 레이어 3개 이상이거나 자리를 비울 때 | 레이어마다 `plan-implementer` 순차 |
-| ③ 최고품질 | `--effort xhigh --model opus` | 되돌리기 비싼 것 — DB 마이그레이션, prod 배포, 자동 게이트가 못 잡는 UI | 리뷰어 3개(렌즈 분리), 순차 |
+| 모드 | 런치 | 성립 조건 | 위임 | 게이트 0개일 때 |
+|------|------|-----------|------|------|
+| ① 속도 | `--effort xhigh --model sonnet` | 파일을 공유하지 않는 트랙 2개 이상. 트랙 1개면 ②보다 비싸기만 하다 | `plan-implementer-sonnet-xhigh`, 트랙 worktree, **순차 스폰** | full-auto |
+| ②a 절약 | `--effort medium --model sonnet` | 의존 체인. **게이트가 1개 이상인 플랜은 전부 여기다** | 없음. 레이어마다 `/clear` | (해당 없음 — 상주 모드) |
+| ②b 절약·무인 | 세션 플래그 없음 | 의존 체인 + 게이트 0개 | 레이어마다 `plan-implementer-sonnet-medium` 순차 | full-auto |
+| ③ 최고품질 | `--effort xhigh --model opus` | 되돌리기 비싼 것 — DB 마이그레이션, prod 배포, 자동 게이트가 못 잡는 UI | `plan-implementer-opus-xhigh` + 리뷰어 3개(렌즈 분리), 순차 | full-auto. 게이트가 있어도 ②a로 강등하지 않고 게이트에서 멈춘다 |
+
+**게이트는 상주 축, 모드는 model·effort 축이다.** 플랜 문서 리뷰어가 낸 `**Gates:** N`이 라우팅 입력이고,
+0이면 플랜 세션이 그대로 끝까지 굴린다. 1개 이상이면 ②a인데, ③ 성립 조건이 걸리면 ③이 이긴다 —
+되돌리기 비용이 상주 편의보다 강한 신호다. 서브에이전트는 `AskUserQuestion`이 제거돼 게이트에서 물을 수
+없으므로, 무인으로 보낸 게이트는 중단이 아니라 **정지**가 된다.
 
 **②a vs ②b는 "버리느냐 복제하느냐"뿐이다.** 둘 다 컨텍스트 성장을 막는다. ②a는 컨텍스트를 버려서
 추가 비용 0이지만 레이어마다 사람 입력이 필요하고, ②b는 레이어당 프리픽스(38~88k)를 지불하는 대신
@@ -925,7 +943,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 
 | # | 항목 | 상태 |
 |---|------|------|
-| O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. `plan-implementer`의 `memory: local` 트레이드오프도 미측정 |
+| O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. 구현자 3종의 `memory: local` 트레이드오프도 미측정. 변이체 3종으로 갈라진 뒤 memory 파편화도 미측정 — 세 디렉터리가 같은 레포 환경 사실을 각자 다시 배운다. |
 | O2 | `maxTurns` 60/30 값의 근거 | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
 | O3 | 모드 3종의 **실사용 후 재측정** | 도입 2026-08-07, 아직 안 함. 기준선은 $2.57~2.82/태스크 |
 | O4 | ~~스킬 43개 개별 사용 빈도~~ | **해소(2026-08-10)**. 1개월 로그 스캔 → 미사용 18개 중 다운로드 출처만 삭제. §4 참조 |
@@ -943,6 +961,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | O16 | 머지 전 플랜 디렉터리 삭제가 **권장**이라 미준수 가능 | 피해가 작아 권장으로 뒀다. 누적되면 에이전트가 낡은 플랜을 현재 설계로 오독할 위험이 있고, 날짜 접두어와 `plans/` 경로가 1차 방어다 |
 | O18 | **R16(한국어 output-style)의 근거가 로컬 실측이 아니다** | 2026-08-19 도입. 원본 저장소의 전후 비교를 그대로 채택했고 이 환경에서 재현하지 않았다. 같이 안 잰 것 셋: ① 세션 floor 증가분(추정 ~1.5k) ② 응답 길이 증가가 `home/CLAUDE.md` 밀도 규칙을 잡아먹는지 ③ 서브에이전트가 실제로 준수하는지. `token-waste-audit`의 세션 스캐너로 ①②는 전후 비교가 가능하다 |
 | O17 | ready 전환 후 머지 전 창에서 **R12 경고가 강한 문구로 복귀**하는 것이 성가신지 | 미검증. 그 창은 짧을 것으로 가정하지만 승인·CI 대기가 길어지면 매 세션 시작마다 "새 워크트리를 만들까요"를 듣는다. 관측되면 하향 조건을 `--draft` 대신 `--state open` PR 존재로 넓힌다 |
+| O19 | **full-auto 오케스트레이터가 무는 플래닝 프리픽스** | 산술 추정만 있다. R1 실측(죽은 잔재 ~155k)에 요청 ~18회를 곱하면 2.7M cache read — opus 오케스트레이터 기준 ~$4/플랜, 태스크당 $2.57~2.82 기준선에서 10태스크 플랜의 ~15%. 실측 안 했다. `token-waste-audit`으로 full-auto 세션과 ②a 세션을 전후 비교할 수 있다 |
 
 - ⚠️ **`refuse`는 발신자에게 아무 통지도 하지 않는다** — 문서 원문: "A message refused on arrival
   produces no sender-side notice." 즉 **다른 세션에서 이 머신의 세션에 메시지를 보냈는데 답이 없으면,

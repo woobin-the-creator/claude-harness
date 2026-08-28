@@ -22,6 +22,13 @@
 # 2026-08-21 — writing-plans 스킬이 처음부터 plans/<slug>/ 로 분할 저장하도록 바뀌었다(같은 문서를
 # 두 번 쓰지 않으려고). 그래서 이 훅도 분할 산출물에 발화해야 한다: `00-overview.md` 1개에만 울리고
 # `task-N.md`는 침묵하며, 그 경우 분할 지시 대신 자기완결성 점검·모드 추천만 낸다.
+#
+# 2026-08-27 — 게이트가 0개인 플랜은 세션 경계를 넘지 않는다. 플랜 문서 리뷰어가 낸 게이트 수가
+# 라우팅 입력이고, 0이면 이 세션이 그대로 구현까지 굴린다(모드 ①·②b·③). 1개 이상이면 종전대로
+# ②a 킥오프 블록을 낸다 — 서브에이전트는 AskUserQuestion 이 제거돼 게이트에서 물을 수가 없어서,
+# 무인으로 보내면 중단이 아니라 정지가 된다. 아래 본문은 세 갈래 최종 결론(0개/1개↑/1개↑+③)만
+# 요약하고, 그 근거·표·상세 절차는 $MODES_FILE 이 소유한다(§9-1 이중 소유 회피) — ②a 킥오프의
+# `claude` 커맨드도 $MODES_FILE에서 그대로 뽑아 쓴다, 하드코딩하지 않는다.
 
 set -u
 
@@ -35,6 +42,10 @@ elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -f "$CLAUDE_PLUGIN_ROOT/plan-exec-mod
 else
   MODES_FILE=$HOME/.claude/plan-exec-modes.md
 fi
+# 리뷰어 프롬프트는 항상 $MODES_FILE과 같은 트리에 있다(플러그인 레이아웃: <root>/plan-exec-modes.md,
+# <root>/skills/writing-plans/plan-document-reviewer-prompt.md) — $CLAUDE_PLUGIN_ROOT를 따로 참조하면
+# 그 변수가 비어 있는 override·~/.claude 폴백 경로에서 존재하지 않는 경로가 된다.
+REVIEWER_PROMPT="$(dirname "$MODES_FILE")/skills/writing-plans/plan-document-reviewer-prompt.md"
 # docs/ 아래 플랜·스펙이 사는 디렉터리 이름(정규식 alternation). 이름이 바뀌면 여기만 고친다.
 # 전환기 동안 옛 이름을 남겨둔다 — 아직 옛 경로인 브랜치·워크트리에서 훅이 조용히 죽지 않게.
 PLAN_DOCS_DIRS=${PLAN_DOCS_DIRS:-superpowers|woobin_plan}
@@ -116,35 +127,52 @@ if [ ! -f "$MODES_FILE" ]; then
   mode_step="${step_n}. 사용자에게 안내하세요: \"\`/clear\` 후 \`${kickoff_target} 플랜으로 구현 진행해줘\`\"
 $((step_n+1)). 그리고 이번 턴을 종료하세요. 사용자가 /clear를 실행할 차례입니다."
 else
-mode_step="${step_n}. **구현 모드를 추천하고 사용자에게 고르게 하세요.** 정의는 \`${MODES_FILE}\` 에 있습니다 — 지금 읽으세요.
-   추천의 유일한 근거는 방금 쓴 overview의 **태스크 간 순서 의존성**입니다. 그 판단은 지금 이 세션만 할 수 있습니다.
-   - 파일을 공유하지 않는 트랙이 2개 이상 → ① 속도 (xhigh + sonnet, 트랙 단위 worktree 병렬)
-   - 의존성 체인이거나 같은 파일 공유 → ② 절약 (medium + sonnet)  ← 대부분 여기
-     ②를 고르면 레이어 경계 처리도 같이 물어보세요: **②a 수동 \`/clear\`**(가장 쌈, 자리 지켜야 함) /
-     **②b 레이어당 \`plan-implementer\` 위임**(끝까지 자동, 레이어당 프리픽스 1회). 판단 기준은 모드 파일에 있습니다.
-   - 되돌리기 비싼 작업(마이그레이션·prod 배포·자동 게이트가 못 잡는 UI) → ③ 최고 퀄리티 (xhigh + opus + 별도 리뷰어)
+# ②a launch flag는 여기서 하드코딩하지 않는다 — 모드 파일 "## ② 절약" 절 첫 코드펜스에서 그대로 뽑는다.
+a_launch_cmd=$(awk '
+  /^## ② 절약/ { insec=1 }
+  insec && /^```/ { if (infence) exit; infence=1; next }
+  insec && infence { print; next }
+' "$MODES_FILE")
+[ -n "$a_launch_cmd" ] || a_launch_cmd="claude --effort medium --model sonnet"
 
-   3개를 한 줄씩 제시하고, **추천 1개와 그 근거(어느 태스크가 어느 파일을 공유하는지)를 명시**한 뒤
-   사용자가 고르면 아래 킥오프를 그 모드로 출력하세요:
+mode_step="${step_n}. **플랜 문서 리뷰어를 먼저 띄우세요.** 프롬프트 템플릿은
+   \`${REVIEWER_PROMPT}\` 에 있습니다.
+   general-purpose 서브에이전트로 띄우고, 지적을 플랜 문서에 반영한 뒤 다음으로 가세요.
+   리뷰어가 내는 \`**Gates:** N\`(사람 확인이 필요한 지점의 수)이 아래 라우팅의 입력입니다.
+
+$((step_n+1)). **모드를 추천하고 게이트 수로 라우팅하세요.** 정의는 \`${MODES_FILE}\` 에 있습니다 — 지금 읽으세요.
+   모드 추천의 유일한 근거는 방금 쓴 overview의 **태스크 간 순서 의존성**입니다. 그 판단은 지금 이 세션만 할 수 있습니다.
+   - 파일을 공유하지 않는 트랙이 2개 이상 → ① 속도
+   - 의존성 체인이거나 같은 파일 공유 → ② 절약  ← 대부분 여기
+   - 되돌리기 비싼 작업(마이그레이션·prod 배포·자동 게이트가 못 잡는 UI) → ③ 최고 퀄리티
+
+   그리고 게이트 수로 갈립니다. 상세 표와 절차는 모드 파일이 소유합니다:
+   - **게이트 0개** → ①·②b·③ 그대로 **이 세션에서 full-auto로 실행**합니다. 킥오프 블록을 내지 마세요.
+   - **게이트 1개 이상** → **②a**. 아래 킥오프를 출력하고 턴을 종료하세요.
+   - **게이트 1개 이상 + ③ 성립 조건** → ③를 유지한 채 이 세션에서 실행하고, 게이트에서 멈춰 사용자에게 올리세요.
+
+   ②a로 갈 때만 출력할 킥오프:
 
    \"이 세션을 종료(\`/exit\`)하고 이렇게 다시 띄우세요:
    \`\`\`
-   claude --effort <모드의 effort> --model <모드의 model>
+   ${a_launch_cmd}
    \`\`\`
    그리고 첫 프롬프트:
    \`\`\`
-   ${kickoff_target} 플랜으로 구현 진행해줘 — 모드 <N>(${MODES_FILE})
+   ${kickoff_target} 플랜으로 구현 진행해줘 — 모드 ②a(${MODES_FILE})
    \`\`\`\"
 
    \`--effort\`는 **그 세션에만** 적용됩니다(문서: \"set it for a single session\").
    \`/effort\`와 달리 settings.json을 건드리지 않으므로 끝나고 되돌릴 것이 없습니다 — 되돌리기 안내를 붙이지 마세요.
-$((step_n+1)). 그리고 이번 턴을 종료하세요. 사용자가 세션을 다시 띄울 차례입니다."
+
+$((step_n+2)). full-auto로 갈 경우 **이 턴을 종료하지 말고** 모드 파일의 full-auto 절차대로 계속하세요:
+   \`plan/<slug>\` 브랜치 · 플랜 커밋 · draft PR → 레이어마다 구현자 1개 순차 → 커밋 → \`plan-reviewer\` → push."
 fi
 
 ctx="[세션 경계 알림] 구현 계획 문서가 저장되었습니다: ${path}
 
 이 문서는 영속화되었으므로, 지금 이 세션의 스펙·플래닝 대화는 구현에 더 이상 필요하지 않습니다.
-**이 세션에서 곧바로 구현을 시작하지 마세요.**
+**아래 점검과 리뷰를 끝내기 전에는 구현을 시작하지 마세요.**
 
 다음 순서로 진행하세요:
 
