@@ -1,6 +1,6 @@
 ---
 name: groupchat-debug
-description: 사내 AI(opencode)가 보낸 traceback·로그·장애 보고서를 air-gap 밖에서 진단하고, external-implementer가 canonical code/test fix를 작성하도록 돕는 원격 디버깅 스킬. internal-executor에는 사내 환경 재현, 로그·env·DB 사실 조회, 승인된 canonical fix/runbook 실행 검증과 evidence 반환만 맡긴다. 사용자가 사내/opencode의 500, SSO, DB connection, redirect, 422, build 장애 보고를 붙여넣고 원인·조치를 물을 때 사용한다. 로컬에서 직접 재현 가능한 버그는 `diagnose`, 장애가 아닌 일반 삼자대화는 `groupchat-ai`를 사용한다.
+description: 사내 AI(opencode)가 보낸 traceback·로그·장애 보고서를 air-gap 밖에서 진단하고, external-implementer가 canonical code/test fix를 작성하도록 돕는 원격 디버깅 스킬. internal-executor에는 사내 환경 재현, 로그·env·DB 사실 조회, 승인된 canonical fix/runbook 실행 검증과 evidence 반환만 맡긴다. 사용자가 사내/opencode의 500, SSO, DB connection, redirect, 422, build 장애 보고를 붙여넣고 원인·조치를 물을 때 사용한다. 로컬에서 직접 재현 가능한 버그는 `debug`, 장애가 아닌 일반 삼자대화는 `groupchat-ai`를 사용한다.
 ---
 
 # groupchat-debug
