@@ -368,6 +368,14 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 (SessionStart 훅의 부수효과). 그래서 "프롬프트로 부탁"이 아니라 **응답을 실제로 검사하는 결정론적 게이트**다.
 `stop_hook_active`로 무한루프를 막고 재시도는 1회까지만 강제한다.
 
+**마커 경로는 라이터와 리더가 같은 식으로 유도해야 한다.** 게이트 전체가 "리더가 라이터의 파일을 찾는다"에
+매달려 있어서, 경로 유도가 갈리면 게이트가 **에러 없이 통과**한다. 2026-09-02에 실제로 그랬다 —
+리더(`stop-warning-ack-guard.sh`)는 `${HARNESS_STATE_DIR:-$HOME/.claude}`를 따랐는데 라이터
+(`stale-branch-guard.sh`)는 `$HOME/.claude`로 하드코딩돼 있었다. Claude에서는 두 값이 같아 안 드러났고,
+`hooks.json`이 `HARNESS_STATE_DIR=$PLUGIN_DATA`를 넘기는 **Codex에서만** 갈려서 ack 게이트가 조용히
+죽어 있었다. `test-hooks.sh`의 Codex 픽스처가 이걸 잡고 있었지만 빨간 채로 방치돼 있었다 —
+**검증 스위트가 빨갛게 남아 있으면 그 다음 회귀는 아무도 못 잡는다.**
+
 **무효화 조건**
 - 하네스의 additionalContext 드롭 버그가 수정되고 전달이 보장됨 → 응답 검사 게이트(짝)만 제거,
   경고 자체는 유지
@@ -433,8 +441,20 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 
 ### R15 — 레이어 경계 커밋 + 리뷰 후 push, draft PR이 회복 진입점
 
-**기전** 훅이 아니라 **절차**다. 실행 절차의 단일 소유자는 `woobin-harness/plan-exec-modes.md`의
-"중단 대비" 소절이고, 여기에는 근거·대가·무효화 조건만 적는다(§6-6 — 절차를 두 곳에 쓰지 않는다).
+**기전** 절차 + **킥오프 훅 주입 + 구현자 정의**. 실행 절차의 단일 소유자는
+`woobin-harness/plan-exec-modes.md`의 "중단 대비" 소절이고, 여기에는 근거·대가·무효화 조건만
+적는다(§6-6 — 절차를 두 곳에 쓰지 않는다). 훅과 에이전트 정의는 절차를 **복제하지 않고 가리킨다.**
+
+**2026-09-02 — 순수 절차로 두었더니 죽어 있었다.** 구현이 끝나도 미커밋이었다. 원인은 둘이고 둘 다
+"규칙이 없어서"가 아니었다. (1) `plan-implementer-*` 정의 3종이 `Do not commit unless a task file
+tells you to`라고 지시해 이 규칙의 ②b("커밋은 레이어 구현자가")와 **정면으로 모순**이었다 — 구현자는
+자기 정의를 읽고 플랜 문서는 커밋을 안 시키므로, 규칙대로 굴러도 커밋이 안 나온다. (2) 킥오프 시점에
+이 절차를 아무도 보여주지 않았다. 그래서 (1)은 세 정의에 `## Committing` 절을 넣어, (2)는
+`sdd-kickoff-guard.sh`가 R2와 **같은 트리거**(구현 의도 + 플랜 경로 + 세션 1회)에서 포인터를 같이
+내도록 고쳤다. 훅을 새로 만들지 않은 이유는 같은 조건에 훅이 둘이면 소유자가 둘이 되기 때문이다(§6-6).
+훅은 `gh`를 부르지 않고 로컬 git 상태(원격 유무 · `plan/` 접두어)로만 분기한다 —
+UserPromptSubmit에 네트워크 지연을 싣지 않고, fixture로 결정론적으로 검증되기 때문이다.
+**이 규칙이 자동으로 하는 것은 `gh pr ready`까지다.** `gh pr merge --squash`는 사용자가 낸다.
 요지: 구현 시작 시 `plan/<plan-name>` 브랜치를 만들고 **플랜 문서를 첫 커밋**으로 올려
 **draft PR**을 연다. 레이어가 끝나면 **커밋 → 리뷰 → (수정) → push** 순서로
 진행하고, push할 때 그 레이어에서 발견한 것을 PR 코멘트에 5행 이내로 남긴다.
@@ -496,6 +516,9 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 - 하드 컷 후 세션 resume이 무손실이 되거나, `Workflow`의 `resumeFromRunId`를 실제로 쓰기 시작함
   → 폐기. §7-B의 "손으로 만든 모드는 중단 시 재개 수단이 없다"가 이 규칙의 존재 이유다
 - 재측정에서 **하드 컷 중단 건수 < 방향 오류로 되돌린 건수** → 커밋 절차만 남기고 PR 기계를 버린다
+- **훅 주입을 넣었는데도 커밋이 안 나옴** → 남은 원인은 모순이 아니라 무시다. 소프트 주입을 버리고
+  Stop 훅 차단(미커밋 + `plan/` 브랜치면 `exit 2`)으로 올린다. 지금 그러지 않은 이유는 매 턴 종료마다
+  git을 도는 비용과, "커밋할 게 없는 게 정상인 턴"에서의 오탐이다
 - **열린 PR이 상시 여러 개인 레포로 이 규칙을 옮김** → `plan/` 접두어를 눈으로 거르는 게 안 통한다.
   그때 비로소 라벨이 값을 갖는다(서버 사이드 필터). 지금 없앤 이유가 사라지는 지점이다
 - **draft가 "구현 중"과 어긋나기 시작함**(구현 중인데 리뷰를 받으려 ready로 올리는 일이 생김)
@@ -666,10 +689,10 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 | `idle-return-guard.sh` | UserPromptSubmit | 65분 경과 / `/close-session` | block 1회 | R6 |
 | `plan-saved-session-boundary.sh` | PostToolUse:Write | 플랜 경로 저장 (분할본은 `00-overview.md`만) | additionalContext | R1·R2 |
 | `plan-session-boundary-guard.sh` | UserPromptSubmit | 플랜 진입 프롬프트 + ctx ≥120k | additionalContext, 세션 1회 | R1 |
-| `sdd-kickoff-guard.sh` | UserPromptSubmit | 구현 의도 정규식 + 플랜 경로 | additionalContext, 세션 1회 | R2 |
+| `sdd-kickoff-guard.sh` | UserPromptSubmit | 구현 의도 정규식 + 플랜 경로 | additionalContext, 세션 1회. R2 몫(통독 금지)과 R15 몫(브랜치·커밋·draft PR 포인터)을 같이 낸다 — R15 몫은 **원격이 있을 때만**, 로컬 git 상태로만 분기(`gh` 호출 없음) | R2 · R15 |
 | `sdd-orchestrator-edit-guard.sh` | PreToolUse:Edit\|Write\|MultiEdit | [A] SDD 원장 존재 / [B] ctx ≥150k **AND** 편집 ≥15회 | deny 1회 → 재시도 통과 | — |
 | `subagent-model-default.sh` | PreToolUse:Agent\|Task | model 미지정 | `updatedInput` 주입 | R3 |
-| `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커. 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R15 |
+| `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커(`${HARNESS_STATE_DIR:-$HOME/.claude}/hooks/.stale-branch-pending/` — 짝인 ack 가드와 **같은 식으로** 유도해야 한다). 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R15 |
 | `plugin-update-guard.sh` | SessionStart | 설치본 version ≠ 소스 version, 또는 같은 version인데 설치본 커밋이 소스보다 뒤 | additionalContext로 갱신 절차 4단계 안내. 차단하지 않음 | R18 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
