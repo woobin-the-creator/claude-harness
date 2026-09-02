@@ -78,6 +78,22 @@ thread. Revise if the subject, a local term, the conclusion, the evidence, the
 current state, or the next action would be unclear there — or if the answer
 assumes a prerequisite the reader has not shown.
 
+## Consumers outside the chat
+
+Some callers use this skill to write a document rather than a chat reply. The
+calibration and self-containment rules above apply unchanged; only the
+container differs, and the container is owned by the caller, not by this skill.
+
+- **Pull request title and body** — the caller is the R15 procedure in
+  `woobin-harness/plan-exec-modes.md`, invoked once when the draft PR is opened
+  and again just before `gh pr ready`. The reader is a maintainer reading the
+  PR list or `git log` months later with no access to this session, so default
+  to the *situated* layer. Lead with the problem the user actually had, in the
+  user's terms, before naming any file, hook, or symbol. Keep what was verified
+  separate from what was assumed. The title is a single line and becomes the
+  squash merge commit subject, so it carries the problem — not the branch name,
+  not the file count.
+
 Output formatting and answer density follow the active output style and the
 global `CLAUDE.md` density rules. This skill decides **which layer to start
 from**, not how long the answer is.
