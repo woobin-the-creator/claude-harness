@@ -202,10 +202,11 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
 
   <li class="step">
     <div class="step-card">
-      <h3>구현 시작 = 브랜치 + draft PR <span class="tag">R15</span></h3>
+      <h3>구현 시작 = 브랜치 + draft PR, 끝 = 서사 <span class="tag">R15</span></h3>
       <p>첫 턴에 <code>plan/&lt;name&gt;</code> 브랜치를 만들고 <b>플랜 문서를 첫 커밋</b>으로 올려 <b>draft PR</b>을 연다. 레이어가 끝날 때마다 <b>커밋 → 리뷰 → push</b>. 마지막 레이어를 push하면 <code>gh pr ready</code>로 <b>draft를 벗긴다</b> — draft는 "구현 중"이지 "머지 전"이 아니다. 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다).</p>
       <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이고 레이어 해상도로 충분하다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --state open --draft</code>로 찾힌다.</p>
       <p class="why">이 규칙은 <b>2026-09-02까지 죽어 있었다</b> — 순수 절차라 아무도 강제하지 않았고, 구현자 정의 3종이 정반대(<code>Do not commit…</code>)를 지시하고 있었다. 지금은 정의가 커밋을 소유하고, 킥오프 가드가 절차 포인터를 같이 낸다. <b>자동으로 하는 건 <code>gh pr ready</code>까지</b>이고 <code>gh pr merge --squash</code>는 사람이 낸다.</p>
+      <p class="why">PR 제목·본문은 <b>변경 파일 목록이 아니라 서사</b>다 — "사용자가 겪던 문제 → 어떻게 풀었나". 문장은 <code>explain</code> 스킬을 <b>실제로 호출해서</b> 쓴다. 호출은 두 번: draft를 열 때 <b>문제</b>를, 마지막 레이어를 push한 뒤 <code>gh pr edit</code>으로 <b>해결</b>을 채운다(create 시점엔 코드가 없어 후자가 존재하지 않는다). 제목은 <b>squash 머지 커밋 제목</b>이 되므로 slug가 아니라 산문이다.</p>
     </div>
   </li>
 
