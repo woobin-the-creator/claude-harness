@@ -133,7 +133,7 @@ In `woobin-harness/plan-exec-modes-codex.md`, the R15 bullet spans lines 30–35
 - [ ] **Step 7: Verify**
 
 Run: `grep -c '어떻게 풀었나' woobin-harness/plan-exec-modes.md`
-Expected: `2`
+Expected: `3` — the two `## 어떻게 풀었나` headings from Steps 2 and 4, plus the prose mention inside the first bullet added in Step 5.
 
 Run: `grep -c '왜 이걸 하나' woobin-harness/plan-exec-modes.md`
 Expected: `2`

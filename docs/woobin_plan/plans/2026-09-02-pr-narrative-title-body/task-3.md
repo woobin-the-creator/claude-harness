@@ -49,14 +49,17 @@ fi
 
 Run:
 
+`$OLDPWD` is empty in a non-interactive shell, so capture the repo path explicitly first:
+
 ```bash
+repo=$(pwd)
 tmp=$(mktemp -d) && mkdir -p "$tmp/docs/woobin_plan/plans/p" \
   && printf '# Overview\n' >"$tmp/docs/woobin_plan/plans/p/00-overview.md" \
   && git -C "$tmp" init -q \
   && git -C "$tmp" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init \
   && git -C "$tmp" remote add origin https://example.invalid/x.git \
   && (cd "$tmp" && printf '%s' '{"session_id":"probe","prompt":"docs/woobin_plan/plans/p 구현 진행해줘"}' \
-      | TMPDIR="$tmp" "$OLDPWD/woobin-harness/hooks/sdd-kickoff-guard.sh") | jq -r '.hookSpecificOutput.additionalContext'
+      | TMPDIR="$tmp" "$repo/woobin-harness/hooks/sdd-kickoff-guard.sh") | jq -r '.hookSpecificOutput.additionalContext'
 ```
 
 Expected: the injected text prints, containing both `PR 제목·본문은 서사입니다` and `gh pr edit`. If `jq` errors, the shell string was closed in the wrong place in Step 2.

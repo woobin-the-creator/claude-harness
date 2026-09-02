@@ -28,7 +28,7 @@
 
 | # | Title | Files | Completion check |
 |---|---|---|---|
-| 1 | Rewrite the R15 create/ready procedure | `woobin-harness/plan-exec-modes.md:51-98`, `woobin-harness/plan-exec-modes-codex.md:30-35` | `grep -c '어떻게 풀었나' woobin-harness/plan-exec-modes.md` prints `2`; `claude plugin validate ./woobin-harness` |
+| 1 | Rewrite the R15 create/ready procedure | `woobin-harness/plan-exec-modes.md:51-98`, `woobin-harness/plan-exec-modes-codex.md:30-35` | `grep -c '어떻게 풀었나' woobin-harness/plan-exec-modes.md` prints `3`; `claude plugin validate ./woobin-harness` |
 | 2 | Give `explain` a documented PR consumer | `woobin-harness/skills/explain/SKILL.md` | `./scripts/test-skills.sh` |
 | 3 | Add the narrative pointer to the kickoff hook | `woobin-harness/hooks/sdd-kickoff-guard.sh:126-131`, `scripts/test-hooks.sh:144-161` | `./scripts/test-hooks.sh` |
 | 4 | Re-sync the four R15 documents | `docs/workflow-spec.md:442-527`, `docs/workflow.html:203-210`, `home/HARNESS-LOG.md` | the five distinctive-phrase `grep -q` chain in task-4 Step 7, then `./scripts/check-harness-docs.sh` |

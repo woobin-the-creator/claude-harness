@@ -90,9 +90,8 @@ container differs, and the container is owned by the caller, not by this skill.
   PR list or `git log` months later with no access to this session, so default
   to the *situated* layer. Lead with the problem the user actually had, in the
   user's terms, before naming any file, hook, or symbol. Keep what was verified
-  separate from what was assumed. The title is a single line and becomes the
-  squash merge commit subject, so it carries the problem — not the branch name,
-  not the file count.
+  separate from what was assumed. The title is a single line that outlives the
+  branch, so it carries the problem — not the branch name, not the file count.
 
 Output formatting and answer density follow the active output style and the
 global `CLAUDE.md` density rules. This skill decides **which layer to start
