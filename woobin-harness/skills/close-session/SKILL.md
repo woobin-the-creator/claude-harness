@@ -1,15 +1,9 @@
 ---
 name: close-session
-description: Mark a Claude Code session as finished so the idle auto-handoff hook does not wake up and write a handoff document for it. Use only when the user explicitly invokes or requests close-session; Codex does not enable the idle auto-handoff hook.
+description: Mark a Claude Code session as finished so the idle auto-handoff hook does not wake up and write a handoff document for it. Use only when the user explicitly invokes or requests close-session.
 ---
 
 The user has declared this conversation finished.
-
-## Codex
-
-Do not derive or invent a session id. The Codex hook set intentionally omits the asynchronous idle handoff because Codex does not support asynchronous command hooks. Tell the user that no idle handoff is scheduled and stop. Do not run the Claude cleanup commands below.
-
-## Claude Code
 
 Normally `idle-return-guard.sh` intercepts `/close-session` at the `UserPromptSubmit` hook and blocks it, so this skill never runs — that path costs zero tokens. If you are reading this, the interception did not happen, so do the same thing here.
 

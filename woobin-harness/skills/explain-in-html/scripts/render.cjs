@@ -2,7 +2,7 @@
 // usage: node render.cjs <htmlPath> <pngPath> [width=1200] [height=700]
 const path = require('path');
 
-// playwright는 이 스크립트 위치(Claude/Codex plugin cache)가 아니라 대상 프로젝트에
+// playwright는 이 스크립트 위치(Claude plugin cache)가 아니라 대상 프로젝트에
 // 설치돼 있으므로 cwd 기준으로 resolve한다. 없으면 글로벌/NODE_PATH로 fallback.
 function loadChromium() {
   const paths = [process.cwd(), path.join(process.cwd(), 'frontend'), path.join(process.cwd(), 'backend')];

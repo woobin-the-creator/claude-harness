@@ -10,7 +10,7 @@
 
 ## 0. 리뷰 프로토콜 — 이 문서를 받은 모델에게
 
-세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R17)** 를 붙여서 답하라.
+세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R22)** 를 붙여서 답하라.
 
 | # | 판정 | 판정 방법 |
 |---|------|-----------|
@@ -83,7 +83,7 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │     plan-reviewer (레이어별 배치 1회, 같은 세션에서 스폰 가능)
    │     PR → pr-demo-video 스킬
    │
-   ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, 선택적 DESIGN.md, 조건부 모듈)
+   ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, principles 선두, 선택적 DESIGN.md, 조건부 모듈)
    │                       └─ 복수 시안 격리 프리뷰·공유가 필요할 때만 show-design-sample
    ├─(C) 디버깅 ────── debug 스킬 (재현 루프를 먼저, 진단 기록을 산출물로)
    └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
@@ -305,7 +305,7 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 
 ### R9 — 구현자에게 검증을 지시하지 않는다
 
-**기전** 호스트별 모드 파일(`plan-exec-modes.md` / `plan-exec-modes-codex.md`) 공통 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
+**기전** `plan-exec-modes.md` 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
 넣지 않는다. 검증은 **별도 컨텍스트**(plan-reviewer)의 몫.
 
 **근거** Opus 5 프롬프팅 문서: *"legacy harness scaffolding that adds separate verification steps"* 는
@@ -371,9 +371,9 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 **마커 경로는 라이터와 리더가 같은 식으로 유도해야 한다.** 게이트 전체가 "리더가 라이터의 파일을 찾는다"에
 매달려 있어서, 경로 유도가 갈리면 게이트가 **에러 없이 통과**한다. 2026-09-02에 실제로 그랬다 —
 리더(`stop-warning-ack-guard.sh`)는 `${HARNESS_STATE_DIR:-$HOME/.claude}`를 따랐는데 라이터
-(`stale-branch-guard.sh`)는 `$HOME/.claude`로 하드코딩돼 있었다. Claude에서는 두 값이 같아 안 드러났고,
-`hooks.json`이 `HARNESS_STATE_DIR=$PLUGIN_DATA`를 넘기는 **Codex에서만** 갈려서 ack 게이트가 조용히
-죽어 있었다. `test-hooks.sh`의 Codex 픽스처가 이걸 잡고 있었지만 빨간 채로 방치돼 있었다 —
+(`stale-branch-guard.sh`)는 `$HOME/.claude`로 하드코딩돼 있었다. 두 값이 같은 환경에서는 안 드러나고,
+`HARNESS_STATE_DIR`를 다른 경로로 넘기는 환경에서만 마커가 갈려 ack 게이트가 조용히 죽는다.
+`test-hooks.sh`가 이걸 잡고 있었지만 빨간 채로 방치돼 있었다 —
 **검증 스위트가 빨갛게 남아 있으면 그 다음 회귀는 아무도 못 잡는다.**
 
 **무효화 조건**
@@ -414,7 +414,7 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 ### R14 — 하네스 문서 동기화를 기계가 센다
 
 **기전** `scripts/check-harness-docs.sh` — 훅·에이전트·스킬의 **실제 개수**를 세어 README·
-Claude/Codex `plugin.json`·marketplace·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
+`plugin.json`·marketplace·이 문서(§4)의 선언값과 대조하고, 훅·에이전트 파일이 §4 인벤토리에
 등재됐는지 확인하고, `woobin-harness/` 변경 시 문서 동반 수정 여부를 git diff로 판정한다.
 짝: `harness-doc-sync-guard.sh` (PostToolUse:Edit|Write|MultiEdit) — 이 레포에서 `woobin-harness/`를
 고치면 검사기를 돌려 결과를 additionalContext로 주입한다. 세션 1회, 차단하지 않는다.
@@ -466,9 +466,7 @@ UserPromptSubmit에 네트워크 지연을 싣지 않고, fixture로 결정론�
 그 문장을 소유한 문서가 레포에 없다. `00-overview.md`의 `Goal:`은 이미 엔지니어링 언어로 번역된 뒤다.
 그래서 제목·본문을 서사로 바꾸고(`<문제> — <해결 요지>`), 문장 규칙은 새로 쓰지 않고 `explain`
 스킬을 **실제로 호출해서** 쓰기로 했다(그 스킬의 `## Consumers outside the chat` 절이 이 소비처를
-명시한다). Claude Code에서는 `Skill` 툴 호출이고, **Codex에는 그 수단이 없을 수 있어**
-`skills/explain/SKILL.md`를 읽어 적용하는 경로를 `plan-exec-modes-codex.md`가 따로 규정한다.
-호출은 두 번이다 — draft PR을 열 때 "왜 이걸 하나"를, 마지막 레이어를 push한 뒤
+명시한다). 호출은 두 번이다 — draft PR을 열 때 "왜 이걸 하나"를, 마지막 레이어를 push한 뒤
 `gh pr edit`로 "어떻게 풀었나"를 채운다. **create 시점에는 후자가 존재할 수 없다**(코드가 아직 없다).
 훅은 새로 만들지 않고 `sdd-kickoff-guard.sh`의 기존 R15 블록을 **세 군데** 고쳤다 —
 (1) `plan/*` 분기에 절차 포인터 한 줄, (2) 서사 불릿 신설, (3) 기존 `gh pr ready` 불릿을
@@ -616,7 +614,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 **문제.** 신규 방향 탐색, 기존 시스템 보존, 구현 계약, 렌더 리뷰, 반복 실패의 가드 승격은 서로 다른 비용과 권한을 가진다. 하나의 큰 규칙 문서나 넓은 자동 트리거로 합치면 작은 변경도 모든 컨텍스트를 읽고 `design-rules`와 후보 비교 스킬이 경쟁한다.
 
-**규칙.** 명시적 첫 도입·리디자인·리뷰·반복 실패와 managed `DESIGN.md`가 있는 프로젝트의 UI 작업은 `design-workflow`가 먼저 분류한다. 그린필드/대규모 리디자인에서만 direction을 읽고, review-only는 쓰지 않으며, `DESIGN.md` 부재·unmanaged 상태는 작업을 막지 않는다. 복수 시안 렌더가 필요할 때만 `show-design-sample`로 내려간다.
+**규칙.** 명시적 첫 도입·리디자인·리뷰·반복 실패와 managed `DESIGN.md`가 있는 프로젝트의 UI 작업은 `design-workflow`가 먼저 분류한다. `none`이 아닌 모든 route는 `principles`를 선두에서 읽고(R21), 그린필드/대규모 리디자인에서만 direction을 읽고, review-only는 쓰지 않으며, `DESIGN.md` 부재·unmanaged 상태는 작업을 막지 않는다. 복수 시안 렌더가 필요할 때만 `show-design-sample`로 내려간다.
 
 **기전.** 짧은 Router가 route를 공개하고 progressive disclosure reference를 조건부로 읽는다. 구조화된 `DESIGN.md`는 선택적 durable state이고, validator는 managed block만 검사한다. 프로젝트별 가드는 기존 컴포넌트·린터·테스트 스택에 생성한다.
 
@@ -681,8 +679,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 외울 목록도 같이 바뀐다. 그리고 진입 스킬을 모델 자동 발동에 맡기면 트리거가 겹치는 순간 안 뜬다 —
 `brainstorming`이 `grill-me`와 겹쳐 3일 246세션 **발동 0회**로 삭제된 게 실측이다(HARNESS-LOG #27).
 
-**규칙** 진입점은 `kick-off` 하나다. `disable-model-invocation: true`(Codex는 `agents/openai.yaml`의
-`policy.allow_implicit_invocation: false`)로 **사람만** 부른다. 스킬 본문은 하위 스킬을 이름으로만
+**규칙** 진입점은 `kick-off` 하나다. `disable-model-invocation: true`로 **사람만** 부른다. 스킬 본문은 하위 스킬을 이름으로만
 부르고 절차를 옮겨 적지 않는다. **난이도는 판정하지 않는다** — 호출됐다는 사실 자체가 사용자의 판정이다.
 
 **기전** 둘이다. ① 스킬 `kick-off`이 레포 상태(`plans/`·`specs/`)로 진입 지점을 정하고
@@ -711,9 +708,98 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 ---
 
+### R21 — 디자인 모듈은 처방이 아니라 원칙·관찰·프로세스만 담는다
+
+**문제** `design-workflow`의 모듈들이 처방을 담고 있었다 — "테이블 셀은 기본 한 줄", "라벨은 톤이 아니라
+굵기로 값과 구분한다", "`transition: all`을 기본으로 쓰지 마라", "고정 팔레트·60/30/10·단일 강조 규칙을
+외부에서 베끼지 마라". 처방은 두 가지로 실패한다. ① **자기 권위 순서와 모순된다** —
+`system-evidence.md`는 프로젝트 증거가 스킬 기본값을 이긴다고 선언하는데, 처방은 프로젝트를 읽기 전에
+답을 이미 정해 놓는다. 충돌하면 어느 쪽이 이기는지 스킬 자신이 답하지 못한다. ② **프론티어 모델에게
+처방은 판단을 대체한다** — 근거가 떨어져 나간 형태만 남은 규칙은 맥락이 다른 화면에도 그대로 적용된다.
+같은 스킬의 `evolution.md`가 이미 "A prohibition names the thing it prohibits and invites it back"이라고
+적어 두었는데, 그 문장이 자기 본문에는 적용되지 않고 있었다.
+
+**규칙** 디자인 모듈이 담을 수 있는 것은 세 종류다 — (a) 권위 순서·승인 경계·라이프사이클 같은
+**프로세스 가드레일**, (b) 실제로 무엇이 어긋났는지의 **관찰 기록**, (c) 왜 결과가 달라지는지의 **원칙**.
+"이렇게 하라 / 하지 마라"의 형태는 담지 않는다. 외부에서 온 상수(400ms, 7±2, 60/30/10, 58/400,
+중첩 깊이 3)는 기전만 남기고 값은 프로젝트에서 측정한다. 예외는 외부 표준(WCAG 대비·타깃 크기)과
+데이터 파괴를 막는 안전 규칙 둘뿐이며, 이 둘도 이유를 함께 적는다.
+
+**기전** `references/principles.md`가 `none`이 아닌 모든 route의 선두에서 읽힌다. 원칙마다 세 줄 —
+무엇을 주장하나 / 이 프로젝트에서 무엇을 묻게 하나 / 언제 약해지나. 파일 서두가 "원칙은 질문을 만들고
+답은 프로젝트가 준다"를 명시해 권위 순서와 경쟁하지 않게 한다. 처방을 지운 자리에는 `Observed:` 기록이
+남는다 — `evolution.md`가 "선례는 나중 세션이 코드를 읽어 복구할 수 없는 유일한 부분"이라고 한 그것이다.
+`implementation-contracts.md`의 표는 `Portable treatment`(처방)에서 `What it showed`(관찰)로 바뀌었다.
+
+**근거** 2026-09-02 `lawsofux.com`의 30개 항목을 전수 검토해 23개를 21개 원칙으로 옮기고 7개를 버렸다
+(Occam·Pareto는 UI 규칙이 아닌 일반 격언, Flow·Parkinson은 UI 결정으로 환원되지 않음, Cognitive
+Load·Working Memory·Cognitive Bias는 사전 항목이라 Chunking·Hick에 흡수). 옮기는 과정에서 기존 처방과 새 원칙이 정면
+충돌하는 지점이 드러난 것이 이 규칙의 직접 계기다 — `direction.md`의 "universal one-accent rule 금지"는
+Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hick's Law를 고정 상한으로
+쓰는 순간 무너진다. 두 충돌 모두 "법칙을 규칙으로 쓰면" 생기고, "근거로 쓰면" 사라진다.
+
+**대가** ① **원칙은 검사할 수 없다.** 훅이나 테스트가 위반을 잡지 못하고, 지켜졌는지는 렌더 리뷰에서
+사람이 본다. ② 처방보다 길다 — `principles.md` 한 파일이 모든 route에 얹힌다. ③ 모델이 원칙을 인용해
+자기 취향을 정당화할 여지가 생긴다. 그래서 권위 순서는 여전히 원칙 위에 있고, 원칙 파일 자신이 그렇게
+선언한다.
+
+**무효화 조건** — 다음 중 하나라도 참이면 이 규칙을 되돌리거나 좁혀라
+- 처방을 지운 뒤 **같은 종류의 렌더 실패가 3회 반복 관측된다** → 그 항목만 `evolution.md`의 사다리를
+  타고 컴포넌트·린터·테스트로 올린다. 산문 처방으로 되돌리는 게 아니라 **기계 가드로 올린다**
+- 모델이 원칙을 인용해 프로젝트 증거를 뒤집는 게 관측된다 → 원칙 파일 서두의 권위 문단이 실패한 것이므로
+  원칙 전체를 `candidate` 라이프사이클 안으로 되돌린다
+- `principles.md`가 매 route에 얹히는 비용이 관측 가능한 지연·누락으로 나타난다 → route별로 섹션을
+  쪼개거나 review 전용으로 내린다
+- 하네스가 디자인 결과에 대한 결정론적 검증(시각 회귀 게이트, 렌더 diff)을 갖게 된다 → 그때는 검사
+  가능한 항목부터 다시 규칙으로 내려도 된다. 이 규칙의 근거 절반은 "검사할 수 없으면 처방은 해롭다"이다
+
+---
+
+### R22 — 이 레포는 한 런타임만 소유한다
+
+**문제** 같은 하네스를 Claude Code와 Codex에서 같이 쓰려고 2026-08-12에 호환 레이어를 넣었다(R17 이전
+버전의 §7). 대가는 **모든 것이 두 벌이 되는 것**이었다 — 매니페스트 2개, 훅 wiring 2개(`hooks.json` ·
+`claude-hooks.json`), 에이전트 정의 2벌(`.md` · `.toml`), 구현 모드 문서 2개, bootstrap 2개, 검증
+스크립트 2개, 레포 루트 지침 2개(`CLAUDE.md` · `AGENTS.md`). 소유자가 둘이 되면 한쪽만 고쳐 조용히
+갈라진다 — §6-6이 문서에 대해 말하는 그 실패가 런타임 축으로 복제됐다. 실제로 세 번 났다:
+
+1. `stale-branch-guard.sh`가 `HARNESS_STATE_DIR`를 리더만 따르고 라이터는 하드코딩해, R12의 ack
+   게이트가 Codex에서만 죽어 있었다(2026-09-02, R12 §기전)
+2. `test-skills.sh`·`validate-codex.sh`가 실제와 다른 스킬 개수(44)를 단언한 채 08-12부터 계속 빨갰다
+3. R20이 `kick-off`에 요구하는 `disable-model-invocation: true`를 Codex validator가 **거부**해
+   `validate-codex.sh`가 상시 실패했다 — 두 런타임의 요구가 정면으로 모순된 지점이다
+
+**규칙** 이 레포는 Claude Code 하네스만 소유한다. Codex 하네스는 별도 플러그인 레포가 소유한다.
+런타임 분기(`HARNESS_HOST`), 호스트별 대응본, "두 매니페스트를 같은 버전으로" 같은 규약을 이 레포에
+다시 들이지 않는다. 스킬 본문에 다른 런타임의 이름을 조건으로 적지 않는다.
+
+**기전** 삭제다 — `codex/`, `.agents/`, `.codex-plugin/`, `bootstrap-codex.sh`, `validate-codex.sh`,
+`plan-exec-modes-codex.md`, `hooks/hooks.json`, `scripts/codex-apply-patch-adapter.sh`,
+`git-guardrails-codex`, `AGENTS.md`, 호환 감사 문서. 훅의 `HARNESS_HOST` 분기 2곳과
+`check-harness-docs.sh`의 두 번째 버전 대조를 제거했다. `HARNESS_STATE_DIR`는 **남긴다** —
+그건 호스트 분기가 아니라 테스트 격리 수단이다.
+
+**근거** 호환 레이어가 산 것은 "같은 스킬을 두 런타임에서 읽는다"였는데, 스킬은 애초에 마크다운이라
+레포를 나누어도 복사가 가능하다. 반대로 잃은 것은 단일 소유권이었고, 그 대가가 위 세 사고다.
+분리 시점에 Codex 쪽 자산은 파일 11개·에이전트 6개로, 별도 레포가 감당 못 할 크기가 아니다.
+
+**대가** ① 두 레포에서 같은 스킬을 고쳐야 하는 순간이 온다 — 그때는 **복사**이지 동기화 규약이 아니다.
+어느 쪽이 정본인지는 각 레포가 스스로 답한다. ② Codex에서 이 하네스를 쓰던 흐름이 끊긴다.
+③ 과거 이력(§4의 08-12 감사 서술, `HARNESS-LOG.md` #21·#22)은 사실로 남아 있어, 이 문서만 읽으면
+"왜 있었는지"를 알 수 없다. 그래서 이 규칙이 그 서사를 대신 짊어진다.
+
+**무효화 조건** — 다음 중 하나라도 참이면 되돌려라
+- 두 레포의 스킬이 실제로 갈라져 **한쪽에서만 고쳐진 버그가 관측된다** → 복사 비용이 호환 레이어
+  비용을 넘은 것이다. 단, 그때도 두 매니페스트가 아니라 **스킬만** 공유하는 형태부터 시도해라
+- 플러그인 규격이 런타임 간 표준화돼 매니페스트·훅 wiring·에이전트 형식이 한 벌로 충분해진다
+  → 이 규칙의 근거(모든 것이 두 벌)가 통째로 사라진다
+- Codex를 다시 상시 사용하게 되고, 별도 레포를 유지하는 손이 이 레포보다 더 든다는 게 관측된다
+
+---
+
 ## 4. 구성요소 인벤토리
 
-공통 스킬과 훅 스크립트는 `woobin-harness` 플러그인이 나른다. Claude Code와 Codex는 같은 스킬 디렉터리를 읽되, 매니페스트와 훅 wiring은 런타임별로 분리한다. Claude 에이전트는 플러그인이, Codex 에이전트 TOML은 `bootstrap-codex.sh`가 사용자 홈에 설치한다.
+스킬·훅·에이전트를 `woobin-harness` 플러그인 하나가 나른다. Codex 지원은 2026-09-02에 별도 플러그인 레포로 분리했다(R22) — 이 인벤토리는 Claude Code 전용이다.
 
 ### 훅 13개
 
@@ -733,7 +819,7 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
 | `kickoff-guard.sh` | UserPromptSubmit | [A] 킥오프 키워드(하이픈 파일명 제외) / [B] 상태 파일 `active: true` + `stage: spec\|plan` + 구현 의도 정규식 | additionalContext. [A]는 매번, [B]는 세션 1회 | R20 |
 
-Codex는 이 13개 중 `sdd-kickoff-guard.sh`, `kickoff-guard.sh`, `harness-doc-sync-guard.sh`, `stale-branch-guard.sh`, `stop-warning-ack-guard.sh` 5개만 연결한다. `plugin-update-guard.sh`는 Claude Code의 `~/.claude/plugins/` 레이아웃에만 의존하는 Claude 전용 훅이라 Codex에 연결하지 않는다. 비동기 command hook 미지원 때문에 `idle-handoff-stop.sh`는 연결할 수 없고, transcript 토큰 계측·Claude 모델명·subagent payload에 의존하는 훅은 잘못된 강제를 피하려고 미연결로 둔다. `hooks/hooks.json`이 Codex 정본, `hooks/claude-hooks.json`이 Claude 정본이다. Codex의 `apply_patch` 입력은 `scripts/codex-apply-patch-adapter.sh`가 `tool_input.file_path`로 정규화한다.
+`hooks/claude-hooks.json`이 wiring 정본이다.
 
 **조정 손잡이** (전부 환경변수, 기본값)
 
@@ -774,11 +860,12 @@ KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_
 써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
 프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
-Codex 대응본은 `codex/agents/*.toml` 6개다. `explorer`·`screenshot-verifier`는 `gpt-5.6-terra/low`, `plan-implementer-terra-medium`은 `gpt-5.6-terra/medium`, `plan-implementer-gpt56-medium`은 `gpt-5.6/medium`, `plan-implementer-gpt56-xhigh`는 `gpt-5.6/xhigh`, `plan-reviewer`는 `gpt-5.6/high`로 옮겼다. Claude의 `memory`·`maxTurns` 계약은 Codex custom-agent schema에 동일 필드가 없어 복제하지 않고, 핵심 보고 상한과 read-only sandbox만 유지한다.
 
-### 스킬 21개
+### 스킬 20개
 
-2026-08-28, `systematic-debugging`을 `debug`로 교체했다(개수 21 유지). 근거는 실측 둘이다 —
+2026-09-02, Codex 지원을 분리하면서 `git-guardrails-codex`를 지워 21 → 20이 됐다(R22).
+
+2026-08-28, `systematic-debugging`을 `debug`로 교체했다(당시 개수 21 유지). 근거는 실측 둘이다 —
 세션 JSONL 1,803개에서 발동 3회, 그리고 재현 산출물을 만든 16세션 중 15세션이 그 스킬을 **한 번도
 발동하지 않은** 세션이다(즉 "수정 전 재현"은 스킬이 만든 습관이 아니다). 본문 274줄 중 대부분이
 obra/superpowers 사본이었고 보조 파일 3개는 upstream과 바이트 동일이었다. 새 본문은 세 조항만
@@ -792,8 +879,8 @@ diagnosing-bugs`가 트리거 문구로 "debug this"를 명시적으로 갖고 �
 채울 수 없다. 서사는 `home/HARNESS-LOG.md` #33.
 
 2026-08-27, 파이프라인의 단일 진입점 `kick-off`을 추가해 20 → 21이 됐다. 이 레포에서 처음으로
-`disable-model-invocation: true`를 쓰는 스킬이다(Codex 대응은 `agents/openai.yaml`의
-`policy.allow_implicit_invocation: false`) — 사람만 부를 수 있어서 `interview`와 트리거가 경쟁하지
+`disable-model-invocation: true`를 쓰는 스킬이다
+— 사람만 부를 수 있어서 `interview`와 트리거가 경쟁하지
 않는다. 본문은 위임만 하고 하위 스킬의 절차를 한 줄도 옮겨 적지 않는다. 규칙은 §3 R20.
 
 2026-08-26, 기존 인포그래픽 스킬을 `explain-in-html`로 개명하고 독자 눈높이에 맞춘 텍스트 설명
@@ -861,11 +948,8 @@ diagnosing-bugs`가 트리거 문구로 "debug this"를 명시적으로 갖고 �
 **같이 발견한 것**: `~/.claude/skills/`에 플러그인 이전의 실디렉터리 사본이 22개 남아 있었다(k-skill 심링크 62개와 별개).
 10개는 정본과 갈라져 있었고 — `grill-me` 사본은 08-07판이라 08-21 재작성 전 물건이었다 — 두 벌의 description이 모두 상시 로드되므로
 이 문단이 말하는 바로 그 **프롬프트 충돌**이다. 백업(`~/.claude/skills-backup-woobin-260821.tgz`) 후 22개를 지웠다.
-그리고 `scripts/test-skills.sh`·`scripts/validate-codex.sh`가 스킬 **44개**를 단언하고 있었다(실제 28개) — 08-12부터 계속 실패하던 게이트다.
+그리고 `scripts/test-skills.sh`가 스킬 **44개**를 단언하고 있었다(실제 28개) — 08-12부터 계속 실패하던 게이트다.
 
-Codex 호환으로 `git-guardrails-codex`를 추가했다. Claude 전용 `argument-hint`·`disable-model-invocation` frontmatter는 Codex validator가 거부하므로 제거하고, 명시 호출 제한은 description으로 옮겼다. Claude Buddy·Claude 세션 로그처럼 본질적으로 Claude 전용인 스킬은 description에 경계를 명시하고 그대로 배포한다.
-
-2026-08-12 결정론적 감사에서 Codex의 실제 prompt input이 44개를 모두 발견했고, 번들 자산(브레인스토밍 서버, 토큰/역량 분석기, 미디어 추출기, 포스트 조립기)의 네트워크 없는 fixture가 통과했다. 세부 결과와 의도적 미지원은 `docs/codex-compatibility-audit-2026-08-12.md`.
 
 상시 컨텍스트 비용은 스킬 **description만** 실린다(본문은 호출 시 로드). 이전 측정에서 유사 플러그인
 14엔트리가 ~500 tok이었다 — 세션 floor 43~46k의 1% 수준이라 **비용은 스킬 제거 사유가 아니다.**
@@ -897,9 +981,9 @@ mtime 캐시로 1초 갱신 부담 제거. claude-buddy **wrapper** 방식이라
 
 ## 5. 구현 모드
 
-전문은 Claude Code용 `woobin-harness/plan-exec-modes.md`와 Codex용 `woobin-harness/plan-exec-modes-codex.md`. 공유 `writing-plans` 스킬이 호스트 대응본에서 **1개를 추천**한다 —
+전문은 `woobin-harness/plan-exec-modes.md`. `writing-plans` 스킬이 그중 **1개를 추천**한다 —
 추천 근거는 overview의 순서 의존성이고, 그 판단은 **플랜을 방금 쓴 세션만 싸게 할 수 있다.**
-아래 표는 Claude Code 런치 값이며, Codex 대응은 각각 `gpt-5.6-terra/medium`, `gpt-5.6/medium`, `gpt-5.6/xhigh`를 쓴다.
+아래 표가 런치 값이다.
 
 | 모드 | 런치 | 성립 조건 | 위임 | 게이트 0개일 때 |
 |------|------|-----------|------|------|
@@ -1060,8 +1144,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | 파일 | 내용 |
 |------|------|
 | `home/HARNESS-LOG.md` | 개선 이력의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
-| `woobin-harness/plan-exec-modes.md` | Claude Code 모드 3종 전문 |
-| `woobin-harness/plan-exec-modes-codex.md` | Codex 모델·effort·에이전트 대응본 |
+| `woobin-harness/plan-exec-modes.md` | 모드 3종 전문 |
 | `woobin-harness/hooks/*.sh` | 각 파일 헤더에 그 훅만의 상세 근거(사고 이력 포함) |
 | `docs/workflow.html` | 사람이 보는 요약 |
 | `README.md` | 레포 구조·플러그인 형태·전환 절차 |

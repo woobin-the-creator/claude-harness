@@ -36,7 +36,6 @@ report=$(sh "$checker" 2>&1) || :
 printf '%s' "$report" | grep -q '✗\|⚠' || exit 0
 
 guide=CLAUDE.md
-[ "${HARNESS_HOST:-claude}" = "codex" ] && guide=AGENTS.md
 
 msg="[하네스 문서 동기화 검사] \`woobin-harness/\` 를 수정했습니다. 아래는 \`scripts/check-harness-docs.sh\` 결과입니다.
 

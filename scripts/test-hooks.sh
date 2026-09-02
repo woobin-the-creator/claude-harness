@@ -185,9 +185,9 @@ exit 1
 EOF
 chmod +x "$sync_root/scripts/check-harness-docs.sh"
 sync_input="{\"session_id\":\"sync-session\",\"cwd\":\"$sync_root\",\"tool_input\":{\"file_path\":\"$sync_root/woobin-harness/file.txt\"}}"
-out=$(printf '%s' "$sync_input" | TMPDIR="$TEST_TMP" HARNESS_HOST=codex "$HOOKS/harness-doc-sync-guard.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "PostToolUse" and (.hookSpecificOutput.additionalContext | contains("AGENTS.md"))' "harness-doc-sync-guard: missing Codex context"
-out=$(printf '%s' "$sync_input" | TMPDIR="$TEST_TMP" HARNESS_HOST=codex "$HOOKS/harness-doc-sync-guard.sh")
+out=$(printf '%s' "$sync_input" | TMPDIR="$TEST_TMP" "$HOOKS/harness-doc-sync-guard.sh")
+assert_json "$out" '.hookSpecificOutput.hookEventName == "PostToolUse" and (.hookSpecificOutput.additionalContext | contains("CLAUDE.md"))' "harness-doc-sync-guard: missing context"
+out=$(printf '%s' "$sync_input" | TMPDIR="$TEST_TMP" "$HOOKS/harness-doc-sync-guard.sh")
 assert_silent "$out" "harness-doc-sync-guard once-only"
 pass "harness-doc-sync-guard trigger/once"
 
@@ -227,25 +227,25 @@ git -C "$seed" push -q
 
 stale_input='{"session_id":"stale-session","source":"startup"}'
 out=$(cd "$behind" && printf '%s' "$stale_input" \
-  | HARNESS_HOST=codex HARNESS_STATE_DIR="$TEST_ROOT/codex-state" "$HOOKS/stale-branch-guard.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "SessionStart" and (.hookSpecificOutput.additionalContext | contains("새 worktree"))' "stale-branch-guard: missing Codex context"
-[ -f "$TEST_ROOT/codex-state/hooks/.stale-branch-pending/stale-session" ] || fail "stale-branch-guard: marker missing"
+  | HARNESS_STATE_DIR="$TEST_ROOT/hook-state" "$HOOKS/stale-branch-guard.sh")
+assert_json "$out" '.hookSpecificOutput.hookEventName == "SessionStart" and (.hookSpecificOutput.additionalContext | contains("EnterWorktree"))' "stale-branch-guard: missing context"
+[ -f "$TEST_ROOT/hook-state/hooks/.stale-branch-pending/stale-session" ] || fail "stale-branch-guard: marker missing"
 
 out=$(printf '%s' '{"session_id":"stale-session","stop_hook_active":false,"last_assistant_message":"unrelated"}' \
-  | HARNESS_HOST=codex HARNESS_STATE_DIR="$TEST_ROOT/codex-state" "$HOOKS/stop-warning-ack-guard.sh")
+  | HARNESS_STATE_DIR="$TEST_ROOT/hook-state" "$HOOKS/stop-warning-ack-guard.sh")
 assert_json "$out" '.decision == "block" and (.reason | contains("stale-branch 경고"))' "stop-warning-ack-guard: missing block"
 out=$(printf '%s' '{"session_id":"stale-session","stop_hook_active":true,"last_assistant_message":"still unrelated"}' \
-  | HARNESS_HOST=codex HARNESS_STATE_DIR="$TEST_ROOT/codex-state" "$HOOKS/stop-warning-ack-guard.sh")
+  | HARNESS_STATE_DIR="$TEST_ROOT/hook-state" "$HOOKS/stop-warning-ack-guard.sh")
 assert_silent "$out" "stop-warning-ack-guard active retry"
-[ ! -e "$TEST_ROOT/codex-state/hooks/.stale-branch-pending/stale-session" ] || fail "stop-warning-ack-guard: active marker not removed"
+[ ! -e "$TEST_ROOT/hook-state/hooks/.stale-branch-pending/stale-session" ] || fail "stop-warning-ack-guard: active marker not removed"
 
 out=$(cd "$behind" && printf '%s' '{"session_id":"stale-ack","source":"resume"}' \
-  | HARNESS_HOST=codex HARNESS_STATE_DIR="$TEST_ROOT/codex-state" "$HOOKS/stale-branch-guard.sh")
+  | HARNESS_STATE_DIR="$TEST_ROOT/hook-state" "$HOOKS/stale-branch-guard.sh")
 assert_json "$out" '.hookSpecificOutput.hookEventName == "SessionStart"' "stale-branch-guard: second session did not trigger"
 out=$(printf '%s' '{"session_id":"stale-ack","stop_hook_active":false,"last_assistant_message":"stale-branch 점검 경고 전달"}' \
-  | HARNESS_HOST=codex HARNESS_STATE_DIR="$TEST_ROOT/codex-state" "$HOOKS/stop-warning-ack-guard.sh")
+  | HARNESS_STATE_DIR="$TEST_ROOT/hook-state" "$HOOKS/stop-warning-ack-guard.sh")
 assert_silent "$out" "stop-warning-ack-guard acknowledged response"
-[ ! -e "$TEST_ROOT/codex-state/hooks/.stale-branch-pending/stale-ack" ] || fail "stop-warning-ack-guard: acknowledged marker not removed"
+[ ! -e "$TEST_ROOT/hook-state/hooks/.stale-branch-pending/stale-ack" ] || fail "stop-warning-ack-guard: acknowledged marker not removed"
 pass "stale-branch + stop-warning block/ack/loop guard"
 
 # plugin-update-guard: 버전 드리프트 / 커밋 드리프트 / 정상 / 판단불가 네 갈래.

@@ -220,10 +220,7 @@ Keep the reviewer's `**Gates:** N` line. The Execution Handoff below routes on t
 
 ## Execution Handoff
 
-Read the execution-mode file for the current host and follow it — it owns the mode contract, the gate-routing table, and the full-auto procedure:
-
-- Claude Code: [plan-exec-modes.md](../../plan-exec-modes.md)
-- Codex: [plan-exec-modes-codex.md](../../plan-exec-modes-codex.md)
+Read [plan-exec-modes.md](../../plan-exec-modes.md) and follow it — it owns the mode contract, the gate-routing table, and the full-auto procedure.
 
 ### Pick the mode
 
@@ -255,8 +252,6 @@ Never fan out a subagent per task, and never tell an implementer to verify its o
 
 End the response with a copyable kickoff prompt, because the handoff only pays off if the user can start the next session without composing anything. Anything they have to fill in themselves is a place the handoff breaks.
 
-Make a fenced ` ```text ` block the **final content of the response** — nothing after it. Match the user's language — the kickoff block is read by a person, unlike the plan documents themselves. Follow the selected host file's kickoff format, and substitute the real model, effort, mode number, and absolute plan path. Leave no angle-bracket placeholders.
+Make a fenced ` ```text ` block the **final content of the response** — nothing after it. Match the user's language — the kickoff block is read by a person, unlike the plan documents themselves. Follow the kickoff format in `plan-exec-modes.md`, and substitute the real model, effort, mode number, and absolute plan path. Leave no angle-bracket placeholders.
 
-Do not mix hosts: no Claude model names or `/effort` commands in a Codex kickoff, and no Codex model slugs or `-c model_reasoning_effort=…` in a Claude Code kickoff. A kickoff that names the wrong runtime is worse than none — it gets pasted and fails in a way the user has to debug.
-
-Measured basis: this harness repo's `home/HARNESS-LOG.md` §16 (single-owner effort/model, no per-task fanout, no self-verification), and the sources at the bottom of the selected modes file.
+Measured basis: this harness repo's `home/HARNESS-LOG.md` §16 (single-owner effort/model, no per-task fanout, no self-verification), and the sources at the bottom of `plan-exec-modes.md`.

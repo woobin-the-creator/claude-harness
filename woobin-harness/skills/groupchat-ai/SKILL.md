@@ -1,7 +1,7 @@
 ---
 name: groupchat-ai
 description: |
-  나(사용자) · 사외 AI(Claude Code/Codex) · 사내 AI(opencode)의 air-gap 삼자대화를 중개한다.
+  나(사용자) · 사외 AI(Claude Code) · 사내 AI(opencode)의 air-gap 삼자대화를 중개한다.
   사용자가 사내/opencode 보고·전달문을 붙여넣거나, 사내/opencode에 lookup·runbook·코드
   구현·commit·push를 요청하는 모든 경우에 발동한다. 프로젝트의 clone-local agent role을 먼저
   확인하고, external-implementer만 mediator로 진행한다. internal-executor에는 사실 조회와
@@ -11,7 +11,7 @@ description: |
 
 # groupchat-ai
 
-**호스트 호환 용어:** 이 문서의 역사적 표기 `Claude`/`Claude Code`는 "현재 이 스킬을 실행하는 사외 AI"를 뜻한다. Codex에서 호출됐으면 그 역할은 Codex다. 제품 고유 동작을 지시하는 표현이 아니라 역할명으로 읽는다.
+**용어:** 이 문서의 `Claude`/`Claude Code`는 "사외 AI" 역할명이다. 제품 고유 동작을 지시하는 표현이 아니다.
 
 나 · 외부 구현자 · 내부 실행자가 하나의 대화방에 있는 것처럼 협업하되, 역할과 정본 소유권을 섞지 않는다.
 
