@@ -112,7 +112,8 @@ if git rev-parse --git-dir >/dev/null 2>&1 && [ -n "$(git remote 2>/dev/null)" ]
   case "$cur_branch" in
     plan/*)
       r15="이미 \`${cur_branch}\` 위입니다 — 첫 턴 절차를 다시 하지 마세요.
-열린 draft PR이 있는지만 확인하고(\`gh pr list --head ${cur_branch} --state open --draft\`), 없으면 지금 엽니다.
+열린 draft PR이 있는지만 확인하고(\`gh pr list --head ${cur_branch} --state open --draft\`), 없으면 지금 엽니다 —
+제목·본문 형식은 \`plan-exec-modes.md\`의 \"중단 대비\" 소절에 있습니다.
 이후 레이어마다: 커밋(구현자) → \`plan-reviewer\` → 수정 → push(오케스트레이터) → PR 코멘트 5행 이내." ;;
     *)
       r15="아직 \`plan/\` 브랜치가 아닙니다(현재: \`${cur_branch:-detached}\`). **코드에 손대기 전에** 첫 턴 절차부터 하세요 —
@@ -127,7 +128,12 @@ if git rev-parse --git-dir >/dev/null 2>&1 && [ -n "$(git remote 2>/dev/null)" ]
 
 - **커밋은 레이어 구현자가, push는 리뷰를 돌린 오케스트레이터가** 합니다. 구현자에게 push를 시키지 마세요 —
   이 분리가 \"리뷰 전에는 원격에 안 올라간다\"를 절차가 아니라 구조로 만듭니다.
-- **마지막 레이어를 push한 직후 \`gh pr ready\`** 로 draft를 벗깁니다. 머지까지 미루지 마세요.
+- **PR 제목·본문은 서사입니다** — 변경 파일 나열이 아니라 \"사용자가 겪던 문제 → 어떻게 풀었나\"입니다.
+  \`explain\` 스킬을 **실제로 호출해서**(Claude Code: \`Skill\` 툴) 쓰고, 호출은 **두 번**입니다 —
+  draft를 열 때와 \`gh pr ready\` 직전. 제목 형식·본문 틀·왜 두 번인지는
+  \`plan-exec-modes.md\`의 \"중단 대비\" 소절이 소유합니다. 거기 것을 그대로 쓰세요.
+- **마지막 레이어를 push한 직후 \`gh pr edit\`로 제목·본문을 다시 쓰고 \`gh pr ready\`** 로 draft를
+  벗깁니다. create 시점에는 \"어떻게 풀었나\"가 존재하지 않았습니다. 머지까지 미루지 마세요.
 - 머지(\`gh pr merge --squash\`)는 사용자가 합니다. 자동으로 머지하지 마세요."
 fi
 

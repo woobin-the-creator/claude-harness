@@ -146,6 +146,7 @@ git -C "$r15_root" remote add origin https://example.invalid/x.git
 r15_input='{"session_id":"r15-a","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
 out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
 assert_json "$out" '.hookSpecificOutput.additionalContext | contains("R15 — 중단 대비") and contains("draft PR") and contains("gh pr ready")' "sdd-kickoff-guard R15: missing first-turn procedure"
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("PR 제목·본문은 서사입니다") and contains("explain") and contains("gh pr edit")' "sdd-kickoff-guard R15: missing PR narrative pointer"
 
 # (b) already on a plan/ branch -> do not re-run the first turn.
 git -C "$r15_root" switch -q -c plan/r15-plan
