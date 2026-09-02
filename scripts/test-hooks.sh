@@ -133,6 +133,33 @@ out=$(cd "$plan_root" && printf '%s' "$kick_input" | TMPDIR="$TEST_TMP" "$HOOKS/
 assert_silent "$out" "sdd-kickoff-guard once-only"
 pass "sdd-kickoff-guard split-plan/once"
 
+# sdd-kickoff-guard R15: the same kickoff also carries the branch/commit/draft-PR procedure.
+# Branches on local git state only (no gh), so the three cases below are deterministic.
+r15_root="$TEST_ROOT/r15-project"
+mkdir -p "$r15_root/docs/woobin_plan/plans/r15-plan"
+printf '# Overview\n' >"$r15_root/docs/woobin_plan/plans/r15-plan/00-overview.md"
+git -C "$r15_root" init -q
+git -C "$r15_root" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
+
+# (a) remote present, not on a plan/ branch -> tell it to run the first-turn procedure.
+git -C "$r15_root" remote add origin https://example.invalid/x.git
+r15_input='{"session_id":"r15-a","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
+out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("R15 — 중단 대비") and contains("draft PR") and contains("gh pr ready")' "sdd-kickoff-guard R15: missing first-turn procedure"
+
+# (b) already on a plan/ branch -> do not re-run the first turn.
+git -C "$r15_root" switch -q -c plan/r15-plan
+r15_input='{"session_id":"r15-b","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
+out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("첫 턴 절차를 다시 하지 마세요")' "sdd-kickoff-guard R15: plan-branch branch not taken"
+
+# (c) no remote -> R15 is out of scope and must not be injected at all.
+git -C "$r15_root" remote remove origin
+r15_input='{"session_id":"r15-c","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
+out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
+assert_json "$out" '.hookSpecificOutput.additionalContext | contains("R15") | not' "sdd-kickoff-guard R15: injected into a remoteless repo"
+pass "sdd-kickoff-guard R15 branch/plan-branch/no-remote"
+
 # sdd-orchestrator-edit-guard: SDD ledger causes a one-time deny for main-loop source edits.
 edit_root="$TEST_ROOT/edit-project"
 mkdir -p "$edit_root/.superpowers/sdd/run" "$edit_root/src"

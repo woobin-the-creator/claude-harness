@@ -10,6 +10,17 @@
 # 플랜에는 소급 적용되지 않는다 — 그 경우 결정론적 명령으로 목차·제약만 확보하게 한다(①).
 #
 # 소프트 개입: 차단하지 않고 additionalContext만 주입한다. 세션당 1회.
+#
+# R15도 여기서 나른다(2026-09-02). R15는 기전이 "절차"뿐이라 아무도 강제하지 않았고, 실제로 죽어 있었다 —
+# 구현이 끝나도 미커밋이었다. 원인은 두 개였고 둘 다 고쳤다: (1) `plan-implementer-*` 정의 3종이
+# "Do not commit unless a task file tells you to"로 R15 ②b("커밋은 구현자가")와 정면 모순이었다,
+# (2) 킥오프 시점에 R15 절차를 아무도 보여주지 않았다. 이 훅이 (2)를 덮는다.
+# 트리거가 R2와 완전히 같아서(구현 의도 + 플랜 경로 + 세션 1회) 훅을 새로 만들지 않았다 —
+# 같은 조건에 훅이 둘이면 §6-6의 "소유자가 둘"이 된다.
+#
+# 절차 본문은 복제하지 않는다. plan-exec-modes.md "중단 대비"가 단일 소유자이므로 여기는 **포인터 +
+# 지금 상태에서 다음에 할 것 한 줄**만 낸다. gh를 호출하지 않는다 — 로컬 git 상태만으로 분기하므로
+# UserPromptSubmit에 네트워크 지연이 실리지 않고, fixture로 결정론적으로 검증된다.
 
 set -u
 
@@ -55,7 +66,11 @@ elif [ -f "$target" ]; then
   [ -n "$lines" ] || lines=0
   chars=$(wc -c < "$target" 2>/dev/null | tr -d ' ')
   [ -n "$chars" ] || chars=0
-  [ "$lines" -lt "$SPLIT_MIN_LINES" ] && exit 0   # 작은 플랜은 통독해도 floor 부담이 작다
+  if [ "$lines" -lt "$SPLIT_MIN_LINES" ]; then
+    # 작은 플랜은 통독해도 floor 부담이 작다 — R2가 할 말이 없다.
+    # 여기서 exit하지 않는다: R15는 플랜 크기와 무관하므로 아래 R15 블록까지는 가야 한다.
+    body=""
+  else
   est_tok=$((chars / 1550))
   body="플랜이 단일 파일이고 큽니다: ${target} (${lines}행, 약 ${est_tok}k 토큰)
 
@@ -72,6 +87,7 @@ cache read로 재청구됩니다(실측: 1,650행 플랜 통독 → floor 93~122
    그래도 모순 판단이 안 되는 구간만 \`Read(offset, limit)\`으로 부분 확인하세요.
 5. (선택) 이 플랜을 앞으로 여러 세션에서 다시 쓸 거라면, 지금 \`${target%.md}/00-overview.md\` +
    \`task-N.md\`로 분할해두면 다음 킥오프부터는 위 우회가 불필요해집니다."
+  fi
 else
   body="프롬프트가 가리킨 플랜 경로를 이 훅이 확인하지 못했습니다: ${target}
 
@@ -79,11 +95,43 @@ else
 태스크 본문은 \`sed -n\`으로 잘라 파일화해 서브에이전트에 경로로 넘기세요."
 fi
 
-ctx="[플랜 킥오프 가드] ${body}
+ctx=""
+if [ -n "$body" ]; then
+  ctx="[플랜 킥오프 가드] ${body}
 
 예외 — 아래에 해당하면 이 지침을 무시하고 통독하되, 이유를 한 줄로 밝히세요:
 - 태스크가 1~2개뿐이라 오케스트레이터 요청 수가 애초에 적다
 - 플랜이 짧아(500행 미만) 통독 비용이 무의미하다
 - 사용자가 전체 통독을 명시적으로 요구했다"
+fi
+
+# --- R15 — 브랜치·커밋·draft PR 진입점 -------------------------------------
+# 원격이 없으면 R15 전체가 비적용이다(spec §3 R15 대가 절). 그 경우 아무 말도 얹지 않는다.
+if git rev-parse --git-dir >/dev/null 2>&1 && [ -n "$(git remote 2>/dev/null)" ]; then
+  cur_branch=$(git branch --show-current 2>/dev/null)
+  case "$cur_branch" in
+    plan/*)
+      r15="이미 \`${cur_branch}\` 위입니다 — 첫 턴 절차를 다시 하지 마세요.
+열린 draft PR이 있는지만 확인하고(\`gh pr list --head ${cur_branch} --state open --draft\`), 없으면 지금 엽니다.
+이후 레이어마다: 커밋(구현자) → \`plan-reviewer\` → 수정 → push(오케스트레이터) → PR 코멘트 5행 이내." ;;
+    *)
+      r15="아직 \`plan/\` 브랜치가 아닙니다(현재: \`${cur_branch:-detached}\`). **코드에 손대기 전에** 첫 턴 절차부터 하세요 —
+\`plan/<plan-name>\` 브랜치 → 플랜 문서 첫 커밋 → push → **draft PR**.
+정확한 명령과 PR 본문 형식은 \`plan-exec-modes.md\`의 \"중단 대비\" 소절에 있습니다. 그대로 쓰세요." ;;
+  esac
+
+  [ -n "$ctx" ] && ctx="${ctx}
+
+"
+  ctx="${ctx}[R15 — 중단 대비] ${r15}
+
+- **커밋은 레이어 구현자가, push는 리뷰를 돌린 오케스트레이터가** 합니다. 구현자에게 push를 시키지 마세요 —
+  이 분리가 \"리뷰 전에는 원격에 안 올라간다\"를 절차가 아니라 구조로 만듭니다.
+- **마지막 레이어를 push한 직후 \`gh pr ready\`** 로 draft를 벗깁니다. 머지까지 미루지 마세요.
+- 머지(\`gh pr merge --squash\`)는 사용자가 합니다. 자동으로 머지하지 마세요."
+fi
+
+# 낼 게 없으면 조용히 나간다(작은 단일 파일 플랜 + 원격 없음).
+[ -n "$ctx" ] || exit 0
 
 jq -cn --arg ctx "$ctx" '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$ctx}}'

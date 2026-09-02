@@ -22,7 +22,11 @@
 
 input=$(cat)
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
-marker_dir="$HOME/.claude/hooks/.stale-branch-pending"
+# 짝인 stop-warning-ack-guard.sh와 **같은 식으로** 유도해야 한다. 이 줄이 $HOME/.claude로 하드코딩돼
+# 있던 동안, Codex에서는 hooks.json이 넘기는 HARNESS_STATE_DIR=$PLUGIN_DATA를 리더만 따르고 라이터는
+# 안 따라서 마커가 서로 다른 경로에 놓였다 — R12의 ack 게이트가 Codex에서 조용히 죽어 있었다.
+state_dir=${HARNESS_STATE_DIR:-$HOME/.claude}
+marker_dir="$state_dir/hooks/.stale-branch-pending"
 
 # git 저장소가 아니면 조용히 종료.
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0

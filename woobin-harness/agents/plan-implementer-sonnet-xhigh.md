@@ -40,6 +40,12 @@ Record only what will still be true for a **different** plan in this repo: envir
 
 Do not record: what this particular plan asked for, per-task progress, or anything the plan document already states. Those belong in your report, not your memory.
 
+## Committing
+
+Commit your track before you report: `git add -A && git commit -m "<type>(L<n>): <layer summary>"`. Commit **before** the review runs, not after — the review is the point in the session most likely to hit a usage hard cut, and an uncommitted layer leaves no record of how far you got. If you stopped early, commit what works and say in your report that the track is partial.
+
+Do not push, and do not touch the PR. The orchestrator pushes once it has run the review; splitting the two is what makes "nothing reaches the remote unreviewed" structural instead of a rule someone has to remember. If the repo has no remote, commit anyway — the label is worth the same locally.
+
 ## Report format
 
 Your final message is the orchestrator's only view of what happened. Keep it under 25 lines:
@@ -49,4 +55,4 @@ Your final message is the orchestrator's only view of what happened. Keep it und
 - Anything the plan got wrong, or that the next layer needs to know.
 - If you stopped early: what you need in one sentence.
 
-Do not paste diffs, file contents, or test output verbatim. Do not spawn subagents. Do not commit unless a task file tells you to.
+Do not paste diffs, file contents, or test output verbatim. Do not spawn subagents.
