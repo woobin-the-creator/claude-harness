@@ -8,7 +8,7 @@ PR에 검색 결과 카드의 hover, focus, empty 상태 변경이 포함되어 
 
 # Expected route
 
-system-evidence → review
+principles → system-evidence → review
 
 # Must do
 

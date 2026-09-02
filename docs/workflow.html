@@ -206,7 +206,7 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
       <p>첫 턴에 <code>plan/&lt;name&gt;</code> 브랜치를 만들고 <b>플랜 문서를 첫 커밋</b>으로 올려 <b>draft PR</b>을 연다. 레이어가 끝날 때마다 <b>커밋 → 리뷰 → push</b>. 마지막 레이어를 push하면 <code>gh pr edit</code>으로 <b>제목·본문을 다시 쓰고</b> <code>gh pr ready</code>로 <b>draft를 벗긴다</b> — draft는 "구현 중"이지 "머지 전"이 아니다. 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다).</p>
       <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이고 레이어 해상도로 충분하다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --state open --draft</code>로 찾힌다.</p>
       <p class="why">이 규칙은 <b>2026-09-02까지 죽어 있었다</b> — 순수 절차라 아무도 강제하지 않았고, 구현자 정의 3종이 정반대(<code>Do not commit…</code>)를 지시하고 있었다. 지금은 정의가 커밋을 소유하고, 킥오프 가드가 절차 포인터를 같이 낸다. <b>자동으로 하는 건 <code>gh pr ready</code>까지</b>이고 <code>gh pr merge --squash</code>는 사람이 낸다.</p>
-      <p class="why">PR 제목·본문은 <b>변경 파일 목록이 아니라 서사</b>다 — "사용자가 겪던 문제 → 어떻게 풀었나". 문장은 <code>explain</code> 스킬을 <b>실제로 호출해서</b> 쓴다(Codex에 호출 수단이 없으면 그 스킬 파일을 읽어 적용한다). 호출은 두 번: draft를 열 때 <b>문제</b>를, 마지막 레이어를 push한 뒤 <code>gh pr edit</code>으로 <b>해결</b>을 채운다(create 시점엔 코드가 없어 후자가 존재하지 않는다). 제목은 <b>squash 머지 커밋 제목</b>이 되므로 slug가 아니라 산문이다.</p>
+      <p class="why">PR 제목·본문은 <b>변경 파일 목록이 아니라 서사</b>다 — "사용자가 겪던 문제 → 어떻게 풀었나". 문장은 <code>explain</code> 스킬을 <b>실제로 호출해서</b> 쓴다. 호출은 두 번: draft를 열 때 <b>문제</b>를, 마지막 레이어를 push한 뒤 <code>gh pr edit</code>으로 <b>해결</b>을 채운다(create 시점엔 코드가 없어 후자가 존재하지 않는다). 제목은 <b>squash 머지 커밋 제목</b>이 되므로 slug가 아니라 산문이다.</p>
     </div>
   </li>
 
@@ -351,7 +351,7 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
     <tr>
       <td>제품 UI 방향·구현·리뷰·반복 실패</td>
       <td><code>design-workflow</code></td>
-      <td>작업을 분류해 direction, system-evidence, implementation-contracts, review, evolution 중 필요한 모듈만 읽는다. <code>DESIGN.md</code>가 없어도 진행한다.</td>
+      <td>작업을 분류해 principles, direction, system-evidence, implementation-contracts, review, evolution 중 필요한 모듈만 읽는다. <code>principles</code>는 UI 작업이면 항상 먼저 읽는다 — 처방이 아니라 무엇을 물어야 하는지를 준다. <code>DESIGN.md</code>가 없어도 진행한다.</td>
       <td>복수 시안 격리 프리뷰·공유가 필요할 때만 <code>show-design-sample</code></td>
     </tr>
     <tr>
@@ -413,22 +413,9 @@ docs/woobin_plan/plans/&lt;name&gt; 플랜으로 구현 진행해줘 — 모드 
   이름을 바꾸는 순간 훅은 에러 없이 침묵하고 CI는 빨개진다. 훅은 <code>PLAN_DOCS_DIRS</code> 같은 env var로, 테스트 제외는 <code>.no-doc-scan</code> 같은 마커 파일로 판정한다.</li>
 </ul>
 
-<h2><span class="num">07</span>Codex 호환 레이어</h2>
-<p class="sub">스킬은 하나, 런타임 계약만 분리한다.</p>
-<ul class="anti">
-  <li><b>공통 스킬 21개</b>
-  <code>woobin-harness/skills/</code>를 Claude Code와 Codex가 함께 읽는다.</li>
-  <li><b>Codex 훅 5개</b>
-  플랜 킥오프, kick-off 진입·이탈, 문서 동기화, stale-branch 경고와 응답 검사만 연결한다. 비동기 idle handoff와 Claude transcript·모델명 의존 훅은 미연결이다.</li>
-  <li><b>Codex 에이전트 6개</b>
-  플러그인 밖의 <code>codex/agents/*.toml</code>을 <code>bootstrap-codex.sh</code>가 설치한다.</li>
-  <li><b>호스트별 구현 모드</b>
-  Claude Code는 <code>plan-exec-modes.md</code>, Codex는 <code>plan-exec-modes-codex.md</code>가 모델·effort·에이전트 이름을 각각 소유한다.</li>
-</ul>
-
 <footer>
-  <p>모드 정본은 <code>woobin-harness/plan-exec-modes.md</code>(Claude Code)와 <code>plan-exec-modes-codex.md</code>(Codex)다 — 공통 선택 조건은 맞추되 호스트 고유 명령은 섞지 않는다.
-  공통 스킬과 훅 스크립트는 <code>woobin-harness</code> 플러그인이 나른다. 새 머신 셋업은 Claude Code가 <code>bootstrap.sh</code>, Codex가 <code>bootstrap-codex.sh</code>.</p>
+  <p>모드 정본은 <code>woobin-harness/plan-exec-modes.md</code>다. 스킬 20개·훅 13개·에이전트 6개는 <code>woobin-harness</code> 플러그인이 나르고, 플러그인이 못 나르는 전역 설정만 <code>bootstrap.sh</code>가 처리한다.
+  Codex 지원은 2026-09-02에 별도 플러그인 레포로 분리했다 — 이 레포는 Claude Code 전용이다.</p>
 </footer>
 
 </div>

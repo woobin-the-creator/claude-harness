@@ -28,7 +28,7 @@ Collect:
 
 The user must choose before a candidate direction becomes adopted. Ask before locking a signature, a focal point, a high-risk tone, or any direction that would constrain broad future UI.
 
-Do not copy fixed palettes, named fonts, 60/30/10 ratios, or a universal one-accent rule from external interface guidance.
+External interface guidance arrives as constants — a fixed palette, a named font, a 60/30/10 ratio, a single-accent rule. Those numbers were derived from other products. Take the reasoning and derive the value here, from this product's content, density, and task. `principles.md` covers the same point for the usability laws.
 
 ## Direction brief
 

@@ -4,8 +4,21 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../../../.." && pwd -P)
 REFS="$ROOT/woobin-harness/skills/design-workflow/references"
 
-for file in direction system-evidence implementation-contracts review evolution sources; do
+for file in principles direction system-evidence implementation-contracts review evolution sources; do
   test -s "$REFS/$file.md"
+done
+
+# R21 — principles carries mechanisms and questions, never prescriptions or the
+# published constants. These greps are what keeps a later edit from quietly
+# turning it back into a rule sheet.
+grep -F '## Load this module when' "$REFS/principles.md"
+grep -F 'lenses, not rules' "$REFS/principles.md"
+grep -F 'never convert one into a number' "$REFS/principles.md"
+grep -F 'the local authority wins' "$REFS/principles.md"
+grep -F 'Weakens when:' "$REFS/principles.md"
+grep -F 'lawsofux.com' "$REFS/principles.md"
+for law in Proximity 'Common Region' Similarity 'Uniform Connectedness' Prägnanz "Fitts's Law" 'Doherty Threshold' "Hick's Law" "Jakob's Law" Chunking 'Von Restorff' 'Serial Position' 'Selective Attention' "Postel's Law" "Tesler's Law" 'Peak-End' 'Goal-Gradient' Zeigarnik 'Aesthetic-Usability' 'Mental Model' 'Paradox of the Active User'; do
+  grep -F "$law" "$REFS/principles.md" >/dev/null
 done
 
 grep -F '## Load this module when' "$REFS/direction.md"
@@ -17,7 +30,10 @@ grep -F 'focal point' "$REFS/direction.md"
 grep -F 'user-decision' "$REFS/system-evidence.md"
 grep -F 'external-precedent' "$REFS/system-evidence.md"
 grep -F '실제로 잘렸을 때만' "$REFS/system-evidence.md"
-grep -F '한 줄' "$REFS/system-evidence.md"
+# The prescriptions were removed under R21, but the incidents that produced them
+# are the part a later session cannot recover from the code. Keep them pinned.
+grep -F 'Observed: a mockup rendered KPI labels' "$REFS/system-evidence.md"
+grep -F '08-11 > 08-12' "$REFS/system-evidence.md"
 
 grep -F 'validate → normalize → render' "$REFS/implementation-contracts.md"
 grep -F 'measure → reserve affordance' "$REFS/implementation-contracts.md"

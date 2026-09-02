@@ -17,11 +17,9 @@ GitHub only renders inline video/GIF in a PR/comment when the asset lives on its
 
 ## Show it in the chat (deliver as an animated "video")
 
-The fastest way to **show a demo in the chat as a video** is to produce a **GIF** and attach/render it with the current host's local-media mechanism.
+The fastest way to **show a demo in the chat as a video** is to produce a **GIF** and `Read demo.gif` so the user sees it inline.
 
-- Claude Code: `Read demo.gif` so the user sees it inline.
-- Codex desktop: return `![demo](/absolute/path/to/demo.gif)` in the user-facing response. Local media paths must be absolute.
-- So trim/lead the GIF with a meaningful frame (skip a blank loading state at the very start) since the first frame is what a static preview shows.
+- Trim/lead the GIF with a meaningful frame (skip a blank loading state at the very start) since the first frame is what a static preview shows.
 - For portable inline delivery, prefer GIF. An mp4 may not render in terminal clients.
 - A single PNG frame `Read`s as a static image (good for one key moment); a tiled montage shows a storyboard. But for "like a video," use the **GIF**.
 - **The final media rendering stays in the main session — never delegate it.** The whole point is that the *user* sees it. Verification in step 3 remains delegated.

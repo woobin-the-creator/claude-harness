@@ -6,11 +6,13 @@ Load when changing or designing reusable UI behavior, component APIs, validation
 
 ## Choose the lowest effective enforcement layer
 
-Start with this reuse order unless the established project has a stricter order:
+Each step away from what already exists re-implements behavior someone else got right — keyboard handling, form semantics, assistive-technology mapping, and the conventions users arrive with (`principles.md`, Jakob). That is the reason for the usual order:
 
 ```text
 existing design system → native HTML → accessible primitive → custom implementation
 ```
+
+A project with a stricter order of its own wins over this one.
 
 For each adopted pattern, choose prose, a shared component/API, a static scanner, a unit/a11y/browser test, or a CI gate. CI gates and public API changes require approval.
 
@@ -36,7 +38,7 @@ Measure actual item, margin, action, and overflow-trigger widths instead of usin
 open → initial focus → presence/close → launcher focus return
 ```
 
-Initial focus follows task safety. Destructive confirmation starts on input or cancel, never the danger action. Escape behavior derives from modality and dismissibility, not a component name.
+Initial focus follows task safety: when the dialog opens with focus on the danger action, a keyboard Enter destroys data, so confirmation starts on the input or on cancel. Escape behavior derives from modality and dismissibility, not from a component name.
 
 ## Async state contract
 
@@ -48,29 +50,31 @@ Pending prevents duplicate submit. Preserve stable data while refreshing when st
 
 ## Formatting and semantic-state contract
 
-Invalid, missing, unknown, and zero states need distinct representations. Prefer `Intl.NumberFormat(locale, { notation: 'compact' })` over hand-built K/M/B. Severity uses shape/text and color, not color alone.
+Invalid, missing, unknown, and zero mean different things, so collapsing them into one representation makes the interface lie. Hand-built K/M/B abbreviations do not survive a locale change, which is what `Intl.NumberFormat(locale, { notation: 'compact' })` exists for. Color alone excludes anyone who cannot separate the hues, so severity needs shape or text as well.
 
-## Portable pattern catalog
+## Observed cases
 
-| Source observation | Portable treatment |
+These are things that went wrong in real products, kept as evidence rather than as instructions. None of them decides the current task — read what failed, then check whether this project has the same exposure. Provenance is in `sources.md`.
+
+| Case | What it showed |
 |---|---|
-| Raw color/spacing/type/easing | Prefer the project's existing token-aware Stylelint/ESLint rule; add no Carbon dependency by default |
-| Data column width | Include header and representative cells in measurement; reserve sort/action affordances; use project-derived min/max rather than universal 58/400 values |
-| Truncation tooltip | Attach `title` or tooltip only after actual overflow measurement |
-| Action groups | Validate count/kinds separately from order normalization and render refusal; vertical order may differ only when the project's reading/action order requires it |
-| Destructive confirmation | Initial focus goes to confirmation input or cancel, never danger; pending state prevents duplicate submit |
-| Tag/filter overflow | Measure item margins, trigger width, and persistent action width; use prefix fit rather than a fixed slice |
-| Loading existing data | Preserve stable data while refreshing when stale content is still truthful; do not universally append skeleton rows |
-| Compact numbers | Use locale-aware `Intl.NumberFormat`; avoid redundant equal numerator/denominator display |
-| Missing/unknown/zero | Use distinct semantic states and copy |
-| Severity | Convey with shape/text and color, not color alone |
-| Numeric alignment | Align numeric headers and body cells together |
-| Panel Escape behavior | Derive Escape from modality and dismissibility, not the component name `SidePanel` |
-| Clipped actions | Preserve access by relocating or pinning controls when scroll clipping would remove them |
-| Nested overlays | Define a project maximum and refuse/warn beyond it; do not universalize IBM's depth of three |
-| Overflow ladder | Inline → overflow disclosure → searchable surface when measured volume/cost crosses a project threshold |
-| Saving feedback | Keep label/icon/action state synchronized and suppress status before the first dirty input |
-| Search vs filter | Search locates matching results; filters constrain attributes, including attributes not rendered as columns; batch apply is a product choice, not a universal default |
+| Raw color/spacing/type/easing values | Token-aware Stylelint/ESLint rules catch these where a project already has them; pulling in a vendor dependency to obtain the check is a larger commitment than the check is worth |
+| Data column width | Widths derived from body cells alone broke once headers and sort/action affordances were included, and the vendor's 58/400 bounds came from its own content |
+| Truncation tooltip | Tooltips attached without measuring announced truncation that had not happened |
+| Action groups | Count/kind validation, order normalization, and render refusal are three separate failures; collapsing them hid which one fired |
+| Destructive confirmation | Initial focus on the danger action made a keyboard Enter destructive, and without a pending state the same submit fired twice |
+| Tag/filter overflow | A fixed visible count ignored item margins, trigger width, and persistent action width, so the row overflowed anyway |
+| Loading existing data | Replacing still-truthful data with skeleton rows during a refresh lost the user's place |
+| Compact numbers | Rendering an equal numerator and denominator added no information |
+| Missing / unknown / zero | Collapsed into one fallback, these three read identically while meaning different things |
+| Severity | Conveyed by color alone, severity disappeared for part of the audience |
+| Numeric alignment | Headers aligned separately from their body cells read as two columns |
+| Panel Escape behavior | Escape derived from the component name `SidePanel` rather than from modality behaved differently in two panels that looked identical |
+| Clipped actions | Scroll clipping removed controls entirely rather than making them harder to reach |
+| Nested overlays | The vendor's depth limit of three came from its own products; an unbounded stack, however, left no way back |
+| Overflow ladder | Inline, then overflow disclosure, then a searchable surface — where each threshold sits followed from measured volume and cost, not from the ladder itself |
+| Saving feedback | Label, icon, and action state drifting apart left the user unsure whether a save happened, and status shown before the first dirty input announced a save that never occurred |
+| Search vs filter | Search locates matching results while filters constrain attributes, including attributes not rendered as columns; whether filters apply immediately or in a batch was a product choice each time |
 
 ## Project-stack adaptation
 

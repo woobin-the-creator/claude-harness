@@ -3,31 +3,31 @@ import fs from 'node:fs'
 
 const expected = {
   'established-first-use': {
-    route: 'system-evidence → implementation-contracts → review',
+    route: 'principles → system-evidence → implementation-contracts → review',
     design: 'absent',
     localMutation: 'allowed',
     escalation: 'approval-required',
   },
   greenfield: {
-    route: 'direction → system-evidence → implementation-contracts → review',
+    route: 'principles → direction → system-evidence → implementation-contracts → review',
     design: 'absent',
     localMutation: 'allowed',
     escalation: 'approval-required',
   },
   incremental: {
-    route: 'system-evidence → implementation-contracts → review',
+    route: 'principles → system-evidence → implementation-contracts → review',
     design: 'validate',
     localMutation: 'allowed',
     escalation: 'approval-required',
   },
   'review-only': {
-    route: 'system-evidence → review',
+    route: 'principles → system-evidence → review',
     design: 'validate',
     localMutation: 'forbidden',
     escalation: 'forbidden',
   },
   'guard-promotion': {
-    route: 'system-evidence → implementation-contracts → evolution → review',
+    route: 'principles → system-evidence → implementation-contracts → evolution → review',
     design: 'absent',
     localMutation: 'allowed',
     escalation: 'approval-required',

@@ -7,9 +7,9 @@
 # 1.6.0으로 번호가 역전돼 갱신이 막힘) 두 번 실제로 났다. CLAUDE.md가 확인 명령을 적어
 # 두는 방식으로만 대응하고 있었는데, 사람이 기억해서 쳐야 하는 검사는 안 쳐진다.
 #
-# 왜 codex 구현을 안 베꼈나: codex 쪽은 `codex plugin list`의 사람용 텍스트를 정규식으로
-# 판다. Claude Code에는 대응 명령이 없고 대신 두 상태 파일이 JSON으로 있어서 jq로 읽는다.
-# 파싱이 안전하고, gitCommitSha 덕에 드리프트 신호를 하나 더 얻는다(버전 + 커밋).
+# 왜 두 상태 파일을 jq로 읽나: Claude Code에는 설치 상태를 찍어 주는 명령이 없고, 대신
+# known_marketplaces.json 과 installed_plugins.json 이 JSON으로 있다. 사람용 출력을 정규식으로
+# 파는 것보다 안전하고, gitCommitSha 덕에 드리프트 신호를 하나 더 얻는다(버전 + 커밋).
 #
 # 읽기 전용이다 — fetch 하지 않는다. 이미 로컬에 있는 커밋만 센다.
 # fail-open: jq·상태 파일·소스 디렉터리 중 하나라도 없으면 조용히 exit 0. 세션을 막지 않는다.
@@ -52,7 +52,7 @@ elif [ -n "$inst_sha" ]; then
 fi
 [ -n "$detail" ] || exit 0
 
-ctx="${headline} 지금 세션에는 옛 스킬·훅·에이전트가 로드돼 있을 수 있다. 레포 변경을 반영하려면: (1) woobin-harness/.claude-plugin/plugin.json 과 .codex-plugin/plugin.json 의 version 을 올린다 — 올릴 번호가 ~/.claude/plugins/cache/woobin-harness/woobin-harness/ 에 이미 있으면 그 번호는 막히므로 캐시를 먼저 확인한다. (2) claude plugin marketplace update woobin-harness. (3) claude plugin update woobin-harness@woobin-harness — 짧은 이름은 not found 로 실패한다. (4) Claude Code 재시작."
+ctx="${headline} 지금 세션에는 옛 스킬·훅·에이전트가 로드돼 있을 수 있다. 레포 변경을 반영하려면: (1) woobin-harness/.claude-plugin/plugin.json 의 version 을 올린다 — 올릴 번호가 ~/.claude/plugins/cache/woobin-harness/woobin-harness/ 에 이미 있으면 그 번호는 막히므로 캐시를 먼저 확인한다. (2) claude plugin marketplace update woobin-harness. (3) claude plugin update woobin-harness@woobin-harness — 짧은 이름은 not found 로 실패한다. (4) Claude Code 재시작."
 
 jq -cn --arg ctx "$ctx" \
   '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}'

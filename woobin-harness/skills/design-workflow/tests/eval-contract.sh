@@ -47,11 +47,11 @@ for case_name in established-first-use greenfield incremental review-only guard-
   assert_prompt_contract "$case_name"
 done
 
-assert_output_contract established-first-use 'system-evidence → implementation-contracts → review' absent allowed approval-required
-assert_output_contract greenfield 'direction → system-evidence → implementation-contracts → review' absent allowed approval-required
-assert_output_contract incremental 'system-evidence → implementation-contracts → review' validate allowed approval-required
-assert_output_contract review-only 'system-evidence → review' validate forbidden forbidden
-assert_output_contract guard-promotion 'system-evidence → implementation-contracts → evolution → review' absent allowed approval-required
+assert_output_contract established-first-use 'principles → system-evidence → implementation-contracts → review' absent allowed approval-required
+assert_output_contract greenfield 'principles → direction → system-evidence → implementation-contracts → review' absent allowed approval-required
+assert_output_contract incremental 'principles → system-evidence → implementation-contracts → review' validate allowed approval-required
+assert_output_contract review-only 'principles → system-evidence → review' validate forbidden forbidden
+assert_output_contract guard-promotion 'principles → system-evidence → implementation-contracts → evolution → review' absent allowed approval-required
 
 grep -F 'ROUTING_TIMEOUT_SECONDS="${ROUTING_TIMEOUT_SECONDS:-120}"' "$RUNNER" >/dev/null
 grep -F 'CLAUDE_MAX_BUDGET_USD="${CLAUDE_MAX_BUDGET_USD:-0.05}"' "$RUNNER" >/dev/null

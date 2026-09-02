@@ -23,8 +23,8 @@
 input=$(cat)
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
 # 짝인 stop-warning-ack-guard.sh와 **같은 식으로** 유도해야 한다. 이 줄이 $HOME/.claude로 하드코딩돼
-# 있던 동안, Codex에서는 hooks.json이 넘기는 HARNESS_STATE_DIR=$PLUGIN_DATA를 리더만 따르고 라이터는
-# 안 따라서 마커가 서로 다른 경로에 놓였다 — R12의 ack 게이트가 Codex에서 조용히 죽어 있었다.
+# 있던 동안 리더만 HARNESS_STATE_DIR를 따르고 라이터는 안 따라서 마커가 서로 다른 경로에 놓였고,
+# R12의 ack 게이트가 조용히 죽어 있었다.
 state_dir=${HARNESS_STATE_DIR:-$HOME/.claude}
 marker_dir="$state_dir/hooks/.stale-branch-pending"
 
@@ -86,12 +86,7 @@ if [ "$ahead" -gt 0 ] && command -v gh >/dev/null 2>&1; then
   rm -f "$gh_out"
 fi
 
-# 호스트별 워크트리 생성 수단이 다르다. Codex에는 EnterWorktree 툴이 없다.
-if [ "${HARNESS_HOST:-claude}" = "codex" ]; then
-  worktree_instruction="최신 origin/${default} 기반의 새 worktree를 만들지 사용자에게 물어보세요"
-else
-  worktree_instruction="EnterWorktree로 최신 ${default} 기반(baseRef=fresh) 워크트리를 만들지 사용자에게 물어보세요"
-fi
+worktree_instruction="EnterWorktree로 최신 ${default} 기반(baseRef=fresh) 워크트리를 만들지 사용자에게 물어보세요"
 
 if [ "$plan_wip" -eq 1 ]; then
   ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}'는 열린 draft PR이 있는 **구현 중인 플랜 브랜치**이고, origin/${default}보다 ${behind} 커밋 뒤처져 있습니다(앞선 커밋 ${ahead}개).

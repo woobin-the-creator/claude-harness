@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Laws of UX → design-workflow 원칙 모듈</title>
+<style>
+  body { margin:0; background:#fbfcfd; font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif; }
+  .t { dominant-baseline:middle; }
+</style>
+</head>
+<body>
+<svg width="1500" height="1258" viewBox="0 0 1500 1258" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ab" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#2f6fed"/>
+    </marker>
+    <marker id="ag" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#9aa3ae"/>
+    </marker>
+    <marker id="an" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+      <path d="M0,0 L11,5.5 L0,11 z" fill="#2e9e5b"/>
+    </marker>
+  </defs>
+
+  <rect width="1500" height="1258" fill="#fbfcfd"/>
+
+  <!-- ===== 제목 ===== -->
+  <text class="t" x="40" y="40" font-size="25" font-weight="700" fill="#111827">Laws of UX 30개 → design-workflow 원칙 모듈 21개</text>
+  <text class="t" x="40" y="68" font-size="14" fill="#6b7280">처방(이렇게 해라)을 지우고, 질문을 생성하는 원칙으로 바꾼 경로. 답은 프로젝트가 낸다.</text>
+
+  <!-- ============ BAND A ============ -->
+  <text class="t" x="40" y="108" font-size="15" font-weight="700" fill="#2f6fed">① 수집 → 선별 → 변환 → 산출</text>
+
+  <!-- N1 소스 -->
+  <rect x="40" y="132" width="190" height="84" rx="12" fill="#fdf3e7" stroke="#e08a1e" stroke-width="2"/>
+  <text class="t" x="135" y="162" font-size="15" font-weight="700" fill="#7a4a06" text-anchor="middle">🏭 lawsofux.com</text>
+  <text class="t" x="135" y="187" font-size="13" fill="#8a6a3a" text-anchor="middle">법칙 30개 (외부 선례)</text>
+
+  <!-- 분기 -->
+  <path d="M230,174 L262,174" stroke="#2f6fed" stroke-width="2" fill="none"/>
+  <path d="M262,174 L262,148 L286,148" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+  <path d="M262,174 L262,228 L286,228" stroke="#9aa3ae" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+
+  <!-- N2 채택 -->
+  <rect x="290" y="116" width="164" height="64" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="372" y="138" font-size="15" font-weight="700" fill="#1e40af" text-anchor="middle">✅ 채택 23</text>
+  <text class="t" x="372" y="160" font-size="12" fill="#3b5bb5" text-anchor="middle">병합 2쌍 → 원칙 21</text>
+
+  <!-- N3 폐기 -->
+  <rect x="290" y="196" width="164" height="64" rx="12" fill="#f4f5f7" stroke="#9aa3ae" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="t" x="372" y="218" font-size="15" font-weight="700" fill="#6b7280" text-anchor="middle">✕ 폐기 7</text>
+  <text class="t" x="372" y="240" font-size="12" fill="#8a939e" text-anchor="middle">UI 판단으로 안 번역됨</text>
+  <text class="t" x="290" y="282" font-size="11.5" fill="#9aa3ae">Occam · Pareto · Flow · Parkinson</text>
+  <text class="t" x="290" y="300" font-size="11.5" fill="#9aa3ae">인지부하 · 작업기억 · 인지편향</text>
+
+  <!-- 병합 메모 -->
+  <text class="t" x="290" y="98" font-size="11.5" fill="#3b5bb5">힉+선택과부하, 밀러+청킹을 한 항목으로</text>
+
+  <path d="M454,148 L516,148" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <!-- N4 수치 버리기 -->
+  <rect x="520" y="116" width="188" height="64" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="614" y="138" font-size="15" font-weight="700" fill="#1e40af" text-anchor="middle">✂️ 수치 버리기</text>
+  <text class="t" x="614" y="160" font-size="12" fill="#3b5bb5" text-anchor="middle">근거만 남긴다</text>
+  <text class="t" x="520" y="200" font-size="11.5" fill="#9aa3ae">ms · 항목 수 · 비율 =</text>
+  <text class="t" x="520" y="218" font-size="11.5" fill="#9aa3ae">남의 제품을 측정한 값</text>
+
+  <path d="M708,148 L764,148" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <!-- N5 질문화 -->
+  <rect x="768" y="116" width="188" height="64" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="862" y="138" font-size="15" font-weight="700" fill="#1e40af" text-anchor="middle">❓ 질문으로 재작성</text>
+  <text class="t" x="862" y="160" font-size="12" fill="#3b5bb5" text-anchor="middle">모든 항목이 같은 꼴</text>
+  <text class="t" x="768" y="200" font-size="11.5" fill="#9aa3ae">Ask: … / Weakens when: …</text>
+  <text class="t" x="768" y="218" font-size="11.5" fill="#9aa3ae">(질문 + 자기 무효화 조건)</text>
+
+  <path d="M956,148 L1004,148" stroke="#2e9e5b" stroke-width="2" fill="none" marker-end="url(#an)"/>
+
+  <!-- N6 산출 탱크 -->
+  <rect x="1008" y="108" width="206" height="80" rx="14" fill="#e8f7ee" stroke="#2e9e5b" stroke-width="2.5"/>
+  <text class="t" x="1111" y="134" font-size="15" font-weight="700" fill="#1b6b3d" text-anchor="middle">🛢 principles.md</text>
+  <text class="t" x="1111" y="160" font-size="12.5" fill="#2e7d51" text-anchor="middle">원칙 21개 · 5개 묶음</text>
+
+  <!-- 5묶음 패널 -->
+  <rect x="1248" y="100" width="222" height="212" rx="12" fill="#ffffff" stroke="#d5dbe3" stroke-width="1.5"/>
+  <text class="t" x="1264" y="124" font-size="12.5" font-weight="700" fill="#374151">5개 묶음 (합 21)</text>
+  <text class="t" x="1264" y="150" font-size="11.5" fill="#4b5563">① 지각과 묶임 — 5</text>
+  <text class="t" x="1264" y="172" font-size="11.5" fill="#4b5563">② 상호작용의 비용 — 4</text>
+  <text class="t" x="1264" y="194" font-size="11.5" fill="#4b5563">③ 주의와 기억 — 4</text>
+  <text class="t" x="1264" y="216" font-size="11.5" fill="#4b5563">④ 복잡성을 누가 떠안나 — 2</text>
+  <text class="t" x="1264" y="238" font-size="11.5" fill="#4b5563">⑤ 끝난 뒤의 평가 — 6</text>
+  <line x1="1264" y1="256" x2="1454" y2="256" stroke="#e5e7eb" stroke-width="1"/>
+  <text class="t" x="1264" y="276" font-size="11" fill="#9aa3ae">라이선스 미확인 → 원문 문구</text>
+  <text class="t" x="1264" y="294" font-size="11" fill="#9aa3ae">한 줄도 안 씀. 전부 새로 작성</text>
+
+  <line x1="40" y1="336" x2="1470" y2="336" stroke="#e5e7eb" stroke-width="1.5"/>
+
+  <!-- ============ BAND B ============ -->
+  <text class="t" x="40" y="368" font-size="15" font-weight="700" fill="#2f6fed">② 권한 충돌을 어떻게 풀었나 — 같은 입력, 두 경로</text>
+
+  <!-- N7 공통 소스 -->
+  <rect x="40" y="472" width="190" height="84" rx="12" fill="#f0f8ff" stroke="#4a90d9" stroke-width="2"/>
+  <text class="t" x="135" y="502" font-size="15" font-weight="700" fill="#1e4f8a" text-anchor="middle">🖥️ UI 결정 시점</text>
+  <text class="t" x="135" y="527" font-size="12" fill="#3d6c9e" text-anchor="middle">공통 입력</text>
+
+  <path d="M230,514 L262,514" stroke="#4a90d9" stroke-width="2" fill="none"/>
+  <path d="M262,514 L262,436 L292,436" stroke="#9aa3ae" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+  <path d="M262,514 L262,592 L292,592" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <!-- 위 레인: 전 (처방) -->
+  <text class="t" x="300" y="392" font-size="12.5" font-weight="700" fill="#8a939e">전 — 처방(rule)</text>
+  <rect x="296" y="404" width="204" height="64" rx="12" fill="#f4f5f7" stroke="#9aa3ae" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="t" x="398" y="426" font-size="14" font-weight="700" fill="#6b7280" text-anchor="middle">📕 규칙</text>
+  <text class="t" x="398" y="448" font-size="12" fill="#8a939e" text-anchor="middle">"이렇게 해라" = 답</text>
+
+  <path d="M500,436 L556,436" stroke="#9aa3ae" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+
+  <rect x="560" y="404" width="204" height="64" rx="12" fill="#fff4e6" stroke="#e08a1e" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="t" x="662" y="426" font-size="14" font-weight="700" fill="#a3620a" text-anchor="middle">⚔️ 프로젝트 근거와 충돌</text>
+  <text class="t" x="662" y="448" font-size="12" fill="#b5813a" text-anchor="middle">둘 다 "답"이라 붙는다</text>
+
+  <path d="M764,436 L820,436" stroke="#9aa3ae" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+
+  <rect x="824" y="404" width="204" height="64" rx="12" fill="#f4f5f7" stroke="#9aa3ae" stroke-width="2" stroke-dasharray="6 4"/>
+  <text class="t" x="926" y="426" font-size="14" font-weight="700" fill="#6b7280" text-anchor="middle">✕ 규칙이 이김</text>
+  <text class="t" x="926" y="448" font-size="12" fill="#8a939e" text-anchor="middle">판단을 대체해버린다</text>
+
+  <rect x="600" y="480" width="132" height="26" rx="13" fill="#fdece0" stroke="#e08a1e" stroke-width="1.5"/>
+  <text class="t" x="666" y="494" font-size="12" font-weight="700" fill="#a3620a" text-anchor="middle">차이 구간 ⚠️</text>
+
+  <!-- 아래 레인: 후 (원칙) -->
+  <text class="t" x="300" y="548" font-size="12.5" font-weight="700" fill="#2f6fed">후 — 원칙(principle)</text>
+  <rect x="296" y="560" width="204" height="64" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="398" y="582" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle">❓ 원칙</text>
+  <text class="t" x="398" y="604" font-size="12" fill="#3b5bb5" text-anchor="middle">질문을 생성한다</text>
+
+  <path d="M500,592 L556,592" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <rect x="560" y="560" width="204" height="64" rx="12" fill="#e8f7ee" stroke="#2e9e5b" stroke-width="2.5"/>
+  <text class="t" x="662" y="582" font-size="14" font-weight="700" fill="#1b6b3d" text-anchor="middle">🛢 프로젝트가 답한다</text>
+  <text class="t" x="662" y="604" font-size="12" fill="#2e7d51" text-anchor="middle">코드 · 토큰 · 사고기록 · 사용자</text>
+
+  <path d="M764,592 L820,592" stroke="#2e9e5b" stroke-width="2" fill="none" marker-end="url(#an)"/>
+
+  <rect x="824" y="560" width="204" height="64" rx="12" fill="#f0f8ff" stroke="#4a90d9" stroke-width="2"/>
+  <text class="t" x="926" y="582" font-size="14" font-weight="700" fill="#1e4f8a" text-anchor="middle">🖥️ 결정</text>
+  <text class="t" x="926" y="604" font-size="12" fill="#3d6c9e" text-anchor="middle">근거를 가진 채로</text>
+
+  <rect x="600" y="636" width="132" height="26" rx="13" fill="#e3f5ea" stroke="#2e9e5b" stroke-width="1.5"/>
+  <text class="t" x="666" y="650" font-size="12" font-weight="700" fill="#1b6b3d" text-anchor="middle">충돌 없음 ✓</text>
+
+  <!-- 우측 요약 -->
+  <rect x="1058" y="396" width="412" height="266" rx="12" fill="#ffffff" stroke="#d5dbe3" stroke-width="1.5"/>
+  <text class="t" x="1076" y="422" font-size="13" font-weight="700" fill="#374151">무엇이 다른가</text>
+  <text class="t" x="1076" y="450" font-size="12" fill="#4b5563">처방은 <tspan font-weight="700">답</tspan>이라 프로젝트 근거와 같은 자리를</text>
+  <text class="t" x="1076" y="470" font-size="12" fill="#4b5563">놓고 다툰다. 원칙은 <tspan font-weight="700">질문</tspan>이라 자리가 겹치지</text>
+  <text class="t" x="1076" y="490" font-size="12" fill="#4b5563">않는다 — 그래서 애초에 경쟁이 성립 안 한다.</text>
+  <line x1="1076" y1="510" x2="1452" y2="510" stroke="#e5e7eb" stroke-width="1"/>
+  <text class="t" x="1076" y="534" font-size="12" font-weight="700" fill="#374151">권한 순서 (system-evidence.md) — 그대로 유지</text>
+  <text class="t" x="1076" y="558" font-size="11.5" fill="#4b5563">사용자 결정 → 채택된 DESIGN.md → 코드·토큰</text>
+  <text class="t" x="1076" y="578" font-size="11.5" fill="#4b5563">→ 로컬 사고기록 → 외부 선례</text>
+  <text class="t" x="1076" y="602" font-size="11.5" fill="#8a4b00">원칙은 이 사다리의 <tspan font-weight="700">밖</tspan>에 있다. 충돌하면</text>
+  <text class="t" x="1076" y="622" font-size="11.5" fill="#8a4b00">로컬 권한이 이긴다고 모듈 헤더에 못박음.</text>
+  <text class="t" x="1076" y="646" font-size="11" fill="#9aa3ae">→ workflow-spec R21 신설 (무효화 조건 포함)</text>
+
+  <line x1="40" y1="694" x2="1470" y2="694" stroke="#e5e7eb" stroke-width="1.5"/>
+
+  <!-- ============ BAND C ============ -->
+  <text class="t" x="40" y="726" font-size="15" font-weight="700" fill="#2f6fed">③ 배선 — 라우터 · 기존 모듈 정리 · 계약 게이트</text>
+
+  <rect x="40" y="768" width="190" height="84" rx="12" fill="#e8f7ee" stroke="#2e9e5b" stroke-width="2.5"/>
+  <text class="t" x="135" y="798" font-size="14" font-weight="700" fill="#1b6b3d" text-anchor="middle">🛢 principles.md</text>
+  <text class="t" x="135" y="823" font-size="12" fill="#2e7d51" text-anchor="middle">새 모듈</text>
+
+  <path d="M230,810 L262,810" stroke="#2e9e5b" stroke-width="2" fill="none"/>
+  <path d="M262,810 L262,796 L292,796" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+  <path d="M262,810 L262,952 L292,952" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <!-- 라우터 -->
+  <rect x="296" y="756" width="250" height="80" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="421" y="784" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle">🔌 design-workflow</text>
+  <text class="t" x="421" y="808" font-size="12" fill="#3b5bb5" text-anchor="middle">라우트 6개 전부의 <tspan font-weight="700">첫</tspan> 모듈로</text>
+
+  <path d="M546,796 L602,796" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <rect x="606" y="750" width="416" height="92" rx="12" fill="#f7faff" stroke="#4a90d9" stroke-width="1.5"/>
+  <rect x="622" y="772" width="104" height="30" rx="8" fill="#2f6fed"/>
+  <text class="t" x="674" y="787" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle">principles</text>
+  <text class="t" x="736" y="787" font-size="13" fill="#6b7280">→</text>
+  <text class="t" x="756" y="787" font-size="12.5" fill="#3d6c9e">direction → system-evidence → …</text>
+  <text class="t" x="622" y="822" font-size="11.5" fill="#a3620a">프로젝트 근거를 먼저 읽으면 질문이 이미 굳은 뒤 → 원칙이 아무것도 안 바꾼다</text>
+
+  <!-- 두 번째 갈래: 기존 모듈 정리 -->
+  <rect x="296" y="912" width="250" height="80" rx="12" fill="#eaf2ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="421" y="940" font-size="14" font-weight="700" fill="#1e40af" text-anchor="middle">✂️ 처방 삭제 · 관찰 유지</text>
+  <text class="t" x="421" y="964" font-size="11.5" fill="#3b5bb5" text-anchor="middle">direction · implementation · system-evidence</text>
+
+  <path d="M546,952 L602,952" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <rect x="606" y="906" width="416" height="92" rx="12" fill="#f7faff" stroke="#4a90d9" stroke-width="1.5"/>
+  <text class="t" x="622" y="932" font-size="12.5" fill="#6b7280"><tspan text-decoration="line-through">Portable pattern catalog</tspan> — 이식 가능한 <tspan font-weight="700">처방</tspan></text>
+  <text class="t" x="622" y="956" font-size="12.5" fill="#1e40af">→ <tspan font-weight="700">Observed cases</tspan> — 무엇을 보여줬는가 (17행 재작성)</text>
+  <text class="t" x="622" y="980" font-size="11.5" fill="#2e7d51">`Observed:` 사고 기록은 <tspan font-weight="700">한 줄도 안 지웠다</tspan> — 근거가 사라지면 규칙도 죽는다</text>
+
+  <!-- 게이트 -->
+  <path d="M1022,796 L1050,796" stroke="#2f6fed" stroke-width="2" fill="none"/>
+  <path d="M1022,952 L1036,952 L1036,796 L1050,796" stroke="#2f6fed" stroke-width="2" fill="none"/>
+  <path d="M1050,796 L1050,860 L1074,860" stroke="#2f6fed" stroke-width="2" fill="none" marker-end="url(#ab)"/>
+
+  <rect x="1078" y="810" width="392" height="100" rx="12" fill="#fff4e6" stroke="#e08a1e" stroke-width="2"/>
+  <text class="t" x="1096" y="836" font-size="13.5" font-weight="700" fill="#a3620a">🧪 라우트 문자열이 바뀌었다 → 계약 갱신</text>
+  <text class="t" x="1096" y="862" font-size="11.5" fill="#8a6a3a">fixture 7개 · 계약 테스트 3종 · assert-routing.mjs</text>
+  <text class="t" x="1096" y="884" font-size="11.5" fill="#8a6a3a">+ 지워진 처방 문자열 grep을 <tspan font-weight="700">관찰 문장</tspan> grep으로 교체</text>
+
+  <path d="M1274,910 L1274,942" stroke="#2e9e5b" stroke-width="2" fill="none" marker-end="url(#an)"/>
+
+  <rect x="1078" y="946" width="392" height="56" rx="12" fill="#e8f7ee" stroke="#2e9e5b" stroke-width="2.5"/>
+  <text class="t" x="1274" y="974" font-size="14" font-weight="700" fill="#1b6b3d" text-anchor="middle">✅ tests/all.sh 통과 · plugin validate 통과</text>
+
+  <line x1="40" y1="1042" x2="1470" y2="1042" stroke="#e5e7eb" stroke-width="1.5"/>
+
+  <!-- ===== 범례 ===== -->
+  <text class="t" x="40" y="1074" font-size="13" font-weight="700" fill="#374151">범례</text>
+  <line x1="106" y1="1074" x2="146" y2="1074" stroke="#2f6fed" stroke-width="2.5" marker-end="url(#ab)"/>
+  <text class="t" x="158" y="1074" font-size="12" fill="#4b5563">채택된 흐름</text>
+  <line x1="248" y1="1074" x2="288" y2="1074" stroke="#9aa3ae" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ag)"/>
+  <text class="t" x="300" y="1074" font-size="12" fill="#4b5563">폐기 / 이전 방식</text>
+  <rect x="418" y="1064" width="20" height="20" rx="5" fill="#e8f7ee" stroke="#2e9e5b" stroke-width="2"/>
+  <text class="t" x="446" y="1074" font-size="12" fill="#4b5563">🛢 근거 저장소</text>
+  <rect x="558" y="1064" width="20" height="20" rx="5" fill="#f0f8ff" stroke="#4a90d9" stroke-width="2"/>
+  <text class="t" x="586" y="1074" font-size="12" fill="#4b5563">🖥️ 결과</text>
+  <rect x="668" y="1064" width="20" height="20" rx="5" fill="#fff4e6" stroke="#e08a1e" stroke-width="2"/>
+  <text class="t" x="696" y="1074" font-size="12" fill="#4b5563">⚠️ 주의 / 게이트</text>
+  <rect x="826" y="1064" width="20" height="20" rx="5" fill="#fdf3e7" stroke="#e08a1e" stroke-width="2"/>
+  <text class="t" x="854" y="1074" font-size="12" fill="#4b5563">🏭 외부 소스</text>
+
+  <!-- ===== 결론 strip ===== -->
+  <rect x="40" y="1108" width="1430" height="110" rx="14" fill="#eef4ff" stroke="#2f6fed" stroke-width="2"/>
+  <text class="t" x="64" y="1140" font-size="15" font-weight="700" fill="#1e40af">결론 — 법칙을 규칙으로 옮기지 않고, 질문으로 옮겼다</text>
+  <text class="t" x="64" y="1168" font-size="12.5" fill="#334155">30개 중 23개를 21개 원칙으로. 수치는 전부 버리고 근거만. 각 항목은 <tspan font-weight="700">Ask:</tspan>(무엇을 물을 것인가)와 <tspan font-weight="700">Weakens when:</tspan>(언제 이 원칙이 틀리는가)로 끝난다.</text>
+  <text class="t" x="64" y="1194" font-size="12.5" fill="#334155">답은 프로젝트의 코드·토큰·사고기록·사용자가 낸다 → 권한 순서와 경쟁하지 않는다. 처방은 지웠고 <tspan font-weight="700">Observed 관찰은 전부 남겼다.</tspan></text>
+</svg>
+</body>
+</html>

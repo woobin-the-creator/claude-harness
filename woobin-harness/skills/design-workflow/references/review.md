@@ -29,6 +29,10 @@ Signature: verify the selected signature and focal point are visible, not decora
 
 Token: compare color, spacing, radius, depth, and motion to project authorities.
 
+Doubt: ask whether you are approving this because the user path works or because it looks finished. An attractive result is judged as more usable than it is, and the reviewer is not exempt — this is why the render matrix above exists.
+
+For a rendered flow rather than a single screen, the questions in `principles.md` under "How an experience is judged afterward" cover what a state-by-state pass misses: the peak and ending of the flow, visible progress, resumable interrupted work, whose vocabulary the copy uses, and what is only explained in documentation. Read them there rather than restating them here.
+
 ## Interaction and accessibility
 
 Exercise pointer, keyboard, focus return, reduced motion, screen-reader labels where relevant, color-independent severity, and target size. Report only reproducible states.

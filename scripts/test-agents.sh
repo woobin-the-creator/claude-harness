@@ -18,30 +18,14 @@ import pathlib
 import re
 import sys
 
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
-
 root = pathlib.Path(sys.argv[1])
 
-# 모드 3종 ↔ 두 호스트의 에이전트 이름·모델·effort. 여기가 정본이고 mode 파일이 이걸 인용한다.
+# 모드 3종 ↔ 에이전트 이름·모델·effort. 여기가 정본이고 plan-exec-modes.md 가 이걸 인용한다.
 MODES = {
-    "1": {
-        "claude": ("plan-implementer-sonnet-xhigh", "sonnet", "xhigh"),
-        "codex": ("plan-implementer-terra-medium", "gpt-5.6-terra", "medium"),
-    },
-    "2b": {
-        "claude": ("plan-implementer-sonnet-medium", "sonnet", "medium"),
-        "codex": ("plan-implementer-gpt56-medium", "gpt-5.6", "medium"),
-    },
-    "3": {
-        "claude": ("plan-implementer-opus-xhigh", "opus", "xhigh"),
-        "codex": ("plan-implementer-gpt56-xhigh", "gpt-5.6", "xhigh"),
-    },
+    "1": ("plan-implementer-sonnet-xhigh", "sonnet", "xhigh"),
+    "2b": ("plan-implementer-sonnet-medium", "sonnet", "medium"),
+    "3": ("plan-implementer-opus-xhigh", "opus", "xhigh"),
 }
-# 파일명 토큰 → 실제 Codex 모델 슬러그. 슬러그에 점이 있어 파일명에 그대로 못 쓴다.
-CODEX_SLUG = {"terra": "gpt-5.6-terra", "gpt56": "gpt-5.6"}
 
 errors = []
 
@@ -59,7 +43,7 @@ def frontmatter(path):
     return out
 
 
-# 1) 이름이 주장하는 model·effort 가 frontmatter 와 같은가 (Claude)
+# 1) 이름이 주장하는 model·effort 가 frontmatter 와 같은가
 for path in sorted((root / "woobin-harness/agents").glob("plan-implementer-*.md")):
     stem = path.stem
     parts = stem.split("-")
@@ -72,49 +56,22 @@ for path in sorted((root / "woobin-harness/agents").glob("plan-implementer-*.md"
     if data.get("effort") != claimed_effort:
         errors.append(f"{path}: 이름은 effort={claimed_effort!r} 인데 frontmatter 는 {data.get('effort')!r}")
 
-# 2) 같은 검사 (Codex TOML)
-for path in sorted((root / "codex/agents").glob("plan-implementer-*.toml")):
-    stem = path.stem
-    parts = stem.split("-")
-    claimed_slug_token, claimed_effort = parts[-2], parts[-1]
-    with path.open("rb") as handle:
-        data = tomllib.load(handle)
-    if data.get("name") != stem:
-        errors.append(f"{path}: name={data.get('name')!r} != filename {stem!r}")
-    expected_model = CODEX_SLUG.get(claimed_slug_token)
-    if expected_model is None:
-        errors.append(f"{path}: 파일명 토큰 {claimed_slug_token!r} 이 CODEX_SLUG 에 없다")
-    elif data.get("model") != expected_model:
-        errors.append(f"{path}: 이름은 model={expected_model!r} 인데 TOML 은 {data.get('model')!r}")
-    if data.get("model_reasoning_effort") != claimed_effort:
-        errors.append(
-            f"{path}: 이름은 effort={claimed_effort!r} 인데 TOML 은 {data.get('model_reasoning_effort')!r}"
-        )
-
-# 3) 모드 3종이 두 호스트에 모두 존재하는가, 그리고 값이 MODES 와 같은가
-for mode, hosts in MODES.items():
-    name, model, effort = hosts["claude"]
+# 2) 모드 3종이 모두 존재하는가
+for mode, (name, model, effort) in MODES.items():
     path = root / "woobin-harness/agents" / f"{name}.md"
     if not path.exists():
         errors.append(f"모드 {mode}: {path} 가 없다")
-    name, model, effort = hosts["codex"]
-    path = root / "codex/agents" / f"{name}.toml"
-    if not path.exists():
-        errors.append(f"모드 {mode}: {path} 가 없다")
 
-# 4) 핀 없는 옛 정의가 남아 있으면 실패 — 세션 effort 상속 경로가 살아 있다는 뜻이다
-for stale in (root / "woobin-harness/agents/plan-implementer.md", root / "codex/agents/plan-implementer.toml"):
-    if stale.exists():
-        errors.append(f"{stale}: model·effort 가 안 박힌 옛 정의가 남아 있다 — 지워라")
+# 3) 핀 없는 옛 정의가 남아 있으면 실패 — 세션 effort 상속 경로가 살아 있다는 뜻이다
+stale = root / "woobin-harness/agents/plan-implementer.md"
+if stale.exists():
+    errors.append(f"{stale}: model·effort 가 안 박힌 옛 정의가 남아 있다 — 지워라")
 
-# 5) mode 파일이 세 이름을 실제로 인용하는가 (Task 2 가 이 검사에 걸린다)
-claude_modes = (root / "woobin-harness/plan-exec-modes.md").read_text(encoding="utf-8")
-codex_modes = (root / "woobin-harness/plan-exec-modes-codex.md").read_text(encoding="utf-8")
-for mode, hosts in MODES.items():
-    if hosts["claude"][0] not in claude_modes:
-        errors.append(f"plan-exec-modes.md 에 {hosts['claude'][0]} 인용이 없다")
-    if hosts["codex"][0] not in codex_modes:
-        errors.append(f"plan-exec-modes-codex.md 에 {hosts['codex'][0]} 인용이 없다")
+# 4) mode 파일이 세 이름을 실제로 인용하는가
+modes_doc = (root / "woobin-harness/plan-exec-modes.md").read_text(encoding="utf-8")
+for mode, (name, model, effort) in MODES.items():
+    if name not in modes_doc:
+        errors.append(f"plan-exec-modes.md 에 {name} 인용이 없다")
 
 if errors:
     for line in errors:
