@@ -24,27 +24,23 @@ Keep a compact rule record with wrong form, replacement, and observed consequenc
 
 ## Tone and foundations
 
-Use type size, weight, and color together for hierarchy. The project’s adopted depth strategy beats generic border or shadow preferences.
+The project's adopted depth and hierarchy strategy beats generic border, shadow, or type preferences. Read which signals it already uses to mark rank before introducing another one.
 
 Nested surfaces may use concentric radii when the project depth strategy calls for radii. Optical alignment may override naive geometric centering when the reason is explicit.
 
-Avoid treating `transition: all` or layout-property animation as defaults.
-
 ## Content-derived dimensions
 
-Use actual content to size layouts. Dynamic numeric columns may use `tabular-nums`.
+Use actual content to size layouts. Inspect real minimum and maximum content — headings, body copy, numbers, empty states, and localized strings — before fixing a dimension. Dynamic numeric columns may use `tabular-nums`.
 
-KPI labels and table headers need enough size, weight, and color contrast, but do not blindly enlarge every label. Separate a label from its value by weight, not by tone: give the label slightly more size and weight and the same contrast grade as the value. Observed: a mockup rendered labels at nearly the same tone as their values, so neither read first.
-
-Table cells default to a compact 한 줄 unless an explicit multiline variant is selected. Headings and body copy define long-text wrapping behavior.
+Observed: a mockup rendered KPI labels at nearly the same size and tone as their values, so neither read first — the pair carried no rank at all. Which signal should carry that rank is a project decision; the observation only shows that something has to.
 
 ## Information density and truth
 
 Ellipsis communicates truncation. Attach `title` or tooltip 실제로 잘렸을 때만, after measuring or otherwise proving overflow.
 
-State when a dense layout is preserving useful scan speed versus when it hides truth.
+State when a dense layout is preserving useful scan speed and when it is hiding truth. Both happen, and only the content and the reader's task decide which.
 
-For tables, fitting more rows and columns into one screen is the first principle. A cell that needs two lines is a signal to revisit the column width or the value format, not to let the row grow. Observed: wrapping a date-range and a notes column doubled those rows and cut the visible row count; reformatting the range to `08-11 > 08-12` restored it.
+Observed: a table wrapped a date-range column and a notes column to two lines, which halved the rows visible in one screen; reformatting the range to `08-11 > 08-12` restored them. The reformat moved the complexity into the value format instead of onto the reader's scrolling — see `principles.md` under Tesler for why that direction is the one worth checking.
 
 ## Accessibility evidence
 

@@ -8,7 +8,7 @@
 
 # Expected route
 
-system-evidence → implementation-contracts → review
+principles → system-evidence → implementation-contracts → review
 
 # Must do
 

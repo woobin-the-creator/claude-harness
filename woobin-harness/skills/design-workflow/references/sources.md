@@ -12,6 +12,8 @@
   - achecker/Playwright: `achecker.js`, `packages/ibm-products/achecker.js`, `playwright.config.js`, and `e2e/components/*/*-test.avt.e2e.js`
   - CI: `.github/workflows/ci.yml` and `.github/workflows/cancel-ci.yml`
 
+- `lawsofux.com` by Jon Yablonski, read 2026-09-02, supplying the usability and perception findings collected in `references/principles.md`. Thirty entries are listed there; twenty-three are carried as twenty-one principles (Hick pairs with choice overload, Miller with chunking), each paraphrased from the mechanism rather than quoted, and the published constants attached to several of them are deliberately not carried. The license for the site's prose was not confirmed at the time of writing, which is the reason no upstream wording appears in this skill. Confirm it before quoting anything.
+
 This release paraphrases mechanisms. Substantial copied text or code requires preserving copyright and license notices.
 
 ## Local provenance

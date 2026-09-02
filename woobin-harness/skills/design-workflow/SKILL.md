@@ -23,18 +23,21 @@ In review-only mode, do not edit files.
 
 ## Route matrix
 
+`principles` leads every route that runs at all. It is short, it prescribes nothing, and it changes which questions the later modules get asked — reading it after the project evidence wastes it.
+
 | Situation | Ordered modules | Required behavior |
 |---|---|---|
-| Existing project, first explicit use | system-evidence → implementation-contracts → review | Scope inspection to current work; propose DESIGN.md only after durable value appears |
-| Greenfield | direction → system-evidence → implementation-contracts → review | Obtain approval for direction before adoption |
-| Established incremental UI | system-evidence → implementation-contracts → review | Skip direction |
-| Large redesign | direction → system-evidence → implementation-contracts → review → evolution | Keep new direction candidate until approved |
-| Review-only | system-evidence → review | Do not edit files |
-| Recurring failure/enforce | system-evidence → implementation-contracts → evolution → review | Choose lowest effective guard; respect approval boundary |
+| Existing project, first explicit use | principles → system-evidence → implementation-contracts → review | Scope inspection to current work; propose DESIGN.md only after durable value appears |
+| Greenfield | principles → direction → system-evidence → implementation-contracts → review | Obtain approval for direction before adoption |
+| Established incremental UI | principles → system-evidence → implementation-contracts → review | Skip direction |
+| Large redesign | principles → direction → system-evidence → implementation-contracts → review → evolution | Keep new direction candidate until approved |
+| Review-only | principles → system-evidence → review | Do not edit files |
+| Recurring failure/enforce | principles → system-evidence → implementation-contracts → evolution → review | Choose lowest effective guard; respect approval boundary |
 | Render-invariant logic | none | State that this skill does not apply and continue normal engineering work |
 
 ## Module paths
 
+- principles: `references/principles.md`
 - direction: `references/direction.md`
 - system-evidence: `references/system-evidence.md`
 - implementation-contracts: `references/implementation-contracts.md`

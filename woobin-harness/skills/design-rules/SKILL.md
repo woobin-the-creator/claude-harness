@@ -10,10 +10,11 @@ greenfield direction, redesign, review-only, or guard promotion, use `design-wor
 
 For the requested concrete UI decision, read in order:
 
-1. `../design-workflow/references/system-evidence.md`
-2. `../design-workflow/references/implementation-contracts.md`
-3. `../design-workflow/references/review.md` when a render or review is in scope
-4. `../design-workflow/references/evolution.md` only for a repeated failure
+1. `../design-workflow/references/principles.md`
+2. `../design-workflow/references/system-evidence.md`
+3. `../design-workflow/references/implementation-contracts.md`
+4. `../design-workflow/references/review.md` when a render or review is in scope
+5. `../design-workflow/references/evolution.md` only for a repeated failure
 
 `DESIGN.md` remains optional. Never stop because it is absent.
 
@@ -24,7 +25,7 @@ For the requested concrete UI decision, read in order:
 | §1 tone | `system-evidence.md` |
 | §2 dimensions | `system-evidence.md` |
 | §3 information design | `system-evidence.md` + `implementation-contracts.md` |
-| §4 taste defaults | `system-evidence.md` |
+| §4 taste defaults | `principles.md` + `system-evidence.md` |
 | §5 accessibility | `system-evidence.md` + `review.md` |
 | §6 generation/refinement | `direction.md` + `review.md` |
 | §7 rule evolution | `evolution.md` |
