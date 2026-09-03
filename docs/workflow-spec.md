@@ -278,7 +278,7 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 - E7이 거짓(effort가 프리픽스에 안 들어감) → 세션 중 변경 자유
 - 하네스가 턴 단위로 effort를 자동 조절
 - #45453이 수정되고 `/effort`가 세션 스코프가 됨 → `/effort`로 되돌아가도 된다
-- `Agent` 호출이 effort 인자를 받게 됨 → 변이체 3종을 하나로 되돌려라
+- `Agent` 호출이 effort 인자를 받게 됨 → 구현자·문서 리뷰어 변이체(`plan-implementer-*`·`plan-doc-reviewer-*`)를 하나로 되돌려라
 
 ---
 
@@ -781,7 +781,7 @@ Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hi
 
 **근거** 호환 레이어가 산 것은 "같은 스킬을 두 런타임에서 읽는다"였는데, 스킬은 애초에 마크다운이라
 레포를 나누어도 복사가 가능하다. 반대로 잃은 것은 단일 소유권이었고, 그 대가가 위 세 사고다.
-분리 시점에 Codex 쪽 자산은 파일 11개·에이전트 6개로, 별도 레포가 감당 못 할 크기가 아니다.
+분리 시점에 Codex 쪽 자산은 파일 11개·에이전트 정의 6종으로, 별도 레포가 감당 못 할 크기가 아니다.
 
 **대가** ① 두 레포에서 같은 스킬을 고쳐야 하는 순간이 온다 — 그때는 **복사**이지 동기화 규약이 아니다.
 어느 쪽이 정본인지는 각 레포가 스스로 답한다. ② Codex에서 이 하네스를 쓰던 흐름이 끊긴다.
@@ -836,7 +836,7 @@ KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_
 `PLAN_DOCS_DIRS`는 **전환기 값**이다. `origin/main`은 `woobin_plan`인데 로컬 브랜치·워크트리 다수가
 아직 `superpowers`라 둘 다 매칭한다. 전 브랜치가 넘어가면 `woobin_plan`만 남긴다. → §8
 
-### 에이전트 6개
+### 에이전트 8개
 
 | 이름 | model | effort | maxTurns | memory | 특징 |
 |------|-------|--------|----------|--------|------|
@@ -846,13 +846,24 @@ KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_
 | `plan-implementer-sonnet-medium` | sonnet | medium | 60 | `local` | 모드 ②b. **대부분의 플랜이 여기다** |
 | `plan-implementer-opus-xhigh` | opus | xhigh | 60 | `local` | 모드 ③. 되돌리기 비싼 변경 |
 | `plan-reviewer` | opus | low | 30 | **없음(의도)** | memory를 넣으면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다 |
+| `plan-doc-reviewer-opus-medium` | opus | medium | 30 | **없음(의도)** | 플랜 **문서** 리뷰(코드 아님). ③ 트리거가 아닌 **쉬운** 플랜. 편집 불가 |
+| `plan-doc-reviewer-opus-xhigh` | opus | xhigh | 30 | **없음(의도)** | 플랜 **문서** 리뷰. ③ 트리거(마이그레이션·프로덕션·자동 게이트로 못 잡는 UI) — **어려운** 플랜. 편집 불가 |
 
 **frontmatter의 부재가 의도인 곳이 1군데 남았다** — `plan-reviewer`의 `memory`. 리뷰어가 "빠졌다"고
 판단해 채우면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다.
 
-구현자 3종의 `model`·`effort`는 반대로 **반드시 채워져 있어야 한다.** `Agent` 호출에 effort 인자가
-없고 full-auto에는 세션 재런치가 없어서, frontmatter가 유일한 운반 수단이다. 파일명이 그 값을 한 번 더
-주장하므로 `scripts/test-agents.sh`가 둘의 일치를 기계로 센다(규율 6 — 이름을 두 번째 소유자로 두지 않는다).
+구현자 3종과 문서 리뷰어 2종의 `model`·`effort`는 반대로 **반드시 채워져 있어야 한다.** `Agent` 호출에
+effort 인자가 없고 full-auto에는 세션 재런치가 없어서, frontmatter가 유일한 운반 수단이다. 파일명이 그
+값을 한 번 더 주장하므로 `scripts/test-agents.sh`가 `plan-implementer-*`와 `plan-doc-reviewer-*` 둘
+다에서 이름 ↔ frontmatter 일치를 기계로 센다(규율 6 — 이름을 두 번째 소유자로 두지 않는다).
+
+`plan-doc-reviewer-*` 2종은 `writing-plans`가 플랜 문서 리뷰를 띄울 때 **③ 트리거 여부로 하나를 고른다** —
+어려운 플랜(마이그레이션·프로덕션·자동 게이트로 못 잡는 UI)은 `-opus-xhigh`, 그 외는 `-opus-medium`.
+이전에는 이 리뷰를 `general-purpose`로 띄워 "플랜 세션 effort를 상속한다"고 했는데, `subagent-model-default.sh`
+(R3)가 model 미지정 general-purpose를 sonnet으로 고정하므로 그 상속은 실제로는 일어나지 않았다 —
+리뷰가 조용히 sonnet으로 돌았다. frontmatter로 옮겨 그 경로를 닫았다. effort를 티어로 나눈 근거는 R7의
+"위임된 구현자는 frontmatter가 유일한 운반 수단"과 같다. 코드 리뷰어(`plan-reviewer`)와 달리 이들은
+플랜 **문서**를 검토하므로 fable(디자인 감각) 변이체는 두지 않는다 — 문서 단계에서 얻을 게 얇다.
 
 `maxTurns`는 폭주 방지 상한이지 튜닝 손잡이가 아니다. **미강제 버그 열려 있음**: anthropics/claude-code#41143.
 

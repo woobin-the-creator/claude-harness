@@ -6,7 +6,7 @@ Claude Code에서 **직접 만든 하네스만** 공유하는 레포. 새 머신
 
 ## 형태 — 왜 dotfiles 심링크가 아니라 플러그인인가
 
-스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 20개·에이전트 6개·훅 13개를 붙인다.
+스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 20개·에이전트 8개·훅 13개를 붙인다.
 
 > Codex 지원은 2026-09-02에 이 레포에서 **분리했다.** 두 런타임을 한 레포에서 호환시키느라 매니페스트·훅 wiring·에이전트 형식·검증 스크립트가 전부 두 벌이 됐고, 한쪽만 고쳐 조용히 갈라지는 사고가 반복됐다(마지막이 `kick-off`의 `disable-model-invocation` — Claude에서 필수인 값을 Codex validator가 거부해 검증이 상시 실패). Codex 하네스는 별도 플러그인 레포에서 관리한다.
 
@@ -30,7 +30,7 @@ claude-harness/
 │   ├── hooks/claude-hooks.json       훅 wiring 13개
 │   ├── hooks/*.sh                    13개
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
-│   ├── agents/*.md                   6개
+│   ├── agents/*.md                   8개
 │   ├── skills/<name>/SKILL.md        20개
 │   ├── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
 │   └── plan-exec-modes.md            구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
