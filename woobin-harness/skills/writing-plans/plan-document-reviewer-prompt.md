@@ -11,12 +11,24 @@ argument that the Self-Review checklist catches the same things more cheaply. Th
 human reads the kickoff block and sanity-checks the plan before pasting it. Under full-auto (modes
 ①/②b/③ with zero gates) nobody does, so this dispatch is the only pre-flight the run gets.
 
-**Dispatch as:** a `general-purpose` subagent. Do not give it a dedicated agent definition — it runs
-inside the planning session, whose effort the user chose deliberately, and inheriting that effort is
-correct here rather than a hazard.
+**Dispatch as:** a dedicated reviewer agent, picked by difficulty:
+
+| Plan | Agent |
+|------|-------|
+| mode-③ trigger — migration, prod-facing change, or UI that automated gates cannot check | `plan-doc-reviewer-opus-xhigh` |
+| anything else | `plan-doc-reviewer-opus-medium` |
+
+Judge the trigger from the plan you just wrote — it is knowable now, before the review runs (the review
+is what *produces* the gate count, so gate count cannot be the input here). Do not pass a `model`
+argument: the agent definition owns model and effort, and `Agent` calls have no `effort` argument at all.
+
+This used to dispatch a `general-purpose` subagent on the theory that it inherits the planning session's
+deliberately-chosen effort. It does not: `subagent-model-default.sh` (R3) pins any model-unspecified
+`general-purpose` subagent to sonnet, so the review ran on sonnet regardless of the planning session.
+Frontmatter is the only carrier that survives that hook and full-auto's lack of a session relaunch.
 
 ```
-Subagent (general-purpose):
+Subagent (plan-doc-reviewer-opus-medium | plan-doc-reviewer-opus-xhigh):
   description: "Review plan document"
   prompt: |
     You are a plan document reviewer. Verify this plan is complete and ready for implementation.

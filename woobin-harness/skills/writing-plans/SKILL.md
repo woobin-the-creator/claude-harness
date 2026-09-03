@@ -214,7 +214,7 @@ The first three checks ask *does the plan match the spec*. The last three ask *d
 
 Fix what you find inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
-Then dispatch an independent plan-document reviewer using [plan-document-reviewer-prompt.md](plan-document-reviewer-prompt.md). Do this for **every** plan, not only high-stakes ones: the checklist above is you checking your own work, and the plan may be executed with no human reading it first. Apply the findings to the plan files before going any further — a finding you leave unfixed is a finding nobody will see again.
+Then dispatch an independent plan-document reviewer using [plan-document-reviewer-prompt.md](plan-document-reviewer-prompt.md). That file names which reviewer agent to use — `plan-doc-reviewer-opus-xhigh` for a mode-③ trigger (migration, prod-facing, uncheckable UI), `plan-doc-reviewer-opus-medium` otherwise — and why the model is pinned in the agent definition rather than inherited. Do this for **every** plan, not only high-stakes ones: the checklist above is you checking your own work, and the plan may be executed with no human reading it first. Apply the findings to the plan files before going any further — a finding you leave unfixed is a finding nobody will see again.
 
 Keep the reviewer's `**Gates:** N` line. The Execution Handoff below routes on that number.
 

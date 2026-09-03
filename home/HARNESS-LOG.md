@@ -1049,6 +1049,37 @@ chat` 절을 넣어 PR이 소비처임을 명시했다 — 규칙을 `plan-exec-
 (b) `gh pr edit` 없이 create 시점 본문 그대로 ready된 건수. (b)가 0이 아니면 포인터로는 부족한
 것이고, R15 무효화 조건대로 다음 수단은 Stop 훅 차단이다.
 
+## 36. 플랜 문서 리뷰가 sonnet으로 돌고 있었다 — 상속을 믿은 게 화근 (2026-09-03)
+
+**문제** — `writing-plans`대로 플랜을 세우고 문서 리뷰어를 띄웠더니 리뷰가 sonnet으로 돌았다.
+어려운 구현이든 쉬운 구현이든 똑같이 sonnet이었다.
+
+**진단** — `plan-document-reviewer-prompt.md`가 리뷰어를 `general-purpose`로 띄우면서 "플랜
+세션의 effort를 상속하니 전용 에이전트 정의를 주지 마라"고 못박고 있었다. 그런데 그 상속은 실제로
+일어나지 않는다 — `subagent-model-default.sh`(R3)가 model 미지정 `general-purpose` 서브에이전트를
+**sonnet으로 고정**한다. 문서가 주장한 근거가 훅 하나 때문에 통째로 거짓이었고, 증상이 없어
+조용히 돌고 있었다. effort는 `Agent` 호출 인자로 넘길 수도 없다(R7) — frontmatter가 유일한 운반 수단이다.
+
+**수단** — 문서 리뷰어를 `general-purpose` 상속에서 **frontmatter 핀 에이전트 2종**으로 옮겼다.
+난이도는 이미 하네스에 있는 **모드 ③ 트리거**(마이그레이션·프로덕션 영향·자동 게이트로 못 잡는 UI)를
+재사용해 판정한다 — 어려우면 `plan-doc-reviewer-opus-xhigh`, 그 외는 `plan-doc-reviewer-opus-medium`.
+판정 시점이 중요하다: 리뷰가 게이트 수를 *산출*하는 주체라 게이트 수는 입력이 될 수 없고, ③ 트리거는
+플랜을 다 쓴 시점에 이미 알 수 있다. 둘 다 opus·읽기 전용(`plan-reviewer`처럼 memory 없음)이다.
+
+**설계에서 갈린 지점** — 어려운 쪽에 fable을 둘지. 처음엔 "로직=opus / UI·디자인=fable"로 나누려
+했으나 기각했다. 이 리뷰어의 대상은 플랜 **문서**(완결성·분해·스펙 정합)이지 렌더 결과가 아니라
+fable의 디자인 감각이 얻을 게 얇다. fable은 구현 단계의 렌더 리뷰(`screenshot-verifier`·design 모듈)에
+남기고, 문서 단계는 opus 2종으로 단순화했다. 새 규칙(R23)은 만들지 않았다 — R3의 무효화 조건에 이미
+"하네스가 태스크 난이도로 모델을 자동 라우팅"이 적혀 있어, 이 변경은 R7(frontmatter 소유)의 적용
+사례로 정합적이다. §4 인벤토리와 R7 무효화 조건 문구만 리뷰어 변이체까지 넓혔다.
+
+**강제** — `scripts/test-agents.sh`를 `plan-implementer-*`와 `plan-doc-reviewer-*` 둘 다에서 이름 ↔
+frontmatter model·effort를 세도록 넓혔고, 문서 리뷰어 2종의 존재와 `plan-document-reviewer-prompt.md`
+인용을 검사한다. 이름이 갈라지면 `writing-plans`가 옛 이름을 부르는 걸 fixture가 잡는다.
+
+**재측정** — 다음 플랜 몇 개에서 문서 리뷰어가 실제로 opus로 뜨는지(어려운 플랜은 xhigh인지),
+그리고 medium/xhigh 티어가 리뷰 품질·비용에서 갈리는지 본다.
+
 ## 규율 (이 이력에서 반복 확인된 것)
 
 1. **소프트 개입 우선** — 차단은 세션 1회 + 재시도 통과. 오탐이 영구 장애가 되면 안 된다(#7, #10, #11 전부 이 형태).

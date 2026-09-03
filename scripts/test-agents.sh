@@ -43,18 +43,21 @@ def frontmatter(path):
     return out
 
 
-# 1) 이름이 주장하는 model·effort 가 frontmatter 와 같은가
-for path in sorted((root / "woobin-harness/agents").glob("plan-implementer-*.md")):
-    stem = path.stem
-    parts = stem.split("-")
-    claimed_model, claimed_effort = parts[-2], parts[-1]
-    data = frontmatter(path)
-    if data.get("name") != stem:
-        errors.append(f"{path}: name={data.get('name')!r} != filename {stem!r}")
-    if data.get("model") != claimed_model:
-        errors.append(f"{path}: 이름은 model={claimed_model!r} 인데 frontmatter 는 {data.get('model')!r}")
-    if data.get("effort") != claimed_effort:
-        errors.append(f"{path}: 이름은 effort={claimed_effort!r} 인데 frontmatter 는 {data.get('effort')!r}")
+# 1) 이름이 주장하는 model·effort 가 frontmatter 와 같은가.
+#    `plan-implementer-*`(구현자)와 `plan-doc-reviewer-*`(문서 리뷰어) 둘 다 파일명 끝 두 토큰이
+#    model·effort 를 주장한다 — Agent 호출에 effort 인자가 없어 frontmatter 가 유일한 운반 수단이라서다.
+for glob in ("plan-implementer-*.md", "plan-doc-reviewer-*.md"):
+    for path in sorted((root / "woobin-harness/agents").glob(glob)):
+        stem = path.stem
+        parts = stem.split("-")
+        claimed_model, claimed_effort = parts[-2], parts[-1]
+        data = frontmatter(path)
+        if data.get("name") != stem:
+            errors.append(f"{path}: name={data.get('name')!r} != filename {stem!r}")
+        if data.get("model") != claimed_model:
+            errors.append(f"{path}: 이름은 model={claimed_model!r} 인데 frontmatter 는 {data.get('model')!r}")
+        if data.get("effort") != claimed_effort:
+            errors.append(f"{path}: 이름은 effort={claimed_effort!r} 인데 frontmatter 는 {data.get('effort')!r}")
 
 # 2) 모드 3종이 모두 존재하는가
 for mode, (name, model, effort) in MODES.items():
@@ -72,6 +75,17 @@ modes_doc = (root / "woobin-harness/plan-exec-modes.md").read_text(encoding="utf
 for mode, (name, model, effort) in MODES.items():
     if name not in modes_doc:
         errors.append(f"plan-exec-modes.md 에 {name} 인용이 없다")
+
+# 5) 문서 리뷰어 2종이 존재하고, dispatch 소유자(plan-document-reviewer-prompt.md)가 둘을 인용하는가.
+#    이 둘은 ③ 트리거 여부로 갈리는 티어라, 이름이 갈라지면 writing-plans 가 옛 이름을 부른다.
+REVIEWERS = ("plan-doc-reviewer-opus-medium", "plan-doc-reviewer-opus-xhigh")
+prompt_doc_path = root / "woobin-harness/skills/writing-plans/plan-document-reviewer-prompt.md"
+prompt_doc = prompt_doc_path.read_text(encoding="utf-8") if prompt_doc_path.exists() else ""
+for name in REVIEWERS:
+    if not (root / "woobin-harness/agents" / f"{name}.md").exists():
+        errors.append(f"문서 리뷰어 {name}.md 가 없다")
+    if name not in prompt_doc:
+        errors.append(f"plan-document-reviewer-prompt.md 에 {name} 인용이 없다")
 
 if errors:
     for line in errors:
