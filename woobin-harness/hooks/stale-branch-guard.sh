@@ -9,16 +9,16 @@
 # 반려(block)한다 — additionalContext가 모델에게 전달됐는지와 무관하게, 마커
 # 파일 자체는 이 스크립트의 부수효과라 항상 남는다.
 #
-# R15(레이어 경계 커밋 + draft PR) 이후: 의도적으로 오래 사는 플랜 브랜치는 등급을 **하향**한다.
+# 구현 세션 절차(첫 턴 draft PR이 회복 진입점) 이후: 의도적으로 오래 사는 구현 브랜치는 등급을 **하향**한다.
 # 면제가 아니다 — 경고·마커·ack 게이트를 그대로 유지하고 문구만 "워크트리를 만들어라"에서
 # "rebase가 필요한지만 확인해라"로 바꾼다. 조건을 "열린 PR이 있다"로만 두면 방치된
 # 브랜치도 빠져나가므로, "앞선 커밋이 있다"(= 실제 작업 중)를 함께 요구한다.
 #
 # 판정 신호는 **draft 상태 하나**다. 라벨은 쓰지 않는다 — "구현 중"을 draft와 라벨 두 곳에
 # 표현하면 손으로 동기화해야 하고, 한쪽을 잊는 순간 조용히 갈라진다(issue #3).
-# 마지막 레이어 push 시 `gh pr ready`로 draft가 벗겨지므로, ready~머지 사이 창에서는
+# 구현을 마치고 `gh pr ready`로 draft가 벗겨지므로, ready~머지 사이 창에서는
 # 하향이 풀려 강한 문구로 돌아온다 — fail-safe 방향이라 의도한 것이다.
-# 절차 원문은 woobin-harness/plan-exec-modes.md 가 소유한다 — 여기 복제하지 말 것(§6-6, 사고 #16).
+# 절차 원문은 woobin-harness/skills/interview/SKILL.md의 '구현 세션으로 넘기기' 절이 소유한다 — 여기 복제하지 말 것(§6-6, 사고 #16).
 
 input=$(cat)
 session_id=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
@@ -55,7 +55,7 @@ behind=$(git rev-list --count "HEAD..origin/${default}" 2>/dev/null)
 case "$behind" in ''|*[!0-9]*) behind=0 ;; esac
 [ "$behind" -gt 0 ] || exit 0
 
-# R15 — 플랜 브랜치 판정. behind>0 경로에서만 계산하므로 평상시 비용은 0이다.
+# 구현 브랜치 판정(구 R15, 2026-10-01 폐기 후 draft PR 하향만 유지). behind>0 경로에서만 계산하므로 평상시 비용은 0이다.
 ahead=$(git rev-list --count "origin/${default}..HEAD" 2>/dev/null)
 case "$ahead" in ''|*[!0-9]*) ahead=0 ;; esac
 
@@ -89,11 +89,11 @@ fi
 worktree_instruction="EnterWorktree로 최신 ${default} 기반(baseRef=fresh) 워크트리를 만들지 사용자에게 물어보세요"
 
 if [ "$plan_wip" -eq 1 ]; then
-  ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}'는 열린 draft PR이 있는 **구현 중인 플랜 브랜치**이고, origin/${default}보다 ${behind} 커밋 뒤처져 있습니다(앞선 커밋 ${ahead}개).
+  ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}'는 열린 draft PR이 있는 **구현 중인 브랜치**이고, origin/${default}보다 ${behind} 커밋 뒤처져 있습니다(앞선 커밋 ${ahead}개).
 
 이 경고는 사용자의 첫 메시지 내용과 무관하게 예외 없이 최우선입니다. 사용자가 완전히 다른 질문이나 작업을 요청했더라도, 조사나 답변을 먼저 진행하지 말고 이번 턴 응답의 맨 첫 문장으로 위 경고 문구를 사용자에게 그대로 전달한 뒤에 사용자의 실제 요청을 처리하세요. 경고를 생략하거나 뒤로 미루면 안 됩니다.
 
-알린 다음: **새 워크트리를 만들지 마세요** — 이 브랜치는 구현이 진행 중인 플랜 브랜치입니다. 뒤처진 ${behind} 커밋이 이번 레이어가 건드리는 파일과 겹치는지만 확인하고, 겹치면 rebase 여부를 사용자에게 물어보세요. 겹치지 않으면 그대로 진행하세요."
+알린 다음: **새 워크트리를 만들지 마세요** — 이 브랜치는 구현이 진행 중인 브랜치입니다. 뒤처진 ${behind} 커밋이 이번 작업이 건드리는 파일과 겹치는지만 확인하고, 겹치면 rebase 여부를 사용자에게 물어보세요. 겹치지 않으면 그대로 진행하세요."
 else
   ctx="⚠️ 세션 시작 stale-branch 점검: 현재 '${branch}' 브랜치가 origin/${default}보다 ${behind} 커밋 뒤처져 있고, 격리된 워크트리가 아닙니다.
 

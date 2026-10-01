@@ -46,8 +46,8 @@ marker="$marker_dir/$sid"
 [ -e "$marker" ] && exit 0
 
 # 현재 컨텍스트 = transcript 마지막 assistant usage.
-# ctx-warn-statusline.sh · plan-session-boundary-guard.sh 와 **같은 식**을 쓴다.
-# 세 곳이 다른 값을 말하면 사용자가 어느 쪽을 믿을지 몰라진다.
+# ctx-warn-statusline.sh 와 **같은 식**을 쓴다.
+# 두 곳이 다른 값을 말하면 사용자가 어느 쪽을 믿을지 몰라진다.
 ctx=$(tail -n 40 "$tp" 2>/dev/null | jq -rR '
     fromjson? // empty
     | select(.type == "assistant")
