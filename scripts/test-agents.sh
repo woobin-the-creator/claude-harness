@@ -1,10 +1,12 @@
 #!/bin/sh
-# 에이전트 정의 fixture — 파일명이 주장하는 model·effort 가 frontmatter 와 같은지 기계가 센다.
+# 에이전트 정의 fixture — 리뷰어 2종의 frontmatter 계약과 호출 지점 인용을 기계가 센다.
 #
-# 왜: 규율 6("이름이 아니라 출처로 판정한다"). `plan-implementer-sonnet-medium` 이라는 이름은
-# frontmatter 에 사는 사실을 한 번 더 주장하는 형태다. 누가 frontmatter 만 고치면 이름이 조용히
-# 거짓말을 하고, 그 결과는 "모드에 없는 조합으로 구현이 돌았다"인데 증상이 없다.
-# 이 fixture 가 이름을 두 번째 소유자에서 파생값으로 바꾼다.
+# 왜: 리뷰 2회(spec-reviewer·code-reviewer)는 둘 다 frontmatter 가 model·effort·tools 를 소유하는
+# 전용 프로필이다(issue #41). Agent 호출에 effort 인자가 없어 frontmatter 가 유일한 운반 수단이고,
+# 누가 frontmatter 만 고치면 "opus 리뷰"가 조용히 다른 모델로 돌거나, tools 에 Edit 가 섞여
+# "리뷰만 하는" 독립 컨텍스트가 코드를 고치기 시작해도 증상이 없다.
+# 호출 지점(interview 스킬·spec-reviewer-prompt.md)이 옛 이름을 부르면 리뷰가 아예 안 돈다 —
+# 그래서 인용도 함께 센다.
 
 set -eu
 
@@ -20,12 +22,13 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 
-# 모드 3종 ↔ 에이전트 이름·모델·effort. 여기가 정본이고 plan-exec-modes.md 가 이걸 인용한다.
-MODES = {
-    "1": ("plan-implementer-sonnet-xhigh", "sonnet", "xhigh"),
-    "2b": ("plan-implementer-sonnet-medium", "sonnet", "medium"),
-    "3": ("plan-implementer-opus-xhigh", "opus", "xhigh"),
+# 리뷰어 2종 ↔ model·effort. 여기가 정본이다.
+REVIEWERS = {
+    "spec-reviewer": ("opus", "medium"),
+    "code-reviewer": ("opus", "medium"),
 }
+REQUIRED_TOOLS = {"Read", "Grep", "Glob", "Bash"}
+FORBIDDEN_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 
 errors = []
 
@@ -43,49 +46,38 @@ def frontmatter(path):
     return out
 
 
-# 1) 이름이 주장하는 model·effort 가 frontmatter 와 같은가.
-#    `plan-implementer-*`(구현자)와 `plan-doc-reviewer-*`(문서 리뷰어) 둘 다 파일명 끝 두 토큰이
-#    model·effort 를 주장한다 — Agent 호출에 effort 인자가 없어 frontmatter 가 유일한 운반 수단이라서다.
-for glob in ("plan-implementer-*.md", "plan-doc-reviewer-*.md"):
-    for path in sorted((root / "woobin-harness/agents").glob(glob)):
-        stem = path.stem
-        parts = stem.split("-")
-        claimed_model, claimed_effort = parts[-2], parts[-1]
-        data = frontmatter(path)
-        if data.get("name") != stem:
-            errors.append(f"{path}: name={data.get('name')!r} != filename {stem!r}")
-        if data.get("model") != claimed_model:
-            errors.append(f"{path}: 이름은 model={claimed_model!r} 인데 frontmatter 는 {data.get('model')!r}")
-        if data.get("effort") != claimed_effort:
-            errors.append(f"{path}: 이름은 effort={claimed_effort!r} 인데 frontmatter 는 {data.get('effort')!r}")
-
-# 2) 모드 3종이 모두 존재하는가
-for mode, (name, model, effort) in MODES.items():
+# 1) 리뷰어 2종이 존재하고 frontmatter 계약(name·model·effort·읽기 전용 tools)을 지키는가.
+for name, (model, effort) in REVIEWERS.items():
     path = root / "woobin-harness/agents" / f"{name}.md"
     if not path.exists():
-        errors.append(f"모드 {mode}: {path} 가 없다")
+        errors.append(f"{path} 가 없다")
+        continue
+    data = frontmatter(path)
+    if data.get("name") != name:
+        errors.append(f"{path}: name={data.get('name')!r} != filename {name!r}")
+    if data.get("model") != model:
+        errors.append(f"{path}: model={data.get('model')!r}, 기대값 {model!r}")
+    if data.get("effort") != effort:
+        errors.append(f"{path}: effort={data.get('effort')!r}, 기대값 {effort!r}")
+    tools = {t.strip() for t in data.get("tools", "").split(",") if t.strip()}
+    missing = REQUIRED_TOOLS - tools
+    if missing:
+        errors.append(f"{path}: tools 에 {sorted(missing)} 가 없다")
+    leaked = FORBIDDEN_TOOLS & tools
+    if leaked:
+        errors.append(f"{path}: 리뷰어인데 tools 에 편집 도구 {sorted(leaked)} 가 있다")
 
-# 3) 핀 없는 옛 정의가 남아 있으면 실패 — 세션 effort 상속 경로가 살아 있다는 뜻이다
-stale = root / "woobin-harness/agents/plan-implementer.md"
-if stale.exists():
-    errors.append(f"{stale}: model·effort 가 안 박힌 옛 정의가 남아 있다 — 지워라")
-
-# 4) mode 파일이 세 이름을 실제로 인용하는가
-modes_doc = (root / "woobin-harness/plan-exec-modes.md").read_text(encoding="utf-8")
-for mode, (name, model, effort) in MODES.items():
-    if name not in modes_doc:
-        errors.append(f"plan-exec-modes.md 에 {name} 인용이 없다")
-
-# 5) 문서 리뷰어 2종이 존재하고, dispatch 소유자(plan-document-reviewer-prompt.md)가 둘을 인용하는가.
-#    이 둘은 ③ 트리거 여부로 갈리는 티어라, 이름이 갈라지면 writing-plans 가 옛 이름을 부른다.
-REVIEWERS = ("plan-doc-reviewer-opus-medium", "plan-doc-reviewer-opus-xhigh")
-prompt_doc_path = root / "woobin-harness/skills/writing-plans/plan-document-reviewer-prompt.md"
-prompt_doc = prompt_doc_path.read_text(encoding="utf-8") if prompt_doc_path.exists() else ""
-for name in REVIEWERS:
-    if not (root / "woobin-harness/agents" / f"{name}.md").exists():
-        errors.append(f"문서 리뷰어 {name}.md 가 없다")
-    if name not in prompt_doc:
-        errors.append(f"plan-document-reviewer-prompt.md 에 {name} 인용이 없다")
+# 2) 호출 지점이 네임스페이스 이름으로 리뷰어를 인용하는가.
+CITES = {
+    "woobin-harness/skills/interview/spec-reviewer-prompt.md": "woobin-harness:spec-reviewer",
+    "woobin-harness/skills/interview/SKILL.md": "woobin-harness:code-reviewer",
+}
+for rel, needle in CITES.items():
+    path = root / rel
+    if not path.exists():
+        errors.append(f"{rel} 가 없다")
+    elif needle not in path.read_text(encoding="utf-8"):
+        errors.append(f"{rel} 에 {needle} 인용이 없다")
 
 if errors:
     for line in errors:
@@ -93,7 +85,7 @@ if errors:
     raise SystemExit(1)
 PY
 
-pass "에이전트 이름 ↔ frontmatter model·effort 일치"
+pass "리뷰어 2종 frontmatter 계약 + 호출 지점 인용"
 
 for f in "$ROOT"/woobin-harness/agents/*.md; do
   head -1 "$f" | grep -q '^---$' || fail "$f: frontmatter 가 --- 로 시작하지 않는다"

@@ -17,7 +17,7 @@ Codex 지원은 2026-09-02에 **분리했다.** 매니페스트·훅 wiring·에
 | 레포 구조 · 새 머신 설치 · 원본 머신 전환 절차 | `README.md` |
 | 워크플로우가 어떻게 굴러가는지 (사람용 요약) | `docs/workflow.html` |
 | 규칙의 근거 · 대가 · **무효화 조건** (모델 재검토용 전문) | `docs/workflow-spec.md` |
-| 플랜 구현 모드 3종 | `woobin-harness/plan-exec-modes.md` |
+| 스펙 → 리뷰 → 구현 세션 절차 | `woobin-harness/skills/interview/SKILL.md` "구현 세션으로 넘기기" |
 | 개별 훅이 왜 있는지 (사고 이력 포함) | 해당 `woobin-harness/hooks/*.sh` 헤더 주석 |
 | 개선 이력의 전체 서사 — 문제·근거·수단·재측정 | `home/HARNESS-LOG.md` |
 | 역량 채점 이력·추세 | `docs/scores/SCORES.md` |
@@ -63,7 +63,7 @@ claude plugin update woobin-harness@woobin-harness   # ⚠️ 짧은 이름은 "
 
 ```bash
 claude plugin validate ./woobin-harness   # YAML frontmatter 파싱 실패는 이 명령만 잡는다
-./scripts/test-hooks.sh                   # 훅 13개 결정론적 분기 fixture
+./scripts/test-hooks.sh                   # 훅 10개 결정론적 분기 fixture
 ./scripts/test-skills.sh                  # 스킬 자산 구문·참조·로컬 실행 fixture
 ./scripts/test-agents.sh                  # 에이전트 이름 ↔ frontmatter model·effort 일치
 DRY_RUN=1 ./bootstrap.sh                  # 새 머신 설치가 무엇을 건드리는지

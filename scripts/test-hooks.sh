@@ -60,107 +60,6 @@ assert_json "$out" '.decision == "block" and (.reason | contains("세션을 닫�
 [ -f "$TEST_HOME/.claude/idle-handoff/return-session.handoff-done" ] || fail "idle-return-guard: close marker missing"
 pass "idle-return-guard stale/retry/close branches"
 
-# plan-saved-session-boundary: a plan write emits once and uses the no-mode fallback.
-plan_root="$TEST_ROOT/plan-project"
-plan_file="$plan_root/docs/woobin_plan/plans/sample.md"
-mkdir -p "$(dirname "$plan_file")"
-printf '# Plan\n\n- task\n' >"$plan_file"
-plan_input="{\"session_id\":\"plan-save-session\",\"tool_input\":{\"file_path\":\"$plan_file\"}}"
-out=$(printf '%s' "$plan_input" \
-  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
-      "$HOOKS/plan-saved-session-boundary.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "PostToolUse" and (.hookSpecificOutput.additionalContext | contains("세션 경계 알림"))' "plan-saved-session-boundary: missing context"
-out=$(printf '%s' "$plan_input" \
-  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
-      "$HOOKS/plan-saved-session-boundary.sh")
-assert_silent "$out" "plan-saved-session-boundary once-only"
-pass "plan-saved-session-boundary trigger/once"
-
-# plan-saved-session-boundary: 분할 저장된 플랜은 00-overview.md 에만 발화하고 task-N.md 는 침묵한다.
-split_overview="$plan_root/docs/woobin_plan/plans/2026-08-21-sample/00-overview.md"
-split_task="$plan_root/docs/woobin_plan/plans/2026-08-21-sample/task-1.md"
-mkdir -p "$(dirname "$split_overview")"
-printf '# Plan\n\n- task\n' >"$split_overview"
-printf '### Task 1\n' >"$split_task"
-out=$(printf '%s' "{\"session_id\":\"plan-split-session\",\"tool_input\":{\"file_path\":\"$split_overview\"}}" \
-  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
-      "$HOOKS/plan-saved-session-boundary.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("이미") and contains("분할 불필요")' \
-  "plan-saved-session-boundary: overview did not use the presplit branch"
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("2026-08-21-sample 플랜으로 구현")' \
-  "plan-saved-session-boundary: kickoff target is not the plan directory"
-out=$(printf '%s' "{\"session_id\":\"plan-split-session\",\"tool_input\":{\"file_path\":\"$split_task\"}}" \
-  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$TEST_ROOT/missing-modes.md" \
-      "$HOOKS/plan-saved-session-boundary.sh")
-assert_silent "$out" "plan-saved-session-boundary task-N.md silence"
-pass "plan-saved-session-boundary presplit overview/task branches"
-
-# plan-saved-session-boundary: 모드 파일이 있으면 게이트 라우팅과 리뷰어 지시가 나온다.
-modes_file="$TEST_ROOT/plan-exec-modes.md"
-printf '# modes\n' >"$modes_file"
-routed_overview="$plan_root/docs/woobin_plan/plans/2026-08-27-routed/00-overview.md"
-mkdir -p "$(dirname "$routed_overview")"
-printf '# Plan\n\n- task\n' >"$routed_overview"
-out=$(printf '%s' "{\"session_id\":\"plan-routed-session\",\"tool_input\":{\"file_path\":\"$routed_overview\"}}" \
-  | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" PLAN_EXEC_MODES_FILE="$modes_file" \
-      "$HOOKS/plan-saved-session-boundary.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("plan-document-reviewer-prompt.md")' \
-  "plan-saved-session-boundary: 리뷰어 지시가 없다"
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("게이트 0개") and contains("게이트 1개 이상")' \
-  "plan-saved-session-boundary: 게이트 라우팅 분기가 없다"
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("모드 ②a")' \
-  "plan-saved-session-boundary: ②a 킥오프가 없다"
-pass "plan-saved-session-boundary 게이트 라우팅 분기"
-
-# plan-session-boundary-guard: high-context plan-entry prompt emits once.
-plan_ctx_transcript="$TEST_ROOT/plan-context.jsonl"
-printf '%s\n' '{"type":"assistant","message":{"usage":{"input_tokens":130000,"cache_read_input_tokens":1000,"cache_creation_input_tokens":0}}}' >"$plan_ctx_transcript"
-entry_input="{\"session_id\":\"plan-entry-session\",\"transcript_path\":\"$plan_ctx_transcript\",\"prompt\":\"구현 계획을 작성하자\"}"
-out=$(printf '%s' "$entry_input" | TMPDIR="$TEST_TMP" "$HOOKS/plan-session-boundary-guard.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "UserPromptSubmit" and (.hookSpecificOutput.additionalContext | contains("플랜 진입 경계"))' "plan-session-boundary-guard: missing context"
-out=$(printf '%s' "$entry_input" | TMPDIR="$TEST_TMP" "$HOOKS/plan-session-boundary-guard.sh")
-assert_silent "$out" "plan-session-boundary-guard once-only"
-pass "plan-session-boundary-guard trigger/once"
-
-# sdd-kickoff-guard: a split plan directory tells the orchestrator to read overview only.
-split_dir="$plan_root/docs/woobin_plan/plans/split-plan"
-mkdir -p "$split_dir"
-printf '# Overview\n' >"$split_dir/00-overview.md"
-kick_input='{"session_id":"kick-session","prompt":"docs/woobin_plan/plans/split-plan 구현 진행해줘"}'
-out=$(cd "$plan_root" && printf '%s' "$kick_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "UserPromptSubmit" and (.hookSpecificOutput.additionalContext | contains("00-overview.md"))' "sdd-kickoff-guard: missing split-plan context"
-out=$(cd "$plan_root" && printf '%s' "$kick_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
-assert_silent "$out" "sdd-kickoff-guard once-only"
-pass "sdd-kickoff-guard split-plan/once"
-
-# sdd-kickoff-guard R15: the same kickoff also carries the branch/commit/draft-PR procedure.
-# Branches on local git state only (no gh), so the three cases below are deterministic.
-r15_root="$TEST_ROOT/r15-project"
-mkdir -p "$r15_root/docs/woobin_plan/plans/r15-plan"
-printf '# Overview\n' >"$r15_root/docs/woobin_plan/plans/r15-plan/00-overview.md"
-git -C "$r15_root" init -q
-git -C "$r15_root" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
-
-# (a) remote present, not on a plan/ branch -> tell it to run the first-turn procedure.
-git -C "$r15_root" remote add origin https://example.invalid/x.git
-r15_input='{"session_id":"r15-a","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
-out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("R15 — 중단 대비") and contains("draft PR") and contains("gh pr ready")' "sdd-kickoff-guard R15: missing first-turn procedure"
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("PR 제목·본문은 서사입니다") and contains("explain") and contains("gh pr edit")' "sdd-kickoff-guard R15: missing PR narrative pointer"
-
-# (b) already on a plan/ branch -> do not re-run the first turn.
-git -C "$r15_root" switch -q -c plan/r15-plan
-r15_input='{"session_id":"r15-b","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
-out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("첫 턴 절차를 다시 하지 마세요")' "sdd-kickoff-guard R15: plan-branch branch not taken"
-
-# (c) no remote -> R15 is out of scope and must not be injected at all.
-git -C "$r15_root" remote remove origin
-r15_input='{"session_id":"r15-c","prompt":"docs/woobin_plan/plans/r15-plan 구현 진행해줘"}'
-out=$(cd "$r15_root" && printf '%s' "$r15_input" | TMPDIR="$TEST_TMP" "$HOOKS/sdd-kickoff-guard.sh")
-assert_json "$out" '.hookSpecificOutput.additionalContext | contains("R15") | not' "sdd-kickoff-guard R15: injected into a remoteless repo"
-pass "sdd-kickoff-guard R15 branch/plan-branch/no-remote"
-
 # sdd-orchestrator-edit-guard: SDD ledger causes a one-time deny for main-loop source edits.
 edit_root="$TEST_ROOT/edit-project"
 mkdir -p "$edit_root/.superpowers/sdd/run" "$edit_root/src"
@@ -196,7 +95,7 @@ agent_root="$TEST_ROOT/agent-project"
 git -C "$agent_root" init -q 2>/dev/null || { mkdir -p "$agent_root"; git -C "$agent_root" init -q; }
 agent_input="{\"session_id\":\"agent-session\",\"cwd\":\"$agent_root\",\"tool_input\":{\"subagent_type\":\"general-purpose\",\"prompt\":\"inspect\"}}"
 out=$(printf '%s' "$agent_input" | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" "$HOOKS/subagent-model-default.sh")
-assert_json "$out" '.hookSpecificOutput.hookEventName == "PreToolUse" and .hookSpecificOutput.updatedInput.model == "sonnet"' "subagent-model-default: model not injected"
+assert_json "$out" '.hookSpecificOutput.hookEventName == "PreToolUse" and .hookSpecificOutput.updatedInput.model == "opus"' "subagent-model-default: model not injected"
 out=$(printf '%s' '{"cwd":"/tmp","tool_input":{"subagent_type":"general-purpose","model":"opus"}}' \
   | HOME="$TEST_HOME" TMPDIR="$TEST_TMP" "$HOOKS/subagent-model-default.sh")
 assert_silent "$out" "subagent-model-default explicit model"
@@ -307,7 +206,7 @@ kick_state="$kick_root/.claude/kickoff.local.md"   # 아직 없는 경로 — �
 out=$(printf '%s' '{"session_id":"kickoff-a","prompt":"킥오프 해줘"}' \
   | CLAUDE_PLUGIN_ROOT="$ROOT/woobin-harness" KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
 assert_json "$out" '.hookSpecificOutput.hookEventName == "UserPromptSubmit" and (.hookSpecificOutput.additionalContext | contains("skills/kick-off/SKILL.md"))' "kickoff-guard: keyword did not open"
-out=$(printf '%s' '{"session_id":"kickoff-a","prompt":"sdd-kickoff-guard.sh 고쳐줘"}' \
+out=$(printf '%s' '{"session_id":"kickoff-a","prompt":"kickoff-guard.sh 고쳐줘"}' \
   | CLAUDE_PLUGIN_ROOT="$ROOT/woobin-harness" KICKOFF_STATE_FILE="$kick_state" TMPDIR="$TEST_TMP" "$HOOKS/kickoff-guard.sh")
 assert_silent "$out" "kickoff-guard: filename mention must not fire"
 printf -- '---\nactive: true\nstage: spec\ntopic: fixture\n---\nfixture\n' >"$kick_state"
@@ -323,4 +222,4 @@ out=$(printf '%s' '{"session_id":"kickoff-c","prompt":"이제 구현 시작해�
 assert_silent "$out" "kickoff-guard: inactive state must be silent"
 pass "kickoff-guard keyword/drift/once"
 
-printf 'All 13 shared hook scripts passed deterministic fixtures.\n'
+printf 'All 10 shared hook scripts passed deterministic fixtures.\n'

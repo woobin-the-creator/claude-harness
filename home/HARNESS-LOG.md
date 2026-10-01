@@ -248,12 +248,12 @@ superpowers를 끄면 아래 훅의 트리거가 영향을 받는다. **경로·
 
 | 훅 | 트리거 | superpowers 제거 후 |
 |---|---|---|
-| `plan-saved-session-boundary.sh` | 경로 `*/docs/superpowers/plans/*.md` | **로컬 writing-plans가 같은 경로를 유지하면 살아있다.** 경로를 바꾸면 훅도 같이 고쳐야 함 |
-| `sdd-kickoff-guard.sh` | **(#16에서 교체)** 프롬프트에 구현 의도(`구현\|진행\|실행\|착수\|implement\|execute`, 구 SDD 스킬명 포함) + 플랜 경로 | 스킬명에 의존하지 않으므로 새 킥오프 문구에도 발화. **파일명의 `sdd-`는 역사적 표기** |
 | `sdd-orchestrator-edit-guard.sh` [A] | `<repo>/.superpowers/sdd/*/progress.md` 원장 | SDD 스킬을 안 쓰면 원장이 안 생겨 **[A]는 사실상 비활성**. [B]는 무관하게 동작 |
-| `plan-session-boundary-guard.sh` | 프롬프트 정규식 | 무관, 유지 |
 | `subagent-model-default.sh` / `ctx-warn-statusline.sh` / idle 2종 / stale-branch 2종 | 무관 | 유지 |
-| `stale-branch-guard.sh` (R15 하향 분기) | **`gh` CLI + PR의 draft 상태** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다. 라벨 의존은 issue #3에서 제거했다 — 이제 신호가 draft 하나라 이름 취약점이 없고, ready 전환과 동시에 하향이 풀린다(의도) |
+| `stale-branch-guard.sh` (draft PR 하향 분기) | **`gh` CLI + PR의 draft 상태** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다. 라벨 의존은 issue #3에서 제거했다 — 이제 신호가 draft 하나라 이름 취약점이 없고, ready 전환과 동시에 하향이 풀린다(의도) |
+
+2026-10-01(#37): 플랜 경로 전용 훅 3종(플랜 저장 경계 · 플랜 진입 경계 · 구현 킥오프 가드)과 모드 문서를 지워 이 표에서 뺐다.
+draft PR을 여는 절차의 소유자는 이제 `woobin-harness/skills/interview/SKILL.md` "구현 세션으로 넘기기" 절이다 — `stale-branch-guard.sh`의 하향 분기가 거기 기댄다.
 
 ## 17. 300k 자동 핸드오프 + 플랜 진입 정규식 + handoff 스킬 실체화 (2026-08-10)
 
@@ -1079,6 +1079,55 @@ frontmatter model·effort를 세도록 넓혔고, 문서 리뷰어 2종의 존�
 
 **재측정** — 다음 플랜 몇 개에서 문서 리뷰어가 실제로 opus로 뜨는지(어려운 플랜은 xhigh인지),
 그리고 medium/xhigh 티어가 리뷰 품질·비용에서 갈리는지 본다.
+
+## 37. writing-plans 삭제 — 계획서가 아니라 리뷰가 품질을 만들었다 (2026-10-01, #41)
+
+**문제** — 기능 개발의 기본 경로가 `interview → writing-plans(분할 저장) → 세션 재런치 → 모드별 구현 →
+레이어별 리뷰`였다. 이 경로가 비싼 만큼 품질을 사는지 한 번도 같은 작업으로 대조해 본 적이 없었다. 그리고
+유지비가 컸다 — 플랜 전용 에이전트 6종(`plan-implementer-*` 3 · `plan-reviewer` · `plan-doc-reviewer-*` 2),
+훅 3종, `plan-exec-modes.md`, 문서 4종이 같이 움직여야 했다. 이 레포가 반복해서 데인 "한쪽만 고쳐 조용히
+갈라지는" 형태(#28, Codex 분리)가 정확히 이 구조에서 나온다.
+
+**근거** — 같은 작업을 A(자유 구현)와 B(계획 경로)로 두 번 돌렸다(이슈 #41).
+- **1차(2026-09-28, Godot M1)** A **$54 · 2h** vs B **$95~100 · 4h20m**. 품질은 코드 구조를 빼면 A가 앞섰다.
+  B가 건진 것은 구현 **전** 단계의 빈틈 찾기(기본값 13 · 충돌 6 · 재검토 19)였다.
+- **2차(2026-10-01, pholex 대시보드 — 기존 코드베이스)** A **$9.8 · 18분** vs B **$24~27 · 56분**. 블라인드 리뷰는
+  B 8.5 vs A 8.2로 B가 근소하게 앞섰지만, **A + 독립 리뷰 1사이클($3.4)** 이 B를 이겨 채택됐다. B의 레이어별 리뷰가
+  놓친 결함(드래그 폭 키 공유)을 A의 **스펙 대조** 리뷰가 잡았다.
+두 번 다 비용 1.8~2.7배 · 시간 2~3배였고, 품질 차이의 출처는 계획서가 아니라 **코드를 쓰지 않은 컨텍스트의 리뷰**였다.
+
+**수단** — 스펙 `docs/woobin_plan/specs/2026-10-01-remove-writing-plans-design.md`.
+1. `writing-plans` 스킬과 실행 기계(플랜 전용 에이전트 6종 · 훅 3종 · `plan-exec-modes.md`)를 복구 없이 지웠다.
+2. 기본 경로를 `interview → 스펙 파일 → spec-reviewer → /clear → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer
+   → e2e 증명 → ready`로 바꿨다. 스펙 파일 하나가 세 단계를 꿰는 유일한 산출물이라, 구현할 작업이면 **항상** 저장한다.
+3. 리뷰 2회는 둘 다 전용 에이전트 프로필이다 — `plan-doc-reviewer-opus-medium` → `spec-reviewer`, `plan-reviewer` →
+   `code-reviewer`(effort low → medium)로 개명·재작성. frontmatter가 model·effort를 소유하고 호출은 네임스페이스로 한다.
+4. R3(`subagent-model-default.sh`) 기본값을 sonnet → **opus**로 바꿨다. 사용자가 비용보다 리뷰·탐색 품질을 골랐다.
+5. 문서 4종 · 개수 문구 · 테스트 · 버전(1.23.0)을 동기화했다. workflow-spec에 R23을 신설하고 R1·R2·R7·R8·R15·R19와
+   §5는 지우지 않고 **폐기 표시**만 했다(루브릭 v1 보존과 같은 이유 — 과거 결정의 근거를 남긴다).
+- **R15의 후계(결정 13)** — 절차를 전부 버리지 않았다. 2시간짜리 단일 세션도 하드 컷 위험은 같고,
+  `stale-branch-guard.sh`의 draft 하향 분기가 이 절차에 기대고 있다. 구현 세션 절차로 축소해
+  `interview` SKILL.md "구현 세션으로 넘기기" 절이 소유한다: 첫 턴 브랜치 + 스펙 커밋 + push + draft PR, 논리 단위 커밋,
+  `explain` 서사 → `gh pr ready`, 머지는 사용자. 커밋/push 주체 분리는 한 세션이라 폐기.
+- **R23의 무효화 조건(결정 14)** — (a) 세션 하나를 넘는 작업이 와서 단일 세션 구현이 2회 연속 실패하면 분할 수단을
+  git에서 복원 검토, (b) 3번째 A/B에서 계획 경로가 비용·품질 모두 우세하면 R23 폐기, (c) spec-reviewer findings가
+  3회 연속 0건이면 스펙 리뷰 단계 제거 검토.
+
+**설계에서 갈린 지점** — 리뷰를 훅으로 강제할지. `plan-saved-session-boundary.sh`를 `specs/` 경로로 재배선하면
+리뷰 호출이 결정론적이 되지만, 훅에 하드코딩된 문구가 스킬과 갈라져 없는 스킬을 5회 더 권한 사고(#28)가 이 레포의
+대표 실패다. 리뷰 호출은 지시문(spec-reviewer는 `interview`가 직접, code-reviewer는 스펙 Acceptance criteria 기본 항목)으로
+두고 훅은 3종 모두 지웠다. 그리고 spec-reviewer를 medium/xhigh 2종으로 남길지 — #36의 티어링 근거가 모드 ③ 라우팅이었는데
+모드가 사라지면서 근거도 사라졌다. 1종으로 줄였고, 되돌리기 싸다.
+
+**감수한 것** — 세션 하나를 넘는 작업 · 병렬 트랙 · 마이그레이션용 분할 수단이 없다. 그런 작업이 오면 git에서 복원하는
+비용을 그때 낸다. 리뷰는 지시문이라 건너뛸 수 있다.
+
+**재측정 · 다시 확인할 가정**
+- **결정 6** — `code-reviewer` effort를 low → medium으로 올려도 레이어마다가 아니라 기능당 1회라 총비용이 늘지 않는다고
+  가정했다. **미측정.** 다음 기능 몇 개에서 리뷰 1사이클 비용을 센다(2차 A/B의 $3.4가 유일한 점 추정). workflow-spec §8 O20.
+- **결정 4** — R3 기본값 opus의 비용 영향. **미측정.** 기준선은 #8의 2026-07-30 **$25/일**(model 미지정 서브에이전트가
+  opus로 돈 하루 $25.30)이다. `token-waste-audit`로 미지정 서브에이전트의 일일 비용을 다시 세서 R3 무효화 조건과 대조한다. O21.
+- **R23 무효화 조건** — (a)(b)(c) 셋 다 카운터가 없다. PR 본문 `### 리뷰` 절의 findings 건수가 (c)의 유일한 원천이다. O22.
 
 ## 규율 (이 이력에서 반복 확인된 것)
 

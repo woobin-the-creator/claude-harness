@@ -6,7 +6,7 @@ Claude Code에서 **직접 만든 하네스만** 공유하는 레포. 새 머신
 
 ## 형태 — 왜 dotfiles 심링크가 아니라 플러그인인가
 
-스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 20개·에이전트 8개·훅 13개를 붙인다.
+스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 19개·에이전트 4개·훅 10개를 붙인다.
 
 > Codex 지원은 2026-09-02에 이 레포에서 **분리했다.** 두 런타임을 한 레포에서 호환시키느라 매니페스트·훅 wiring·에이전트 형식·검증 스크립트가 전부 두 벌이 됐고, 한쪽만 고쳐 조용히 갈라지는 사고가 반복됐다(마지막이 `kick-off`의 `disable-model-invocation` — Claude에서 필수인 값을 Codex validator가 거부해 검증이 상시 실패). Codex 하네스는 별도 플러그인 레포에서 관리한다.
 
@@ -27,13 +27,12 @@ claude-harness/
 ├── .claude-plugin/marketplace.json   ← 이 레포를 마켓플레이스로 등록
 ├── woobin-harness/                   ← 플러그인 본체
 │   ├── .claude-plugin/plugin.json
-│   ├── hooks/claude-hooks.json       훅 wiring 13개
-│   ├── hooks/*.sh                    13개
+│   ├── hooks/claude-hooks.json       훅 wiring 10개
+│   ├── hooks/*.sh                    10개
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
-│   ├── agents/*.md                   8개
-│   ├── skills/<name>/SKILL.md        20개
-│   ├── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
-│   └── plan-exec-modes.md            구현 모드 3종 — 훅이 ${CLAUDE_PLUGIN_ROOT}로 찾는다
+│   ├── agents/*.md                   4개
+│   ├── skills/<name>/SKILL.md        19개
+│   └── output-styles/                 스타일 2개 + ATTRIBUTION.md·LICENSE (fluent-korean 계열)
 ├── CLAUDE.md                         이 레포 작업 지침 — 라우팅·소유권만 (내용 서술 없음)
 ├── docs/workflow.html                사람이 보는 워크플로우 요약
 ├── docs/workflow-spec.md             ↑의 전문 — 미래 모델에게 재검토시킬 때 통째로 준다
@@ -92,7 +91,6 @@ DRY_RUN=1 ./bootstrap.sh
 | 대상 | 처리 | 왜 |
 |---|---|---|
 | 훅 9개 | `settings.json` 엔트리 제거 + 스크립트를 `~/.claude/hooks/.pre-plugin-260808/`로 이동 | 안 지우면 **이중 발화**한다 |
-| `plan-exec-modes.md` | 같은 백업 디렉터리로 이동 | 훅이 `${CLAUDE_PLUGIN_ROOT}` 동봉본을 쓴다. 두 곳이 소유하면 드리프트 난다 |
 | 에이전트 4개 | `~/.claude/agents/`에 **그대로 둠** | 사용자 정의가 동명 플러그인 에이전트를 **override**한다 → 중복 비용 없음 |
 | 스킬 41개 | `skillOverrides`에 `"woobin-harness:<name>": "off"` 41건 | 플러그인 스킬은 `/woobin-harness:name`으로 **네임스페이스**돼서 `~/.claude/skills`의 것과 **둘 다 살아난다.** 그대로 두면 always-on ~6.9k tok을 매 세션 이중으로 문다. off로 끄면 슬래시 이름(`/interview`)이 그대로 유지된다 |
 
@@ -105,7 +103,6 @@ DRY_RUN=1 ./bootstrap.sh
 ```bash
 cp ~/.claude/settings.json.pre-plugin-260808 ~/.claude/settings.json
 mv ~/.claude/hooks/.pre-plugin-260808/*.sh ~/.claude/hooks/
-mv ~/.claude/hooks/.pre-plugin-260808/plan-exec-modes.md ~/.claude/
 ```
 
 ## 갱신

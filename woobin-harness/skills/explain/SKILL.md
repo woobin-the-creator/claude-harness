@@ -84,9 +84,9 @@ Some callers use this skill to write a document rather than a chat reply. The
 calibration and self-containment rules above apply unchanged; only the
 container differs, and the container is owned by the caller, not by this skill.
 
-- **Pull request title and body** — the caller is the R15 procedure in
-  `woobin-harness/plan-exec-modes.md`, invoked once when the draft PR is opened
-  and again just before `gh pr ready`. The reader is a maintainer reading the
+- **Pull request title and body** — the caller is the implementation-session
+  procedure in `skills/interview/SKILL.md` ("구현 세션으로 넘기기"), invoked once
+  when the draft PR is opened and again just before `gh pr ready`. The reader is a maintainer reading the
   PR list or `git log` months later with no access to this session, so default
   to the *situated* layer. Lead with the problem the user actually had, in the
   user's terms, before naming any file, hook, or symbol. Keep what was verified

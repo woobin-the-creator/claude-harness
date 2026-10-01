@@ -17,7 +17,7 @@ set -u
 # 기본값에 괄호·파이프가 들어가므로 확장 전체를 반드시 큰따옴표로 감싼다.
 # 안 감싸면 dash 계열 sh가 `(` 를 문법 오류로 읽는다.
 STATE_FILE="${KICKOFF_STATE_FILE:-.claude/kickoff.local.md}"
-# 하이픈으로 이어진 파일명(sdd-kickoff-guard.sh, kickoff-guard.sh) 안의 매치는 제외한다.
+# 하이픈으로 이어진 파일명(예: kickoff-guard.sh) 안의 매치는 제외한다.
 KEYWORD_PATTERN="${KICKOFF_KEYWORD_PATTERN:-(^|[^A-Za-z-])(kickoff|kick-off)([^A-Za-z-]|\$)|킥오프}"
 DRIFT_PATTERN="${KICKOFF_DRIFT_PATTERN:-구현|코딩|코드 짜|바로 만들|implement}"
 
@@ -50,13 +50,13 @@ case "$prompt" in
     ;;
 esac
 
-# ── 분기 B: 이탈. 상태 파일이 살아 있고 stage가 spec/plan인데 구현 의도가 왔다.
+# ── 분기 B: 이탈. 상태 파일이 살아 있고 stage가 spec인데 구현 의도가 왔다.
+# (2026-10-01 계획서 스킬 삭제로 `plan` 단계는 없어졌다 — stage는 spec → impl 둘뿐이다.)
 [ -f "$STATE_FILE" ] || exit 0
 grep -qE '^active:[[:space:]]*true[[:space:]]*$' "$STATE_FILE" || exit 0
 stage=$(sed -n 's/^stage:[[:space:]]*\([a-z][a-z]*\).*/\1/p' "$STATE_FILE" | head -1)
 case "$stage" in
-  spec) next="스펙을 굳히는 중입니다(\`interview\`). 결정 원장의 미결이 비기 전에는 코드로 넘어가지 마세요." ;;
-  plan) next="플랜을 쓰는 중입니다(\`writing-plans\`). 플랜이 저장되기 전에는 코드로 넘어가지 마세요." ;;
+  spec) next="스펙을 굳히는 중입니다(\`interview\`). 스펙 파일이 저장되고 spec-reviewer를 거치기 전에는 코드로 넘어가지 마세요." ;;
   *) exit 0 ;;
 esac
 printf '%s' "$prompt" | grep -qiE "$DRIFT_PATTERN" || exit 0

@@ -10,7 +10,8 @@
 
 ## 0. 리뷰 프로토콜 — 이 문서를 받은 모델에게
 
-세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R22)** 를 붙여서 답하라.
+세 가지를 판정해달라. 각 항목에 **§3의 규칙 ID(R1~R23)** 를 붙여서 답하라.
+`> **폐기(날짜)**` 줄이 붙은 규칙(R1·R2·R7·R8·R15·R19)과 §5는 이력이다 — 판정 대상이 아니라 근거 기록으로 읽어라.
 
 | # | 판정 | 판정 방법 |
 |---|------|-----------|
@@ -38,13 +39,13 @@
 
 | ID | 전제 | 2026-08-08 값 | 어떤 규칙이 여기 매달려 있나 |
 |----|------|---------------|------------------------------|
-| E1 | 컨텍스트가 **요청마다 캐시 리드로 재청구**된다 | 그렇다. 실측에서 세션 비용의 66~72%가 cache read | R1·R2·R3·R6·R7 — **하네스의 절반** |
-| E2 | 컨텍스트에 한 번 들어온 건 **안 나간다**(선택적 축출 없음) | 없다. `/clear`가 유일한 배출구 | R1·R2·R4·R5 |
+| E1 | 컨텍스트가 **요청마다 캐시 리드로 재청구**된다 | 그렇다. 실측에서 세션 비용의 66~72%가 cache read | R6·R13·R23(스펙 리뷰 뒤 `/clear`) — 2026-10-01 전에는 R1·R2·R3·R7까지 **하네스의 절반**이었다 |
+| E2 | 컨텍스트에 한 번 들어온 건 **안 나간다**(선택적 축출 없음) | 없다. `/clear`가 유일한 배출구 | R4·R5·R23 (R1·R2는 2026-10-01 폐기) |
 | E3 | 프롬프트 캐시 TTL | 1시간 (이 세션 기준) | R6 (idle 핸드오프) — 전적으로 |
-| E4 | 서브에이전트는 **부모 프리픽스를 공유하지 않는다** | 각자 새로 쓴다 | R8 (팬아웃 금지), 모드 ①의 순차 스폰 |
+| E4 | 서브에이전트는 **부모 프리픽스를 공유하지 않는다** | 각자 새로 쓴다 | R11(분리된 리뷰어). R8(팬아웃 금지)은 2026-10-01 폐기 |
 | E5 | 서브에이전트 `model` 미지정 시 **부모 상속** | 그렇다(기본값 `inherit`) | R3 |
-| E6 | 모델 티어 간 가격차가 유의미 | opus ≫ sonnet ≫ haiku | R3, 모드 3종 전부 |
-| E7 | effort 값이 **렌더된 프롬프트에 들어간다** → 세션 중 변경 시 프리픽스 무효화 | 그렇다 | R7 |
+| E6 | 모델 티어 간 가격차가 유의미 | opus ≫ sonnet ≫ haiku | R3 — **2026-10-01부터 기본값 opus**(가격차를 알고 품질을 골랐다, #41). 싸게 돌릴 에이전트는 frontmatter로 핀(Explore=haiku, screenshot-verifier=sonnet) |
+| E7 | effort 값이 **렌더된 프롬프트에 들어간다** → 세션 중 변경 시 프리픽스 무효화 | 그렇다 | 리뷰 에이전트 2종의 frontmatter effort 핀. R7은 2026-10-01 폐기 |
 | E8 | 모델이 **이미 자기검증을 한다** → 명시적 검증 지시는 over-verification | Opus 5 문서 명시 | R9 |
 | E9 | 컨텍스트 창 | 1M (Opus 5 1M 컨텍스트) | 간접 — 창이 커져도 E1이 살아있으면 규칙은 유지된다 |
 | E10 | 하네스 버전 | Claude Code 2.1.226 | §4의 파일 경로·훅 이벤트 이름 |
@@ -52,7 +53,7 @@
 | E12 | **모델이 지시 없이 쓰는 한국어의 품질** | 낮다. 조사·어미 생략, 명사구 나열, 비유 어휘 치환이 관측된다 | R16 — 전적으로 |
 
 **E1·E2가 이 하네스의 축이다.** 컨텍스트가 "쌓여도 공짜"가 되거나 하네스가 죽은 구간을 자동 축출하면
-R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는 건 R9·R10·R11(품질 규칙)뿐이다.
+R4·R5·R6·R13이 **한꺼번에** 불필요해진다(2026-10-01 전에는 R1·R2·R7도 여기 묶여 있었다). 그 경우 남는 건 R9·R10·R11·R23(품질 규칙)뿐이다.
 리뷰의 첫 질문은 그래서 "E1·E2가 아직 참인가"여야 한다.
 
 **E11은 성격이 다르다.** E1~E10은 "하네스가 이렇게 동작한다"는 관찰이지만, E11은 **다른 프로세스가
@@ -70,29 +71,33 @@ R1·R2·R4·R5·R6·R7이 **한꺼번에** 불필요해진다. 그 경우 남는
    │         .claude/kickoff.local.md 에 적는다. 난이도는 판정하지 않는다
    │
    ├─(A) 기능 개발 ─────────────────────────────────────────────
-   │     interview 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장(필요하면 스펙 저장)
-   │        └ 훅 plan-session-boundary-guard 발화 (ctx ≥120k)
-   │     ── 세션 경계 ① /clear ──
-   │     writing-plans → docs/<plandir>/plans/<name>/ 에 분할 저장
-   │        00-overview.md (≤400행, 오케스트레이터가 읽는 유일한 파일)
-   │        task-N.md      (구현자가 읽는 유일한 파일)
-   │        └ 훅 plan-saved-session-boundary 발화 → 모드 1개 추천 + 자기완결성 4항목 점검
-   │     ── 세션 경계 ② /exit → claude --effort X --model Y ──   ★ 유일한 강제 경계
-   │     구현 (모드 ①/②a/②b/③ — §5)
-   │        └ 훅 sdd-kickoff-guard 발화 → 플랜 통째 Read 금지
-   │     plan-reviewer (레이어별 배치 1회, 같은 세션에서 스폰 가능)
-   │     PR → pr-demo-video 스킬
+   │     interview 스킬로 스펙 초안 → 빈칸 인터뷰 → 결정 원장
+   │     스펙 파일 저장 — 구현할 작업이면 **항상**
+   │        docs/woobin_plan/specs/YYYY-MM-DD-<slug>-design.md   (세 단계를 꿰는 유일한 산출물)
+   │        └ .claude/kickoff.local.md 가 있으면 stage: impl
+   │     woobin-harness:spec-reviewer (opus·medium) 1회 → findings 반영      ← 리뷰 ①
+   │     ── 세션 경계 /clear ── 구현 세션은 스펙 파일 경로만 받는다
+   │     한 세션 구현
+   │        첫 턴: 브랜치 + 스펙 파일 커밋 + push + draft PR (회복 진입점)
+   │        논리 단위 커밋
+   │     woobin-harness:code-reviewer (opus·medium) 1사이클                  ← 리뷰 ②
+   │        └ findings·처리 결과를 PR 본문에
+   │     자동 e2e 증명(새 clone에서 재현) → explain으로 제목·본문 서사 → gh pr ready
+   │     머지는 사용자 · 필요하면 pr-demo-video 스킬
    │
    ├─(B) 제품 UI·디자인 ─── design-workflow (작업 분류, principles 선두, 선택적 DESIGN.md, 조건부 모듈)
    │                       └─ 복수 시안 격리 프리뷰·공유가 필요할 때만 show-design-sample
    ├─(C) 디버깅 ────── debug 스킬 (재현 루프를 먼저, 진단 기록을 산출물로)
-   └─(D) 소규모 수정 ─ 위 전부 생략. 플랜 없이 바로. 훅은 발화 조건 미달로 조용함
+   └─(D) 소규모 수정 ─ 위 전부 생략. 스펙 파일 없이 바로. 훅은 발화 조건 미달로 조용함
 ```
 
-**세션 경계는 ②만 강제다**(훅이 문구를 주입). ①은 소프트 주입이고, (D)에는 아무것도 안 걸린다.
-이건 의도된 비대칭이다 — 실측에서 비용이 지배적인 구간이 "플래닝 잔재를 안고 구현하는 세션"이었다.
+**세션 경계는 스펙 리뷰 뒤 `/clear` 하나이고, 훅이 강제하지 않는다**(R23). 2026-10-01 전에는
+플랜 저장 후 `/exit` 재런치가 훅으로 강제된 유일한 경계였다(R1, 폐기) — "플래닝 잔재를 안고 구현하는
+세션"이 비용을 지배한다는 실측은 여전히 유효하고, 지금은 스펙 파일 하나만 넘기는 것으로 그 잔재를 끊는다.
+리뷰 호출도 훅이 아니라 지시문이다 — spec-reviewer는 interview 스킬이, code-reviewer는 스펙 파일의
+Acceptance criteria 기본 항목이 부른다. (D)에는 아무것도 안 걸린다.
 
-**상시 배경 규율**(파이프라인 어디서나): R3(서브에이전트 sonnet 기본) · R4(스크린샷 위임) ·
+**상시 배경 규율**(파이프라인 어디서나): R3(서브에이전트 opus 기본) · R4(스크린샷 위임) ·
 R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고).
 
 ---
@@ -105,6 +110,8 @@ R5(탐색 위임) · R6(자리비움 핸드오프) · R12(stale 브랜치 경고
 ---
 
 ### R1 — 플랜 저장 후 세션 경계
+
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠고, 이 규칙을 강제하던 `plan-saved-session-boundary.sh`·`plan-session-boundary-guard.sh`도 함께 삭제됐다. 지금의 세션 경계는 R23(스펙 리뷰 뒤 `/clear`)이다. 아래 본문은 이력이다.
 
 **기전** `plan-saved-session-boundary.sh` (PostToolUse:Write). 플랜 저장을 감지 → 자기완결성 4항목 점검
 + 플랜 문서 리뷰어 지시 + 게이트 수 라우팅. **경계를 실제로 넘는 것은 게이트가 1개 이상인 플랜뿐이다**
@@ -132,6 +139,8 @@ full-auto로 구현까지 굴린다 — 이 규칙의 적용 범위가 2026-08-2
 ---
 
 ### R2 — 플랜 분할 저장 (00-overview + task-N)
+
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠다. 분할 저장하던 스킬과 백스톱 훅(`plan-saved-session-boundary.sh`)·통독 금지 훅(`sdd-kickoff-guard.sh`)이 더는 없다. "읽을 파일 자체를 작게"(§6-2)는 R23의 스펙 파일 한 장으로 이어진다. 아래 본문은 이력이다.
 
 **기전** 두 겹이다.
 
@@ -162,24 +171,36 @@ full-auto로 구현까지 굴린다 — 이 규칙의 적용 범위가 2026-08-2
 
 ---
 
-### R3 — 서브에이전트 model 기본값 sonnet
+### R3 — 서브에이전트 model 기본값 opus
 
 **기전** `subagent-model-default.sh` (PreToolUse:Agent|Task). `updatedInput`으로 **미지정일 때만** 주입.
+주입값은 `${SUBAGENT_DEFAULT_MODEL:-opus}`.
 존중: 호출에 model이 이미 있음 / 에이전트 정의에 model frontmatter 있음 / 플러그인 네임스페이스 타입(`codex:…`).
 
-**근거** 2026-07-30. 메인이 opus인 상태에서 model 없이 스폰된 general-purpose 에이전트들이 opus로 돌아
-하루 **$25.30**. 재측정 8/3 서브에이전트가 13개 전량 sonnet, opus 서브 **0건** ✅. [#8]
+**근거** 두 시점이 있다.
+- **배경(2026-07-30, 기본값 sonnet을 만든 이유)** 메인이 opus인 상태에서 model 없이 스폰된 general-purpose
+  에이전트들이 opus로 돌아 하루 **$25.30**. sonnet 기본값 도입 후 재측정 8/3 서브에이전트가 13개 전량 sonnet,
+  opus 서브 **0건** ✅. [#8] 이 수치는 기록으로 남긴다 — 되돌릴 때의 기준선이다.
+- **2026-10-01, opus로 바꿨다(이슈 #41).** 사용자가 비용보다 리뷰·탐색 품질을 골랐다. 같은 날 R23으로
+  기본 경로가 "스펙 파일 + 리뷰 2회"가 되면서 품질 우위의 출처가 **독립 리뷰**라는 게 실측으로 드러났고,
+  2026-09-03에는 sonnet 고정 때문에 플랜 문서 리뷰가 조용히 sonnet으로 돌던 사고도 있었다(HARNESS-LOG #36).
+  **비용 영향은 아직 안 쟀다** — 7/30의 $25.30/일 기준선과 비교하는 재측정이 열려 있다(§8 O21).
 
 **기각한 대안** `CLAUDE_CODE_SUBAGENT_MODEL` 환경변수. 우선순위가 최상위라 Agent 호출의 명시적 `model`
 인자와 에이전트 정의 frontmatter까지 **덮어쓴다**(2.1.220 바이너리 확인 — env가 있으면 tool/frontmatter
 값을 버리고 telemetry에 `override_dropped` 기록). "최종 리뷰는 opus" 같은 의도적 승격이 조용히 깨진다.
 → **§6-5의 규율이 여기서 나왔다: env 전역 override보다 PreToolUse 조건부 주입.**
 
-**대가** 정말 opus가 필요한 서브에이전트는 호출부나 정의에 명시해야 한다(모드 ③이 그 경우).
+**대가** model을 안 적은 서브에이전트는 전부 opus로 돈다 — 7/30에 하루 $25.30으로 잰 그 비용 구조로
+돌아간 것이다. 싸게 돌려야 하는 서브에이전트는 정의 frontmatter에 명시해야 한다(`Explore`=haiku,
+`screenshot-verifier`=sonnet). 그리고 메인이 opus인 세션에서는 주입값이 상속값과 같아 훅이 사실상
+일을 안 한다 — 훅의 값은 메인이 opus가 **아닐** 때(sonnet·fable 세션) 서브에이전트를 opus로 올리는 데 있다.
 
 **무효화 조건**
+- 비용 재측정(§8 O21)에서 미지정 서브에이전트 비용이 7/30 기준선($25.30/일)을 넘는데 리뷰·탐색 품질 이득이
+  관측되지 않음 → `SUBAGENT_DEFAULT_MODEL=sonnet`으로 되돌린다(코드 수정 없이 env 한 줄)
 - E5가 거짓(하네스 기본값이 inherit이 아님, 또는 Agent 툴이 model을 필수 인자로 요구)
-- E6이 거짓(티어 간 가격차 소멸)
+- 메인 세션이 사실상 항상 opus로만 돈다 → 주입값 = 상속값이라 훅이 하는 일이 없다. 훅을 지운다
 - 하네스가 태스크 난이도로 모델을 자동 라우팅
 
 ---
@@ -261,6 +282,8 @@ Glob, Grep, and Read"* — 메인이 직접 훑으라고 **지시**한다. 로�
 
 ### R7 — effort·model 소유자는 세션 런치 플래그와 구현자 frontmatter로 갈린다
 
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠다. 이 규칙의 기전이던 `plan-exec-modes.md`와 구현자 3종(`plan-implementer-*`)이 더는 없다. 남은 조각 하나 — "Agent 호출에 effort 인자가 없으니 frontmatter가 유일한 운반 수단" — 은 리뷰 에이전트 2종(§4)이 그대로 따른다. 아래 본문은 이력이다.
+
 **기전** `plan-exec-modes.md` 공통 규칙. 소유자가 둘이다 — **세션**은 `claude --effort <level> --model <model>`
 (②a와 플랜 세션 자신), **위임된 구현자**는 에이전트 정의 frontmatter다. `Agent` 호출에 effort 인자가
 없어서 다른 수단이 없고, full-auto에는 상속을 기댈 세션 재런치도 없다. 어느 쪽이든 **중간에 바꾸지 않는다**가
@@ -284,6 +307,8 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 
 ### R8 — 태스크 단위 서브에이전트 팬아웃 금지
 
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠다. 이 규칙이 규율하던 레이어·트랙 위임(`plan-exec-modes.md`, `plan-implementer-*`)이 더는 없다 — 구현은 한 세션이 직접 한다(R23). 근거(서브에이전트 tax는 고정비)는 사실로 남는다. 아래 본문은 이력이다.
+
 **기전** `plan-exec-modes.md` 공통 규칙. 위임은 **레이어/트랙 단위**로만. 모드 ①의 트랙 스폰조차 순차
 (첫 트랙이 첫 응답을 낼 때까지 대기 — 콜드 프리픽스에 병렬 스폰이 겹치면 캐시 리드 0으로 전체 프리픽스를
 재기록한다. 실측 52,022토큰 1건).
@@ -305,8 +330,9 @@ effort를 원하기 때문에 레포 단위로는 못 나눈다.
 
 ### R9 — 구현자에게 검증을 지시하지 않는다
 
-**기전** `plan-exec-modes.md` 규칙. 구현자 프롬프트에 "검증해라 / double-check / 최종 검증 단계"를
-넣지 않는다. 검증은 **별도 컨텍스트**(plan-reviewer)의 몫.
+**기전** 규율이다(2026-10-01까지 기전이던 모드 문서는 플랜 기계와 함께 삭제됐다). 구현 세션에 넘기는
+지시에 "검증해라 / double-check / 최종 검증 단계"를 넣지 않는다. 검증은 **별도 컨텍스트**(`code-reviewer`,
+R11)와 스펙 Acceptance criteria의 **자동 e2e 증명**(R23)의 몫.
 
 **근거** Opus 5 프롬프팅 문서: *"legacy harness scaffolding that adds separate verification steps"* 는
 over-verification을 유발하니 제거하라. *"Do not use subagents to verify or double-check your own work."*
@@ -319,13 +345,13 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 **무효화 조건**
 - E8이 거짓 — 모델 세대가 바뀌어 자기검증이 약해짐. **이 규칙은 모델 세대에 가장 강하게 묶여 있다.**
   Opus 5 기준 서술이므로 다음 세대에서 반드시 재확인해라
-- 반대 방향도 가능: 자기검증이 더 강해지면 `plan-reviewer`(R11)까지 불필요해진다
+- 반대 방향도 가능: 자기검증이 더 강해지면 `code-reviewer`(R11)까지 불필요해진다
 
 ---
 
 ### R10 — 리뷰 프롬프트에 "심각한 것만 보고해"를 넣지 않는다
 
-**기전** `plan-reviewer.md` 본문 + 모드 ③. 전부 보고하게 하고 **별도 패스에서 필터**한다.
+**기전** `code-reviewer.md`·`spec-reviewer.md` 본문. 전부 보고하게 하고 **별도 패스에서 필터**한다.
 그래서 리포트 포맷이 `[심각도: high|med|low · 확신: 확실|추정]` 태그를 강제한다 — 랭킹은 호출자 몫.
 
 **근거** 플랫폼 문서 경고: 그렇게 지시하면 모델이 리터럴하게 따라서 **덜 보고한다.**
@@ -339,8 +365,10 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 
 ### R11 — 리뷰는 코드를 쓰지 않은 컨텍스트에서
 
-**기전** `plan-reviewer` 에이전트(opus, effort low, `tools: Read/Grep/Glob/Bash` — **편집 불가**).
-`task-N.md` 경로와 diff **범위**를 넘기고 diff 본문은 넘기지 않는다(리뷰어가 직접 뜬다).
+**기전** `code-reviewer` 에이전트(opus, effort medium, `tools: Read/Grep/Glob/Bash` — **편집 불가**).
+스펙 파일 경로와 diff **범위**를 넘기고 diff 본문은 넘기지 않는다(리뷰어가 직접 뜬다). 축은 셋 —
+정확성 · 스펙 Acceptance criteria 대조 · 레포 관례. 구현 전 스펙 문서는 같은 조건의 `spec-reviewer`가 본다(R23).
+2026-10-01 전에는 이름이 달랐고(코드 리뷰어 = 플랜 태스크 대조, effort low) 레이어마다 돌았다.
 
 **설계상 중요한 사실** — **세션을 새로 열 필요가 없다.** 서브에이전트는 부모의 대화 컨텍스트를 물려받지
 않으므로, 구현한 세션 위에서 띄워도 "분리된 리뷰어" 조건을 만족한다. 이게 세션 경계를 하나 아꼈다.
@@ -348,6 +376,9 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 **근거** #9 — task 1:1 review는 과다. 자동 게이트가 스펙 준수를 이미 검증하는 영역(backend)은
 레이어 배치 1회로 충분하고, UI·스타일은 자동 게이트가 못 잡아 리뷰어가 유일한 검증 수단이라 개별 유지.
 낮은 effort로 충분한 근거: *"Accuracy holds at lower effort settings, which supports a fast pass at review time."*
+2026-10-01에 리뷰가 레이어마다가 아니라 **기능당 1사이클**로 줄면서 effort를 low → medium으로 올렸다 —
+횟수가 줄어 총비용은 늘지 않는다는 **미측정 가정**이다(§8 O20, HARNESS-LOG #37).
+같은 날 2차 A/B 실측에서 레이어별 리뷰가 놓친 결함(드래그 폭 키 공유)을 스펙 대조 리뷰가 잡았다 — 축에 "스펙 대조"가 들어간 이유다.
 
 **무효화 조건**
 - R9의 무효화 조건이 반대 방향으로 참(자기검증이 리뷰어를 대체할 만큼 강해짐)
@@ -359,9 +390,10 @@ over-verification을 유발하니 제거하라. *"Do not use subagents to verify
 
 **기전** `stale-branch-guard.sh` (SessionStart) — 격리된 워크트리가 아니면서 원격 기본 브랜치보다
 뒤처졌으면 경고 + 최신 기반 워크트리 제안. 읽기 전용(git 상태를 바꾸는 건 fetch뿐).
-열린 **draft** PR + 앞선 커밋이 있는 플랜 브랜치는 이 문구를 rebase 확인용으로 **하향**한다(면제
-아님, R15 소관 — 하향 조건·문구는 §3 R15와 훅 헤더 주석이 소유하고 여기서 복제하지 않는다).
-판정 신호가 draft이므로 **ready 전환 뒤에는 하향이 풀린다**(R15 "상태는 draft 하나다" 참조).
+열린 **draft** PR + 앞선 커밋이 있는 구현 브랜치는 이 문구를 rebase 확인용으로 **하향**한다(면제
+아님 — 하향 조건·문구는 훅 헤더 주석이 소유하고, 그 draft PR을 여는 절차는 `woobin-harness/skills/interview/SKILL.md`의
+"구현 세션으로 넘기기" 절이 소유한다. 여기서 복제하지 않는다).
+판정 신호가 draft이므로 **ready 전환 뒤에는 하향이 풀린다**(근거는 R15(폐기) 본문의 "상태는 draft 하나다" — 2026-10-01 이후에도 유효).
 짝: `stop-warning-ack-guard.sh` (Stop) — 응답에 경고 원문이 실제로 포함됐는지 **검사**해서 안 됐으면 반려.
 
 **설계 핵심** additionalContext가 모델에게 전달됐는지와 **무관하게** 마커 파일은 항상 남는다
@@ -440,6 +472,8 @@ R12(`stop-warning-ack-guard.sh`)가 만든 패턴 — "프롬프트로 부탁이
 ---
 
 ### R15 — 레이어 경계 커밋 + 리뷰 후 push, draft PR이 회복 진입점
+
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠다. 이 규칙이 걸던 레이어·`plan/` 브랜치·`plan-exec-modes.md` "중단 대비" 소절·`sdd-kickoff-guard.sh` 주입·구현자 `## Committing` 절이 더는 없고, 커밋/push 주체 분리도 한 세션 구현이 되면서 사라졌다. **살아남은 조각**은 구현 세션 절차로 축소돼 `woobin-harness/skills/interview/SKILL.md`의 **"구현 세션으로 넘기기"** 절이 소유한다(스펙 결정 13) — 첫 턴에 브랜치 + 스펙 파일 커밋 + push + **draft PR**(회복 진입점), 논리 단위 커밋, 마지막에 `explain`으로 제목·본문 서사 → `gh pr ready`, 머지는 사용자. 아래 본문의 근거(하드 컷은 파일을 지우지 않는다 · draft PR이 회복 진입점 · 상태는 draft 하나)는 그 절차와 R12의 draft 하향 분기가 계속 기대고 있다. 본문은 이력이다.
 
 **기전** 절차 + **킥오프 훅 주입 + 구현자 정의 + `explain` 호출**. 실행 절차의 단일 소유자는
 `woobin-harness/plan-exec-modes.md`의 "중단 대비" 소절이고, 여기에는 근거·대가·무효화 조건만
@@ -573,7 +607,7 @@ UserPromptSubmit에 네트워크 지연을 싣지 않고, fixture로 결정론�
 만족하지 않는 유일한 규칙이므로, 리뷰 시 ② 판정 대상으로 먼저 올려라. → §8 O18
 
 채택 이유는 근거의 강도가 아니라 **적용 범위**다. 이 하네스는 서브에이전트에 한국어 프롬프트를 넘기고
-(`plan-implementer-*`·`Explore`·`plan-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
+(`Explore`·`spec-reviewer`·`code-reviewer`), 한국어 산출물을 만드는 스킬을 여럿 굴린다
 (`claude-blog-translate-ko`·`claude-youtube-to-blog`·`explain-in-html`·`handoff`). 원본이 지적한 대로
 다단 에이전트 환경에서는 품질 저하가 **단계마다 누적**되고, 그 손실이 산출물 자체의 완성도로 넘어간다.
 E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문에 각 단계가 앞 단계의 한국어를 **입력으로만**
@@ -654,6 +688,8 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 
 ### R19 — 플랜 산출물은 영어로 쓴다
 
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`와 그 실행 기계를 지웠다. 이 규칙의 대상이던 `00-overview.md`·`task-N.md` 플랜 문서가 더는 생기지 않는다. 지금 인계 산출물인 스펙 파일은 사람이 한 줄씩 짚어 반증하는 결정 원장을 담으므로 사용자 언어로 쓴다(이 규칙 본문의 "원장은 사용자 언어" 단서와 같은 이유). 아래 본문은 이력이다.
+
 **문제** 플랜 문서의 독자는 사람이 아니라 새 구현 세션이다. `00-overview.md`는 그 세션의 **모든**
 요청에 캐시 리드로 재청구된다(1,650행 플랜이 48k 토큰으로 측정돼 세션 floor를 93~122k까지 올렸다 —
 `home/HARNESS-LOG.md`). 한국어는 토크나이저에서 글자당 2~3배 비싸므로, 같은 내용이 같은 위치에서
@@ -682,11 +718,14 @@ E4(서브에이전트는 부모 프리픽스를 공유하지 않는다) 때문�
 **규칙** 진입점은 `kick-off` 하나다. `disable-model-invocation: true`로 **사람만** 부른다. 스킬 본문은 하위 스킬을 이름으로만
 부르고 절차를 옮겨 적지 않는다. **난이도는 판정하지 않는다** — 호출됐다는 사실 자체가 사용자의 판정이다.
 
-**기전** 둘이다. ① 스킬 `kick-off`이 레포 상태(`plans/`·`specs/`)로 진입 지점을 정하고
-`.claude/kickoff.local.md`에 `stage`를 적는다. ② 훅 `kickoff-guard.sh`(UserPromptSubmit)가 키워드를
+**기전** 둘이다. ① 스킬 `kick-off`이 레포 상태(`specs/`)로 진입 지점을 정하고
+`.claude/kickoff.local.md`에 `stage`를 적는다 — 2026-10-01부터 `spec → impl` 2단계이고, `impl` 전환은
+`interview`가 스펙 파일을 저장하는 순간 쓴다(구현 세션은 스펙 파일만 받아 상태 파일을 모른다).
+② 훅 `kickoff-guard.sh`(UserPromptSubmit)가 키워드를
 정규식으로 잡아 스킬의 **파일 경로**를 준다(스킬 이름을 부르지 않는다 — 막힌 스킬은 모델의 Skill
-목록에 없을 수 있고, 없는 스킬을 부르는 훅은 조용히 죽는다). 같은 훅이 `stage`가 `spec`/`plan`인데
+목록에 없을 수 있고, 없는 스킬을 부르는 훅은 조용히 죽는다). 같은 훅이 `stage`가 `spec`인데
 구현 의도 프롬프트가 오면 세션 1회 알린다. 차단하지 않는다.
+이후 기본 경로(스펙 파일 → 리뷰 2회 → 구현 세션 넘기기)는 R23이고, 진입점은 여전히 `kick-off`·`interview`다.
 
 **근거** 삭제된 `brainstorming`의 발동 0회(#27)가 자동 발동 프론트도어의 실패 실측이다. 사람만 부르는
 얇은 진입점은 공식 마켓플레이스 `mattpocock-skills`의 user-invoked/model-invoked 2층 규약과 같은
@@ -797,27 +836,78 @@ Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hi
 
 ---
 
+### R23 — 기본 경로는 스펙 파일 + 리뷰 2회
+
+**문제** 2026-10-01까지 기능 개발의 기본 경로는 `interview → 플랜 작성(분할 저장) → 세션 재런치 →
+모드별 구현 → 레이어별 리뷰`였다. 이슈 #41의 A/B 실측 2회에서 이 계획 경로는 자유 구현보다
+**비용 1.8~2.7배 · 시간 2~3배**였고, 품질 우위는 계획서가 아니라 **독립 리뷰**에서 나왔다. 그리고 계획 경로는
+플랜 전용 에이전트 6종 · 플랜 훅 3종 · 모드 문서 · 문서 4종이 같이 움직여야 하는 유지비를 졌다 — 이 레포가
+반복해서 데인 "한쪽만 고쳐 조용히 갈라지는" 형태다(R22, HARNESS-LOG #28).
+
+**규칙** 구현할 작업의 기본 경로는
+`interview → 스펙 파일 → spec-reviewer → /clear → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer → e2e 증명 → ready`다.
+- **스펙 파일이 세 단계를 꿰는 유일한 산출물이다.** 구현할 작업이면 조건 없이 **항상**
+  `docs/woobin_plan/specs/YYYY-MM-DD-<slug>-design.md`로 저장한다(예전의 "요청·오래 삶·세션 인계" 3조건은 버렸다).
+- **리뷰는 2회다** — 구현 전 스펙 문서 리뷰 1회, 구현 후 코드 리뷰 1사이클. 둘 다 **전용 에이전트 프로필**이고
+  호출은 항상 네임스페이스로 한다: `woobin-harness:spec-reviewer`, `woobin-harness:code-reviewer`.
+  둘 다 opus·medium·편집 불가이며 frontmatter가 model·effort를 소유한다(Agent 호출에 effort 인자가 없다).
+- **호출은 지시문이다, 훅이 아니다.** spec-reviewer는 `interview` 스킬이 직접 부르고, code-reviewer는 스펙 파일
+  Acceptance criteria 템플릿의 기본 항목이다(같은 템플릿에 "자동 e2e로 증명하고 새 clone에서 재현"도 기본 항목).
+- **구현 세션 절차**(첫 턴에 브랜치 + 스펙 커밋 + push + draft PR, 논리 단위 커밋, `explain` 서사 → `gh pr ready`,
+  머지는 사용자)는 `interview` SKILL.md의 "구현 세션으로 넘기기" 절이 소유한다. 여기서 복제하지 않는다(§6-6).
+- `kick-off` 상태는 `spec → impl` 2단계다(R20).
+- 세션 하나를 넘는 크기·병렬 트랙·마이그레이션용 분할 수단은 **만들지 않는다.** 필요해지면 git 이력에서 복원한다.
+
+**기전** 삭제 + 개명 + 지시문이다. 플랜 스킬·모드 문서·구현자 3종·플랜 문서 리뷰어(xhigh)·플랜 훅 3종을
+복구 없이 지웠다. 코드 리뷰어(effort low → medium, 입력을 스펙 경로 + diff 범위로)와 플랜 문서 리뷰어(medium)를
+각각 `code-reviewer`·`spec-reviewer`로 개명·재작성했다. spec-reviewer 체크리스트는
+`woobin-harness/skills/interview/spec-reviewer-prompt.md`가 소유한다. `scripts/test-agents.sh`가 두 리뷰어의
+존재 · model=opus · effort=medium · 편집 툴 없음을 기계로 센다.
+
+**근거** 이슈 #41 A/B 실측 2회. 서사는 `home/HARNESS-LOG.md` #37.
+- **1차(2026-09-28, Godot M1)** A 자유 구현 **$54 · 2h** vs B 계획 경로 **$95~100 · 4h20m**. 품질은 코드 구조를
+  빼면 A 우세. 다만 B의 구현 전 단계가 빈틈(기본값 13 · 충돌 6 · 재검토 19)을 잡았다 — 리뷰를 구현 전에도 한 번
+  두는 근거다.
+- **2차(2026-10-01, pholex 대시보드 — 기존 코드베이스)** A **$9.8 · 18분** vs B **$24~27 · 56분**. 블라인드 리뷰
+  B 8.5 vs A 8.2로 B가 근소 우세였지만, **A + 독립 리뷰 1사이클($3.4)** 이 B를 이겨 채택됐다. B의 레이어별 리뷰가
+  놓친 결함(드래그 폭 키 공유)을 A의 **스펙 대조** 리뷰가 잡았다.
+spec-reviewer를 티어 1종으로 둔 건 #39의 medium/xhigh 티어링 근거가 모드 ③ 라우팅이었고 모드가 사라지면서
+근거도 사라졌기 때문이다(되돌리기 싸다).
+
+**대가** ① 세션 하나를 넘는 작업에 쓸 분할·병렬 수단이 없다 — 그런 작업이 오면 git에서 복원하는 비용을 그때 낸다.
+② 리뷰가 지시문이라 **건너뛸 수 있다.** 훅 강제는 일부러 안 했다 — 플랜 훅을 `specs/` 경로로 재배선하는 안은
+훅 하드코딩 사본이 갈라진 사고 이력(#28) 때문에 기각했다. ③ code-reviewer effort를 medium으로 올린 것이
+비용 중립이라는 건 **미측정 가정**이다(§8 O20). ④ 스펙 파일을 항상 쓰므로 작은 기능에도 파일 하나가 는다.
+
+**무효화 조건** — 다음 중 하나라도 참이면 재검토해라
+- **(a)** 세션 하나를 넘는 작업이 와서 **단일 세션 구현이 2회 연속 실패**한다 → 분할 수단(플랜 분할·레이어 위임)을
+  git 이력에서 복원하는 것을 검토한다
+- **(b)** 3번째 A/B에서 **계획 경로가 비용·품질 모두 우세**하다 → R23을 폐기한다
+- **(c)** spec-reviewer findings가 **3회 연속 0건**이다 → 스펙 리뷰 단계 제거를 검토한다
+
+---
+
 ## 4. 구성요소 인벤토리
 
 스킬·훅·에이전트를 `woobin-harness` 플러그인 하나가 나른다. Codex 지원은 2026-09-02에 별도 플러그인 레포로 분리했다(R22) — 이 인벤토리는 Claude Code 전용이다.
 
-### 훅 13개
+### 훅 10개
+
+2026-10-01, 플랜 경로 전용 훅 3종(플랜 저장 경계 · 플랜 진입 경계 · 구현 킥오프 가드)를 복구 없이 지워 13 → 10이 됐다(R23).
+리뷰 호출을 훅으로 재배선하는 안은 기각했다 — 지시문이 부른다.
 
 | 파일 | 이벤트 | 발화 조건 | 개입 형태 | 규칙 |
 |------|--------|-----------|-----------|------|
 | `idle-handoff-stop.sh` | Stop | 50분 무활동(asyncRewake) | `exit 2` 재기동 | R6 |
 | `ctx-handoff-stop.sh` | Stop | 턴 종료 시 ctx ≥300k | `exit 2` 재기동, 세션 1회 | R13 |
 | `idle-return-guard.sh` | UserPromptSubmit | 65분 경과 / `/close-session` | block 1회 | R6 |
-| `plan-saved-session-boundary.sh` | PostToolUse:Write | 플랜 경로 저장 (분할본은 `00-overview.md`만) | additionalContext | R1·R2 |
-| `plan-session-boundary-guard.sh` | UserPromptSubmit | 플랜 진입 프롬프트 + ctx ≥120k | additionalContext, 세션 1회 | R1 |
-| `sdd-kickoff-guard.sh` | UserPromptSubmit | 구현 의도 정규식 + 플랜 경로 | additionalContext, 세션 1회. R2 몫(통독 금지)과 R15 몫(브랜치·커밋·draft PR 포인터)을 같이 낸다 — R15 몫은 **원격이 있을 때만**, 로컬 git 상태로만 분기(`gh` 호출 없음) | R2 · R15 |
 | `sdd-orchestrator-edit-guard.sh` | PreToolUse:Edit\|Write\|MultiEdit | [A] SDD 원장 존재 / [B] ctx ≥150k **AND** 편집 ≥15회 | deny 1회 → 재시도 통과 | — |
 | `subagent-model-default.sh` | PreToolUse:Agent\|Task | model 미지정 | `updatedInput` 주입 | R3 |
-| `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커(`${HARNESS_STATE_DIR:-$HOME/.claude}/hooks/.stale-branch-pending/` — 짝인 ack 가드와 **같은 식으로** 유도해야 한다). 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R15 |
+| `stale-branch-guard.sh` | SessionStart | 워크트리 아님 + 원격보다 뒤처짐 | additionalContext + 마커(`${HARNESS_STATE_DIR:-$HOME/.claude}/hooks/.stale-branch-pending/` — 짝인 ack 가드와 **같은 식으로** 유도해야 한다). 열린 **draft** PR + 앞선 커밋이 있으면 문구를 rebase 확인용으로 **하향**(면제 아님, ready 전환 뒤엔 풀린다) | R12 · R23 |
 | `plugin-update-guard.sh` | SessionStart | 설치본 version ≠ 소스 version, 또는 같은 version인데 설치본 커밋이 소스보다 뒤 | additionalContext로 갱신 절차 4단계 안내. 차단하지 않음 | R18 |
 | `stop-warning-ack-guard.sh` | Stop | 마커 있는데 응답에 경고 없음 | block 1회 | R12 |
 | `harness-doc-sync-guard.sh` | PostToolUse:Edit\|Write\|MultiEdit | 이 레포의 `woobin-harness/` 수정 | additionalContext, 세션 1회 | R14 |
-| `kickoff-guard.sh` | UserPromptSubmit | [A] 킥오프 키워드(하이픈 파일명 제외) / [B] 상태 파일 `active: true` + `stage: spec\|plan` + 구현 의도 정규식 | additionalContext. [A]는 매번, [B]는 세션 1회 | R20 |
+| `kickoff-guard.sh` | UserPromptSubmit | [A] 킥오프 키워드(하이픈 파일명 제외) / [B] 상태 파일 `active: true` + `stage: spec` + 구현 의도 정규식 | additionalContext. [A]는 매번, [B]는 세션 1회 | R20 |
 
 `hooks/claude-hooks.json`이 wiring 정본이다.
 
@@ -827,52 +917,42 @@ Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hi
 IDLE_HANDOFF_DELAY=3000   IDLE_HANDOFF_MAXGAP=3540   IDLE_GUARD_THRESHOLD=3900
 IDLE_HANDOFF_POLL=60      IDLE_HANDOFF_FRESH=300
 CTX_HANDOFF_THRESHOLD=300000
-PLAN_BOUNDARY_CTX_THRESHOLD=120000   PLAN_SPLIT_MIN_LINES=500
 BULK_EDIT_CTX_THRESHOLD=150000       BULK_EDIT_COUNT_THRESHOLD=15
-SUBAGENT_DEFAULT_MODEL=sonnet        PLAN_DOCS_DIRS=superpowers|woobin_plan
+SUBAGENT_DEFAULT_MODEL=opus          PLAN_DOCS_DIRS=superpowers|woobin_plan
 KICKOFF_STATE_FILE=.claude/kickoff.local.md   KICKOFF_KEYWORD_PATTERN   KICKOFF_DRIFT_PATTERN
 ```
 
 `PLAN_DOCS_DIRS`는 **전환기 값**이다. `origin/main`은 `woobin_plan`인데 로컬 브랜치·워크트리 다수가
 아직 `superpowers`라 둘 다 매칭한다. 전 브랜치가 넘어가면 `woobin_plan`만 남긴다. → §8
 
-### 에이전트 8개
+### 에이전트 4개
 
 | 이름 | model | effort | maxTurns | memory | 특징 |
 |------|-------|--------|----------|--------|------|
 | `Explore` | haiku | low | — | — | 읽기 전용. 리포트 **20줄 상한**("Be concise"는 숫자가 없어 안 지켜진다) |
 | `screenshot-verifier` | sonnet | low | — | — | playwright 툴 보유. 이미지가 사는 **일회용 컨텍스트** |
-| `plan-implementer-sonnet-xhigh` | sonnet | xhigh | 60 | `local` | 모드 ①. 트랙 단위 worktree 위임 |
-| `plan-implementer-sonnet-medium` | sonnet | medium | 60 | `local` | 모드 ②b. **대부분의 플랜이 여기다** |
-| `plan-implementer-opus-xhigh` | opus | xhigh | 60 | `local` | 모드 ③. 되돌리기 비싼 변경 |
-| `plan-reviewer` | opus | low | 30 | **없음(의도)** | memory를 넣으면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다 |
-| `plan-doc-reviewer-opus-medium` | opus | medium | 30 | **없음(의도)** | 플랜 **문서** 리뷰(코드 아님). ③ 트리거가 아닌 **쉬운** 플랜. 편집 불가 |
-| `plan-doc-reviewer-opus-xhigh` | opus | xhigh | 30 | **없음(의도)** | 플랜 **문서** 리뷰. ③ 트리거(마이그레이션·프로덕션·자동 게이트로 못 잡는 UI) — **어려운** 플랜. 편집 불가 |
+| `spec-reviewer` | opus | medium | 30 | **없음(의도)** | 구현 전 **스펙 문서** 리뷰(R23 리뷰 ①). 입력은 스펙 파일 경로, 출력은 `Status / Findings / Recommendations`. 체크리스트는 `skills/interview/spec-reviewer-prompt.md`. 편집 불가 |
+| `code-reviewer` | opus | medium | 30 | **없음(의도)** | 구현 후 코드 리뷰(R23 리뷰 ②, R11). 입력은 스펙 파일 경로 + diff 범위. 정확성 · Acceptance criteria 대조 · 레포 관례 3축. 편집 불가 |
 
-**frontmatter의 부재가 의도인 곳이 1군데 남았다** — `plan-reviewer`의 `memory`. 리뷰어가 "빠졌다"고
+2026-10-01, 플랜 실행 기계를 걷어내며 구현자 3종과 xhigh 문서 리뷰어를 지우고, 남은 코드 리뷰어와
+medium 문서 리뷰어를 `code-reviewer`·`spec-reviewer`로 개명·재작성해 8 → 4가 됐다(R23, HARNESS-LOG #37).
+호출은 항상 네임스페이스로 한다 — `woobin-harness:spec-reviewer`, `woobin-harness:code-reviewer`.
+
+**frontmatter의 부재가 의도인 곳이 2군데다** — 두 리뷰어의 `memory`. 리뷰어가 "빠졌다"고
 판단해 채우면 Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다.
 
-구현자 3종과 문서 리뷰어 2종의 `model`·`effort`는 반대로 **반드시 채워져 있어야 한다.** `Agent` 호출에
-effort 인자가 없고 full-auto에는 세션 재런치가 없어서, frontmatter가 유일한 운반 수단이다. 파일명이 그
-값을 한 번 더 주장하므로 `scripts/test-agents.sh`가 `plan-implementer-*`와 `plan-doc-reviewer-*` 둘
-다에서 이름 ↔ frontmatter 일치를 기계로 센다(규율 6 — 이름을 두 번째 소유자로 두지 않는다).
-
-`plan-doc-reviewer-*` 2종은 `writing-plans`가 플랜 문서 리뷰를 띄울 때 **③ 트리거 여부로 하나를 고른다** —
-어려운 플랜(마이그레이션·프로덕션·자동 게이트로 못 잡는 UI)은 `-opus-xhigh`, 그 외는 `-opus-medium`.
-이전에는 이 리뷰를 `general-purpose`로 띄워 "플랜 세션 effort를 상속한다"고 했는데, `subagent-model-default.sh`
-(R3)가 model 미지정 general-purpose를 sonnet으로 고정하므로 그 상속은 실제로는 일어나지 않았다 —
-리뷰가 조용히 sonnet으로 돌았다. frontmatter로 옮겨 그 경로를 닫았다. effort를 티어로 나눈 근거는 R7의
-"위임된 구현자는 frontmatter가 유일한 운반 수단"과 같다. 코드 리뷰어(`plan-reviewer`)와 달리 이들은
-플랜 **문서**를 검토하므로 fable(디자인 감각) 변이체는 두지 않는다 — 문서 단계에서 얻을 게 얇다.
+두 리뷰어의 `model`·`effort`는 반대로 **반드시 채워져 있어야 한다.** `Agent` 호출에 effort 인자가 없어서
+frontmatter가 유일한 운반 수단이다(2026-09-03, 문서 리뷰가 R3의 sonnet 고정 때문에 조용히 sonnet으로 돈
+사고 — HARNESS-LOG #36). `scripts/test-agents.sh`가 둘 다 존재 · model=opus · effort=medium · `tools`에
+Edit/Write 없음을 기계로 센다.
 
 `maxTurns`는 폭주 방지 상한이지 튜닝 손잡이가 아니다. **미강제 버그 열려 있음**: anthropics/claude-code#41143.
 
-구현자 3종의 `memory: local`은 레포별·git 미추적. 레이어와 플랜을 넘는 **환경 지식**(어떤 러너를
-써야 하는지, 마이그레이션 위치, 느린 게이트)만 쌓게 지시돼 있다. 매 스폰마다 `MEMORY.md` 앞 200행이
-프롬프트에 실리는 대가가 있어 100행 상한을 본문에 박아뒀다. **이 트레이드오프는 아직 미측정이다** → §8
 
+### 스킬 19개
 
-### 스킬 20개
+2026-10-01, 플랜 작성 스킬을 그 실행 기계와 함께 지워 20 → 19가 됐다(R23). 이슈 #41의 A/B 실측 2회에서
+계획 경로가 비용 1.8~2.7배 · 시간 2~3배였고 품질 우위는 독립 리뷰에서 나왔다. 서사는 `home/HARNESS-LOG.md` #37.
 
 2026-09-02, Codex 지원을 분리하면서 `git-guardrails-codex`를 지워 21 → 20이 됐다(R22).
 
@@ -898,7 +978,7 @@ diagnosing-bugs`가 트리거 문구로 "debug this"를 명시적으로 갖고 �
 스킬 `explain`을 새로 만들어 19 → 20이 됐다(두 `description`이 같은 이름 아래 있으면 상시 로드 중
 프롬프트 충돌이 나서 이름을 갈랐다).
 
-파이프라인에 직접 물린 것: `kick-off` · `interview` · `writing-plans` · `debug` ·
+파이프라인에 직접 물린 것: `kick-off` · `interview`(스펙 파일 · spec-reviewer 호출 · 구현 세션 넘기기까지 소유) · `debug` ·
 `design-workflow` · `design-rules` · `show-design-sample` · `pr-demo-video` ·
 `close-session` · `token-waste-audit` · `handoff` · `explain`(대화에서 논의한 개념·결정을
 데이터 플로우 인포그래픽으로 시각화하는 `explain-in-html`과 달리, 텍스트로 설명한다).
@@ -990,7 +1070,9 @@ mtime 캐시로 1초 갱신 부담 제거. claude-buddy **wrapper** 방식이라
 
 ---
 
-## 5. 구현 모드
+## 5. 구현 모드 (폐기 — 이력)
+
+> **폐기(2026-10-01)** — 이슈 #41의 A/B 실측 2회에 따라 `writing-plans`·`plan-exec-modes.md`·구현자 3종을 지우면서 모드 ①/②a/②b/③이 모두 사라졌다. 지금은 모드 선택 없이 한 세션이 구현하고 리뷰 2회를 거친다(R23). 아래는 근거 기록으로만 남긴다 — 무효화 조건 (a)로 분할 수단을 복원할 때 출발점이다.
 
 전문은 `woobin-harness/plan-exec-modes.md`. `writing-plans` 스킬이 그중 **1개를 추천**한다 —
 추천 근거는 overview의 순서 의존성이고, 그 판단은 **플랜을 방금 쓴 세션만 싸게 할 수 있다.**
@@ -1040,8 +1122,9 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 4. **근거 수치와 규칙은 별개로 검증** — 근거가 틀려도 규칙이 맞을 수 있다(R4).
 5. **env 전역 override보다 PreToolUse 조건부 주입** — 의도적 예외를 조용히 깨뜨리지 않는다(R3).
 6. **같은 문장을 두 곳이 소유하지 않는다** — 실제 사고: 스킬에서 SDD 문구를 지웠는데 훅에 하드코딩된
-   사본이 남아 없는 스킬을 5회 더 권했고, 사용자가 매번 손으로 지웠다. 지금은 모드 파일 하나만 참조하고,
-   그 파일이 없으면 모드 단계를 **통째로 생략**한다. → §9-1에 이 규율의 **현재 위반 1건**이 있다.
+   사본이 남아 없는 스킬을 5회 더 권했고, 사용자가 매번 손으로 지웠다. 그 뒤 훅은 모드 파일 하나만 참조하게
+   됐고, 2026-10-01에는 모드 파일과 그걸 읽던 훅을 **함께** 지웠다 — 리뷰 호출을 훅으로 재배선하지 않고 지시문에
+   둔 것도 같은 이유다(R23). 구현 세션 절차는 `interview` SKILL.md 한 곳만 소유한다.
 
 ---
 
@@ -1058,7 +1141,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | `superpowers` 플러그인 유지 | 비용은 무관(~1.3k tok, floor의 3%). **프롬프트 충돌**이 이유 — "1%라도 가능성이 있으면 ABSOLUTELY MUST invoke / 합리화로 빠져나갈 수 없다"가 Anthropic의 "규칙을 줘라 → 판단에 맡겨라" 전환과 정면 충돌하고, 세션 지침과 실제로 서로 밀어냈다. → 값을 한 스킬 3개만 로컬화하며 강제 문구 제거 |
 | 태스크 1:1 리뷰 게이트 | 과다(#9). 자동 게이트가 커버하는 영역은 레이어 배치로 충분 |
 | 정리 로직을 `close-session` **스킬**에만 | `/close-session`은 훅이 block으로 끊어 **모델이 아예 안 뜬다**(토큰 0이 목적). 스킬에만 넣으면 정상 경로에서 **영영 실행되지 않는다** |
-| `plan-reviewer`에 `memory:` | Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다 |
+| `code-reviewer`·`spec-reviewer`에 `memory:` | Read/Write/Edit가 자동 활성화돼 "편집 불가"가 깨진다 |
 | 크로스세션 인바운드 `"accept"`(기본값) 유지 | E11. idle 세션이 **사람 없이** 깨어나 TTL 만료된 프리픽스를 통째로 재캐싱한다. R13 마커는 이미 소진돼 다시 안 걸리고, R6은 transcript mtime으로 판정하므로 타이머가 리셋될 수 있다(O11) |
 | 인바운드 `"hold"` (승인 다이얼로그) | **기술적으로는 이쪽이 규율 1에 더 맞는다** — 사람 있으면 승인, 없으면 `dialogExpiry` 5분 뒤 드롭, 같은 머신 발신자는 결과를 통보받는다. 그런데 이 하네스에 피어를 쓰는 경로가 **0개**라, 얻는 건 "언젠가 쓸 때의 편의"뿐인데 대가는 **매 수신마다 사람이 판단해야 하는 다이얼로그**다. 규율 1의 "오탐이 영구 장애가 되면 안 된다"는 정당한 경로가 있을 때의 얘기고, 여기선 정당한 경로 자체가 없다. → 쓸 경로가 생기면 **refuse보다 hold가 먼저다** |
 | 구현 스킬에 "세션 간 대화 툴 금지" 문구 | 세 가지로 기각. ① **막는 축이 다르다** — 문구는 outbound(모델의 툴 선택)만 억제하는데 위험은 inbound다. 인바운드 턴은 모델을 거치지 않으므로 그 문장이 읽히기 전에 이미 청구된다. ② **소유권이 반쪽**(§6-6) — 구현 스킬은 구현 세션만 로드한다. 정작 발신할 법한 워크트리 세션·Remote Control 세션은 그 문장을 안 읽는다. ③ **트리거가 없다** — `SendMessage`/`ListAgents`는 자동 발화가 없고 관측된 실패도 0건이다. 아직 안 난 사고에 상시 프롬프트 비용을 내는 건 O4가 걱정하는 형태 |
@@ -1069,6 +1152,13 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | **플랜을 레포 밖(`~/.claude/plans/`)에 두기** | `plan-saved-session-boundary.sh`의 경로 정규식이 `/docs/(superpowers\|woobin_plan)/plans/`다. 옮기면 플랜 분할·모드 선택 기계가 **통째로 조용히 죽는다** |
 | **레이어 경계에서 더러운 트리를 검사하는 훅** | 훅 신설 0개로 시작한다. 전달 경로가 이미 있다(모드 파일은 킥오프 훅이 읽게 만든다). §6-2는 **실패가 관측된 뒤** 적용하는 규율이고 R13도 경고 → 재측정 → 훅 순서였다 |
 | **오래된 draft 플랜 PR 자동 폐기(cron/CI)** | 이 레포엔 CI가 없고 새 소유자가 하나 늘어난다. 검사 시점을 "새 플랜 시작 시"로 옮기면 필요한 순간에만 발생한다 |
+| **플랜 작성 스킬을 지우지 않고 조건부로 축소**(R23, 2026-10-01) | 거의 안 쓰는 경로인데 문서 4종 동기화 의무가 그대로 남고, 미트리거 스킬 문제(#25)를 악화시킨다 |
+| **코드 리뷰를 내장 `/code-review`나 mattpocock `code-review`로**(R23) | 내장은 스펙 대조 축이 없다 — 2차 실측에서 B를 이긴 결함은 스펙 대조로 잡혔다. mattpocock은 서드파티 의존 |
+| **리뷰를 구현 후 1회만**(R23) | 1차 실측에서 빈틈 찾기 이득(기본값 13 · 충돌 6 · 재검토 19)이 구현 **전** 단계에서 나왔다 |
+| **리뷰 호출을 훅으로 강제**(플랜 저장 훅을 `specs/` 경로로 재배선, R23) | 훅 하드코딩 사본이 스킬과 갈라진 사고 이력(#28). 리뷰 호출은 지시문이 소유한다 |
+
+R15 표시 행 6개와 플랜 경로 행은 R15·플랜 기계와 함께 2026-10-01 폐기된 대안의 기록이다. 단 "task 단위 커밋"·"리뷰 통과 후 커밋"의
+기각 사유는 지금의 구현 세션 절차(논리 단위 커밋, `interview` "구현 세션으로 넘기기")에도 그대로 적용된다.
 
 ### B. 1st-party와의 중복 — 아직 손으로 하는 것들
 
@@ -1085,6 +1175,9 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | 에이전트 간 조율 | 에이전트 팀(실험, `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`) | **미평가 (2026-08-10에도 그대로).** 아래 크로스세션과 **혼동하지 마라** — 별개 기능이고 팀은 여전히 opt-in이며 `ListAgents`에 뜨지도 않는다 |
 | 세션 간 질의(레포가 달라 한 세션에 못 합칠 때) | 크로스세션 메시징(2.1.224+, 기본 ON) | **인바운드만 닫았다(§7-A). 발신은 살아 있다.** 값이 있는 방향은 발신뿐이고, 유일하게 구체화된 용처는 R13 핸드오프 창(O12) |
 
+2026-10-01: 모드 3행과 R15 행은 대상이 폐기돼 비교가 끝났다(§5·R15). R23의 무효화 조건 (a)로 분할 수단을 되살릴 일이 생기면
+손으로 복원하기 전에 이 표의 `Workflow` 대응물부터 봐라.
+
 **리뷰 질문**: 위 표에서 손으로 만든 쪽을 지우고 1st-party로 대체할 수 있는 게 몇 개인가?
 대체 시 잃는 것은 무엇인가(특히 R8의 순차 스폰 규율이 Workflow의 동시성 캡과 어떻게 상호작용하는가)?
 
@@ -1096,25 +1189,28 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 
 | # | 항목 | 상태 |
 |---|------|------|
-| O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | 38~88k는 추정. 구현자 3종의 `memory: local` 트레이드오프도 미측정. 변이체 3종으로 갈라진 뒤 memory 파편화도 미측정 — 세 디렉터리가 같은 레포 환경 사실을 각자 다시 배운다. |
-| O2 | `maxTurns` 60/30 값의 근거 | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
-| O3 | 모드 3종의 **실사용 후 재측정** | 도입 2026-08-07, 아직 안 함. 기준선은 $2.57~2.82/태스크 |
+| O1 | 모드 ②b의 **레이어당 프리픽스 실비용** | **종료(2026-10-01)** — 대상(모드·구현자)이 삭제됐다. 이하 기록: 38~88k는 추정. 구현자 3종의 `memory: local` 트레이드오프도 미측정. 변이체 3종으로 갈라진 뒤 memory 파편화도 미측정 — 세 디렉터리가 같은 레포 환경 사실을 각자 다시 배운다. |
+| O2 | `maxTurns` 30 값의 근거(구현자 60은 2026-10-01 삭제) | 없다. 폭주 방지 감각값이고 **강제되지도 않는다**(#41143) |
+| O3 | 모드 3종의 **실사용 후 재측정** | **종료(2026-10-01)** — 재측정 대신 이슈 #41 A/B 2회가 계획 경로 전체를 판정했고 모드는 삭제됐다(R23). 기준선이던 $2.57~2.82/태스크는 기록으로 남긴다 |
 | O4 | ~~스킬 43개 개별 사용 빈도~~ | **해소(2026-08-10)**. 1개월 로그 스캔 → 미사용 18개 중 다운로드 출처만 삭제. §4 참조 |
 | O5 | 편집 가드 [A] | SDD 스킬을 안 쓰므로 원장이 안 생겨 **사실상 비활성**. 폐기 후보 1순위 |
 | O6 | `PLAN_DOCS_DIRS` 이중 값 | 전환기. 전 브랜치가 `woobin_plan`으로 넘어가면 좁힌다 |
 | O7 | R12의 **응답 검사 게이트 패턴**을 다른 훅에 확대 | 지금은 stale-branch에만. additionalContext 드롭은 모든 훅에 해당하는데 다른 훅은 검사가 없다 |
 | O8 | design-variants S1/S2/S3 경계 효과 | 2026-08-03 도입, 재측정 안 함. 목표는 메인 peak <150k |
 | O9 | 플러그인 전환 후 훅이 **실제로 발화하는지** | 플러그인 캐시본 직접 호출로만 스모크 테스트했다. 라이브 세션 확인 필요 |
-| O10 | 인바운드 피어 메시지가 여는 턴이 **`UserPromptSubmit`을 태우는지** | **미문서화.** `hooks.md` 전문에 cross-session·SendMessage·peer 언급 0건(2026-08-10 grep). 태우면 `idle-return-guard`가 부분 커버, 안 태우면 UserPromptSubmit 훅 **3개가 통째로 우회**된다. `refuse`가 걸려 있는 동안은 무해하므로 **풀 때 먼저 측정해라** |
+| O10 | 인바운드 피어 메시지가 여는 턴이 **`UserPromptSubmit`을 태우는지** | **미문서화.** `hooks.md` 전문에 cross-session·SendMessage·peer 언급 0건(2026-08-10 grep). 태우면 `idle-return-guard`가 부분 커버, 안 태우면 UserPromptSubmit 훅이 **통째로 우회**(2026-10-01 기준 `idle-return-guard`·`kickoff-guard` 2개)된다. `refuse`가 걸려 있는 동안은 무해하므로 **풀 때 먼저 측정해라** |
 | O11 | 인바운드 턴이 transcript mtime을 갱신해 **R6 idle 타이머를 리셋하는지** | 미검증. 리셋되면 자리비움 핸드오프가 무한 연기된다 |
 | O12 | R13 핸드오프 창 패턴 | 미검증 아이디어 — 옛 세션을 `/clear` 대신 살려둔 채 새 세션을 띄우고, 핸드오프 문서에 구멍이 나면 질의 1회로 때운 뒤 닫는다. TTL 1시간 안이면 cache **read**지 creation이 아니다. 발신 방향이라 `refuse`와 무관하게 지금도 가능 |
 | O13 | ~~자작 추정 미사용 스킬 5개~~ | **해소(2026-08-21).** 사전 등록한 재판단 시점이 왔다 — 5개 전부 여전히 0회였다. `obsidian-vault`·`tutor`·`tutor-setup` 삭제, `internal-sso-oidc`·`agent-ready-audit`(→ 후자도 삭제) 판정은 §4 참조. **자작 추정 자체가 틀렸다**: `obsidian-vault`에 WSL 경로 `/mnt/d/...`가 박혀 있었다 — 이 머신에서 쓴 적이 없다는 뜻이다. 내용 기반 출처 추정의 한계를 실제로 확인한 사례 |
 | O14 | **하드 컷 중단 빈도 vs 방향 오류 되돌림 빈도** | **미계측.** R15의 핵심 교환("버리기가 되돌리기로 바뀐다")이 전부 여기 매달려 있다. `token-waste-audit`의 세션 스캐너로 뽑을 수 있다 — 구현 세션이 컷으로 끊긴 건수 대비 `reset`/`checkout .`으로 되돌린 건수 |
-| O15 | 단일성 불변식(워크트리당 열린 draft 플랜 PR 1개) | 소프트 절차다. 깨졌을 때 실제로 진입점이 못 쓰이게 되는지 미검증. 깨지는 걸 관측하면 §6-2 순서로 구조화 |
-| O16 | 머지 전 플랜 디렉터리 삭제가 **권장**이라 미준수 가능 | 피해가 작아 권장으로 뒀다. 누적되면 에이전트가 낡은 플랜을 현재 설계로 오독할 위험이 있고, 날짜 접두어와 `plans/` 경로가 1차 방어다 |
+| O15 | 단일성 불변식(워크트리당 열린 draft PR 1개) | 2026-10-01 이후 `interview` "구현 세션으로 넘기기"가 잇는다. 소프트 절차다. 깨졌을 때 실제로 진입점이 못 쓰이게 되는지 미검증. 깨지는 걸 관측하면 §6-2 순서로 구조화 |
+| O16 | 머지 전 플랜 디렉터리 삭제가 **권장**이라 미준수 가능 | **종료(2026-10-01)** — 새 플랜 디렉터리가 더는 안 생긴다. 남은 과거 디렉터리는 정리 대상에서 뺐다(스펙 Non-goals). 이하 기록: 피해가 작아 권장으로 뒀다. 누적되면 에이전트가 낡은 플랜을 현재 설계로 오독할 위험이 있고, 날짜 접두어와 `plans/` 경로가 1차 방어다 |
 | O18 | **R16(한국어 output-style)의 근거가 로컬 실측이 아니다** | 2026-08-19 도입. 원본 저장소의 전후 비교를 그대로 채택했고 이 환경에서 재현하지 않았다. 같이 안 잰 것 셋: ① 세션 floor 증가분(추정 ~1.5k) ② 응답 길이 증가가 `home/CLAUDE.md` 밀도 규칙을 잡아먹는지 ③ 서브에이전트가 실제로 준수하는지. `token-waste-audit`의 세션 스캐너로 ①②는 전후 비교가 가능하다 |
 | O17 | ready 전환 후 머지 전 창에서 **R12 경고가 강한 문구로 복귀**하는 것이 성가신지 | 미검증. 그 창은 짧을 것으로 가정하지만 승인·CI 대기가 길어지면 매 세션 시작마다 "새 워크트리를 만들까요"를 듣는다. 관측되면 하향 조건을 `--draft` 대신 `--state open` PR 존재로 넓힌다 |
-| O19 | **full-auto 오케스트레이터가 무는 플래닝 프리픽스** | 산술 추정만 있다. R1 실측(죽은 잔재 ~155k)에 요청 ~18회를 곱하면 2.7M cache read — opus 오케스트레이터 기준 ~$4/플랜, 태스크당 $2.57~2.82 기준선에서 10태스크 플랜의 ~15%. 실측 안 했다. `token-waste-audit`으로 full-auto 세션과 ②a 세션을 전후 비교할 수 있다 |
+| O19 | **full-auto 오케스트레이터가 무는 플래닝 프리픽스** | **종료(2026-10-01)** — full-auto 오케스트레이터가 삭제됐다. 이하 기록: 산술 추정만 있다. R1 실측(죽은 잔재 ~155k)에 요청 ~18회를 곱하면 2.7M cache read — opus 오케스트레이터 기준 ~$4/플랜, 태스크당 $2.57~2.82 기준선에서 10태스크 플랜의 ~15%. 실측 안 했다. `token-waste-audit`으로 full-auto 세션과 ②a 세션을 전후 비교할 수 있다 |
+| O20 | **`code-reviewer` effort low → medium이 비용 중립인가** | **미측정 가정(2026-10-01).** 레이어마다 돌던 리뷰가 기능당 1사이클로 줄어 총비용이 늘지 않는다고 봤다. 2차 A/B의 독립 리뷰 1사이클 $3.4가 유일한 점 추정이다. 다음 기능 몇 개에서 리뷰 1회 비용을 `token-waste-audit`으로 센다 |
+| O21 | **R3 기본값 opus의 비용 영향** | **미측정(2026-10-01).** 7/30 기준선은 model 미지정 서브에이전트가 opus로 돈 하루 **$25.30**이다. 같은 스캐너로 미지정 서브에이전트의 일일 비용을 다시 세서 R3 무효화 조건 첫 항목과 대조한다 |
+| O22 | **R23 무효화 조건의 계수** | 셋 다 카운터가 없다 — (a) 단일 세션 구현 연속 실패 수, (b) 3번째 A/B 여부, (c) spec-reviewer findings 0건 연속 수. 지금은 사람이 PR 본문 "리뷰" 절을 보고 센다 |
 
 - ⚠️ **`refuse`는 발신자에게 아무 통지도 하지 않는다** — 문서 원문: "A message refused on arrival
   produces no sender-side notice." 즉 **다른 세션에서 이 머신의 세션에 메시지를 보냈는데 답이 없으면,
@@ -1135,13 +1231,14 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 **리뷰어가 "발견"하기 전에 미리 적는다.** 이미 아는 것이므로 여기 있는 걸 지적해도 새 정보가 아니다.
 새 것을 찾아라.
 
-1. **세션 경계 문구가 두 곳에서 갈린다.** 프로젝트 `CLAUDE.md`는 `/clear`를 안내하고("컨텍스트만
+1. **해소(2026-10-01)** — 재런치를 지시하던 모드 파일과 플랜 훅이 삭제돼, 남은 세션 경계는 R23의 `/clear` 하나다.
+   이하 기록: **세션 경계 문구가 두 곳에서 갈린다.** 프로젝트 `CLAUDE.md`는 `/clear`를 안내하고("컨텍스트만
    리셋하므로 터미널·워크트리·MCP 연결은 유지된다"), 훅과 모드 파일은 `/exit` 후 `--effort` 플래그로
    **재런치**를 지시한다. R7 도입 시 훅만 고치고 CLAUDE.md를 안 고쳤다. **§6-6 규율의 현재 위반이다.**
    `/clear`로는 effort를 못 바꾸므로 훅 쪽이 옳다.
-2. **`sdd-*` 파일명이 실체와 안 맞는다.** SDD(subagent-driven-development) 스킬은 설치돼 있지 않다.
-   `sdd-kickoff-guard.sh`는 트리거를 스킬명 → 구현 의도 정규식으로 이미 교체했고 절약 근거는 스킬과
-   무관하게 유효하다. 이름만 역사적 표기로 남았다. 개명하면 훅 배선(`hooks.json`)도 같이 고쳐야 한다.
+2. **`sdd-orchestrator-edit-guard.sh`의 `sdd-` 접두어가 실체와 안 맞는다.** SDD(subagent-driven-development)
+   스킬은 설치돼 있지 않다. 같은 접두어의 킥오프 가드는 2026-10-01 플랜 기계와 함께 삭제됐고, 남은 편집 가드는
+   [B]만 살아 있다(3번). 이름만 역사적 표기로 남았다. 개명하면 훅 배선(`claude-hooks.json`)도 같이 고쳐야 한다.
 3. **편집 가드가 [A]/[B] 두 모드인데 [A]는 죽어 있다**(O5). 한 파일에 산 코드와 죽은 코드가 섞여 있다.
 4. **R4(스크린샷)의 근거가 이미 한 번 50~100배 틀렸다.** 규칙은 유지가 옳았지만, 이 하네스에서
    **근거 검증이 가장 약했던 지점**이라는 기록으로 남긴다.
@@ -1155,7 +1252,7 @@ lead to overthinking."* 플랜 실행이 그 부류다.
 | 파일 | 내용 |
 |------|------|
 | `home/HARNESS-LOG.md` | 개선 이력의 **전체 서사** — 문제·근거·수단·재측정. 이 문서의 `근거` 필드는 전부 여기서 왔다 |
-| `woobin-harness/plan-exec-modes.md` | 모드 3종 전문 |
+| `woobin-harness/skills/interview/SKILL.md` | 기본 경로 정본 — 스펙 파일 저장 · spec-reviewer 호출 · "구현 세션으로 넘기기"(R23) |
 | `woobin-harness/hooks/*.sh` | 각 파일 헤더에 그 훅만의 상세 근거(사고 이력 포함) |
 | `docs/workflow.html` | 사람이 보는 요약 |
 | `README.md` | 레포 구조·플러그인 형태·전환 절차 |

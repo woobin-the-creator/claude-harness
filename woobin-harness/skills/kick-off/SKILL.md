@@ -16,9 +16,9 @@ disable-model-invocation: true
 
 | 레포에 있는 것 | 진입 지점 |
 |---|---|
-| 이 주제의 `docs/woobin_plan/plans/<slug>/00-overview.md` | 구현 — 그 경로를 그대로 쓴다 |
-| `docs/woobin_plan/specs/` 아래 확정 스펙 | `writing-plans` |
-| 둘 다 없음 | `interview` |
+| 이 주제의 `docs/woobin_plan/specs/<date>-<slug>-design.md`(frontmatter에 `spec_review:` 있음) | 구현 — 스펙 경로를 그대로 쓴다. 절차는 `interview`의 "구현 세션으로 넘기기" |
+| 같은 파일인데 `spec_review:`가 없음 | `interview` — 스펙 리뷰부터 |
+| 없음 | `interview` |
 
 3. 정한 것을 **한 줄로 선언**한다: `진입: <단계> · 경로: <이어질 스킬 이름들>`
    틀렸으면 사용자가 그 자리에서 잡는다.
@@ -26,7 +26,7 @@ disable-model-invocation: true
 
 ## 문 목록
 
-- 기능 개발 → `interview` → `writing-plans`
+- 기능 개발 → `interview` (스펙 파일 → `spec-reviewer` → 구현 세션 → `code-reviewer`)
 - 제품 UI·디자인 → `design-workflow`
 - 디버깅 → `debug`
 
@@ -35,7 +35,7 @@ disable-model-invocation: true
 ## 난이도는 판정하지 않는다
 
 `/kick-off`가 눌렸다는 것 자체가 "이건 워크플로우를 태울 일이다"라는 사용자의 판정이다.
-크기에 맞춰 산출물을 줄이는 건 `interview`와 `writing-plans`가 각자 이미 한다.
+크기에 맞춰 산출물을 줄이는 건 `interview`가 이미 한다.
 
 ## 상태 파일
 
@@ -52,7 +52,7 @@ started_at: <ISO 8601>
 <사용자가 처음 준 요구사항 원문>
 ```
 
-- `stage`는 `spec` → `plan` → `impl` 순으로만 간다. 스펙이 확정되면 `plan`, 플랜이 저장되면 `impl`.
+- `stage`는 `spec` → `impl` 순으로만 간다. `interview`가 스펙 파일을 저장하는 순간 `impl`로 쓴다.
 - 훅이 이 파일을 읽는다. `active: false`면 훅은 조용해진다.
 
 ## 끝내기

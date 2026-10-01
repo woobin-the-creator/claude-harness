@@ -1,10 +1,12 @@
 #!/bin/sh
-# PreToolUse(Agent|Task) — model 미지정 서브에이전트를 sonnet(latest)으로 기본값 고정.
+# PreToolUse(Agent|Task) — model 미지정 서브에이전트를 opus(latest)으로 기본값 고정.
 #
 # 왜: 서브에이전트는 model을 명시하지 않으면 **부모 세션 모델을 상속**한다(harness 기본값 "inherit").
 # 2026-07-30 실측 — 메인이 opus-5인 상태에서 model 없이 스폰된 general-purpose 에이전트들이
 # opus로 돌아 하루 $25.30을 썼다(시안 3개 $8.91/$6.58/$5.79, SDD Task 6 $3.26).
 # 같은 일을 sonnet으로 했으면 ~40% 싸다.
+#
+# 2026-10-01 — 기본값을 sonnet → opus로 바꿨다(issue #41). 계획서 스킬 삭제로 서브에이전트의 주 용도가 "대량 구현"에서 "탐색·리뷰"로 옮겨 갔고, 사용자가 그 품질을 비용보다 우선했다. 위 2026-07-30 비용 근거는 기록으로 남긴다 — 비용이 다시 문제가 되면 SUBAGENT_DEFAULT_MODEL=sonnet 으로 되돌린다.
 #
 # 왜 env(CLAUDE_CODE_SUBAGENT_MODEL)를 쓰지 않는가: 그 변수는 우선순위가 최상위라
 # Agent 호출의 명시적 model 인자와 에이전트 정의 frontmatter까지 **덮어쓴다**
@@ -19,7 +21,7 @@
 
 set -u
 
-DEFAULT_MODEL=${SUBAGENT_DEFAULT_MODEL:-sonnet}
+DEFAULT_MODEL=${SUBAGENT_DEFAULT_MODEL:-opus}
 
 input=$(cat)
 command -v jq >/dev/null 2>&1 || exit 0
