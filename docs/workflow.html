@@ -151,7 +151,7 @@
 
 <!-- ══════════════ 1. 전체 흐름 ══════════════ -->
 <h2><span class="num">01</span>전체 흐름</h2>
-<p class="sub">세션 경계는 <b>스펙 리뷰 직후 <code>/clear</code> 딱 한 번</b>이다. 스펙 파일 하나가 설계 → 구현 → 리뷰를 꿰는 유일한 산출물이다.</p>
+<p class="sub">세션 경계는 <b>스펙 리뷰 직후 딱 한 번</b>이고, 사람이 <code>/clear</code>를 치는 대신 <b>인터뷰 세션이 구현 세션을 연다</b>(Paseo 워크트리 에이전트, 없으면 <code>claude -p</code>). 스펙 파일 하나가 설계 → 구현 → 리뷰를 꿰는 유일한 산출물이다.</p>
 
 <ul class="rail">
 
@@ -183,10 +183,9 @@
   <li class="boundary">
     <div class="boundary-card">
       <h3>◆ 필수 세션 경계</h3>
-      <p>스펙 리뷰까지 끝나면 <code>/clear</code>하고, 새 세션에는 <b>스펙 파일 경로만</b> 넘긴다. 설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구되는 걸 끊는 자리다. 훅은 없다 — 사람이 친다.</p>
-<pre><code>/clear
-<span class="cmt"># 첫 프롬프트 (한 줄)</span>
-docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 스펙대로 구현해줘</code></pre>
+      <p>스펙 리뷰까지 끝나면 <b>인터뷰 세션이 구현 세션을 연다</b> — Paseo 워크트리 에이전트(claude/opus), 없으면 워크트리에서 백그라운드 <code>claude -p</code>. 새 세션에는 <b>스펙 파일 경로만</b> 넘긴다. 설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구되는 걸 끊는 자리다. 훅은 없다 — 사람이 <code>/clear</code>를 칠 필요도 없다. 인터뷰 세션은 세션·워크트리·브랜치를 한 줄로 알리고 역할을 끝낸다. "지켜볼게"라고 하면 예외로 <code>/clear</code> 후 직접 구현한다.</p>
+<pre><code><span class="cmt"># 새 세션이 받는 첫 프롬프트 (한 줄)</span>
+docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 기준으로 구현해줘. 절차는 interview 스킬의 "구현 세션으로 넘기기" ③ 절차를 따른다.</code></pre>
     </div>
   </li>
 
@@ -228,7 +227,7 @@ docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 스펙대로 구현�
       <p>턴이 <strong>300k 컨텍스트</strong>를 넘겨 끝나면 <code>ctx-handoff-stop.sh</code>가 모델을 깨워
 <code>handoff</code> 스킬로 핸드오프 문서를 <code>~/.claude/idle-handoffs/&lt;sid&gt;.md</code>에 쓰게 한다.
 그 뒤 <code>/clear</code>하고 그 문서를 읽고 이어가면 된다. 세션당 1회만 발화한다.</p>
-      <p class="why">계획된 경계는 위의 <em>필수</em> <code>/clear</code> 하나뿐이지만, 이건 <em>넘겼을 때 자동으로</em> 생기는 경계다.
+      <p class="why">계획된 경계는 위의 <em>필수</em> 경계(인터뷰 세션이 구현 세션을 연다) 하나뿐이지만, 이건 <em>넘겼을 때 자동으로</em> 생기는 경계다.
 2026-08-10 7일 전수에서 300k를 넘긴 뒤에도 계속 돈 세션이 10건이었고 그 초과분만 $88.47이었다.</p>
     </div>
   </li>
@@ -266,7 +265,7 @@ docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 스펙대로 구현�
 
   <div class="mode rec">
     <div class="mode-h"><span class="mode-n">→</span><span class="mode-t">지금 기본 경로</span><span class="badge">기본</span></div>
-    <p class="when">스펙 파일 → <code>spec-reviewer</code> → <code>/clear</code> → 한 세션 구현 → <code>code-reviewer</code> → e2e 증명 → ready.</p>
+    <p class="when">스펙 파일 → <code>spec-reviewer</code> → 인터뷰 세션이 구현 세션을 연다(Paseo 또는 <code>claude -p</code>) → 한 세션 구현 → <code>code-reviewer</code> → e2e 증명 → ready.</p>
     <p class="cost">계획 경로가 끌고 다니던 전용 에이전트 6종 · 훅 3종 · 모드 문서도 같이 지웠다. 문서 4종이 함께 움직여야 해서 한쪽만 고쳐 갈라지는 사고가 반복되던 자리다.</p>
   </div>
 
@@ -381,7 +380,7 @@ docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 스펙대로 구현�
 
 <ul class="anti">
   <li><b>스펙을 쓴 세션에서 그대로 구현 시작</b>
-  설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구된다. 막아주는 훅은 없다 — 스펙 리뷰 뒤 <code>/clear</code>는 사람이 친다.</li>
+  설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구된다. 막아주는 훅은 없다 — 스펙 리뷰 뒤 인터뷰 세션이 구현 세션을 열고 손을 떼야 한다(Paseo 워크트리 에이전트, 없으면 <code>claude -p</code>).</li>
 
   <li><b>리뷰 2회 중 하나 건너뛰기</b>
   품질을 산 건 계획서가 아니라 리뷰였다. 훅이 강제하지 않으므로(호출은 지시문) 건너뛰면 아무도 모른다. code-reviewer 결과는 PR 본문 <code>### 리뷰</code> 절에 남겨 흔적을 만든다.</li>
