@@ -1098,7 +1098,7 @@ frontmatter model·effort를 세도록 넓혔고, 문서 리뷰어 2종의 존�
 
 **수단** — 스펙 `docs/woobin_plan/specs/2026-10-01-remove-writing-plans-design.md`.
 1. `writing-plans` 스킬과 실행 기계(플랜 전용 에이전트 6종 · 훅 3종 · `plan-exec-modes.md`)를 복구 없이 지웠다.
-2. 기본 경로를 `interview → 스펙 파일 → spec-reviewer → /clear → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer
+2. 기본 경로를 `interview → 스펙 파일 → spec-reviewer → 구현 세션을 연다(인터뷰 세션이 Paseo/claude -p로) → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer
    → e2e 증명 → ready`로 바꿨다. 스펙 파일 하나가 세 단계를 꿰는 유일한 산출물이라, 구현할 작업이면 **항상** 저장한다.
 3. 리뷰 2회는 둘 다 전용 에이전트 프로필이다 — `plan-doc-reviewer-opus-medium` → `spec-reviewer`, `plan-reviewer` →
    `code-reviewer`(effort low → medium)로 개명·재작성. frontmatter가 model·effort를 소유하고 호출은 네임스페이스로 한다.
@@ -1128,6 +1128,20 @@ frontmatter model·effort를 세도록 넓혔고, 문서 리뷰어 2종의 존�
 - **결정 4** — R3 기본값 opus의 비용 영향. **미측정.** 기준선은 #8의 2026-07-30 **$25/일**(model 미지정 서브에이전트가
   opus로 돈 하루 $25.30)이다. `token-waste-audit`로 미지정 서브에이전트의 일일 비용을 다시 세서 R3 무효화 조건과 대조한다. O21.
 - **R23 무효화 조건** — (a)(b)(c) 셋 다 카운터가 없다. PR 본문 `### 리뷰` 절의 findings 건수가 (c)의 유일한 원천이다. O22.
+
+**추가 결정(2026-10-01, 같은 날)** — 세션 경계의 주체
+- **바뀐 것** — 스펙 리뷰 뒤 경계를 사람이 `/clear`로 치던 것을 **인터뷰 세션이 구현 세션을 직접 여는 것**으로 바꿨다.
+  Paseo MCP가 있으면 `create_workspace`(워크트리 branch-off) + `create_agent`(claude/opus, initialPrompt = 스펙 경로 한 줄,
+  notifyOnFinish), 없으면 워크트리에서 `claude -p "<한 줄>" --permission-mode acceptEdits`를 백그라운드 + Monitor로 띄운다.
+  인터뷰 세션은 세션·워크트리·브랜치를 한 줄로 알리고 역할을 끝낸다. "지켜볼게"면 예외로 `/clear` 후 직접 구현.
+  절차의 정본은 `interview` SKILL.md ③.
+- **검토한 셋** — (A) 경계 제거 / (A') 컨텍스트 100k 미만이면 경계 생략 / (B) opus 서브에이전트 하나가 구현 / (C) 실제 세션을 자동으로 연다.
+  경계는 남겨야 했다 — 플래닝 잔재 ~155k가 구현 캐시 비용의 44%였고(#5), 2차 A/B 오케스트레이터는 요청마다 평균 265k를
+  재독했다. 그래서 (A)는 기각. (A')는 경계를 사람이 칠 때만 의미 있던 절약이라 자동으로 열면 필요 없다. (B)는 서브에이전트
+  제약 셋 때문에 기각 — Agent 툴이 없어 `Explore`·`screenshot-verifier`에 위임 못 하고, 사용자에게 묻지 못하며,
+  UserPromptSubmit·Stop 훅(R6·R13 핸드오프, kickoff-guard) 밖이라 컨텍스트 소진에 조용히 끊긴다. **C**가 경계의 절약과
+  세션의 기능을 둘 다 갖는다.
+- **재측정** — 자동 스폰 구현 세션 vs `/clear` 직접 구현의 비용·품질 비교, **n=0**. workflow-spec §8 O23, R23 무효화 조건 (d)(e).
 
 ## 규율 (이 이력에서 반복 확인된 것)
 
