@@ -64,7 +64,7 @@ spec_review: spec-reviewer 1회(2026-10-01, plan-doc-reviewer-opus-medium로 대
    스펙 파일 Acceptance criteria 템플릿에 "자동 e2e로 증명하고 새 clone에서 재현"과 "`woobin-harness:code-reviewer` 1사이클 findings를 PR 본문에 처리 결과와 함께 기록" 기본 항목.
 4. **R3 훅**: `DEFAULT_MODEL=${SUBAGENT_DEFAULT_MODEL:-opus}`, 헤더에 2026-10-01 변경 사유. `scripts/test-hooks.sh`의 `== "sonnet"` 단언을 `"opus"`로.
 5. **참조 정리**(AC10 grep으로 검사): `kickoff-guard.sh`(plan 단계·writing-plans 문구), `kick-off/SKILL.md`(stage 3단계 → 2단계), `explain/SKILL.md`, `bootstrap.sh`,
-   `stale-branch-guard.sh` 주석의 소유자 참조, `sdd-orchestrator-edit-guard.sh` deny 메시지의 `task-N.md` 문구와 `PLAN_DOCS_DIRS`에 `specs` 포함,
+   `stale-branch-guard.sh` 주석의 소유자 참조, `sdd-orchestrator-edit-guard.sh` deny 메시지의 `task-N.md` 문구(`specs/` 경로 허용은 기존 정규식 `(plans|specs)`가 이미 하므로 `PLAN_DOCS_DIRS`는 그대로),
    `CLAUDE.md` 라우팅 표의 plan-exec-modes 행 → interview 절로, "훅 13개 결정론적 분기 fixture" → 10개, `README.md` 전 구간.
 6. **개수·설명 문구**: 스킬 19 · 에이전트 4(Explore, screenshot-verifier, spec-reviewer, code-reviewer) · 훅 10 — `plugin.json`(description 문구 "플랜 세션 경계·구현 모드"도 새 경로로), `marketplace.json`, `README.md`, `docs/workflow.html`(모드 정본 문장 재작성), `docs/workflow-spec.md` §4.
 7. **문서**: `docs/workflow-spec.md` 결정 10·14 반영 + §4 인벤토리(훅 10·에이전트 4·스킬 19) + §1 E6 등 R3 관련 전제 갱신. `docs/workflow.html`의 모드·플랜 서술을 새 경로로.
