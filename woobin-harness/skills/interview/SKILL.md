@@ -220,8 +220,8 @@ Acceptance criteria에는 사용자가 말하지 않아도 두 항목이 **기�
 
 여는 수단은 둘이고 순서대로 시도한다:
 
-1. **Paseo** (`create_workspace`·`create_agent` MCP 툴이 있을 때) — `paseo-handoff` 스킬의 절차를 따른다. 워크트리 격리(`isolation: "worktree"`, `mode: "branch-off"`, `baseBranch`는 기본 브랜치), provider는 `claude/opus`, `initialPrompt`는 아래 한 줄, `notifyOnFinish: true`. 기다리거나 폴링하지 않는다 — 끝나면 알림이 온다.
-2. **`claude -p`** (Paseo가 없을 때) — 기본 브랜치 기준 워크트리를 만들고 그 안에서 `claude -p "<아래 한 줄>" --permission-mode acceptEdits`를 **백그라운드**로 띄운다. 출력 파일을 Monitor로 걸어 draft PR URL과 종료만 받는다.
+1. **Paseo** (`create_workspace`·`create_agent` MCP 툴이 있을 때) — `paseo-handoff` 스킬의 절차를 따른다. 워크트리 격리(`isolation: "worktree"`, `mode: "branch-off"`, `baseBranch`는 기본 브랜치), provider는 `claude/opus`, effort는 `medium`, `initialPrompt`는 아래 한 줄, `notifyOnFinish: true`. 기다리거나 폴링하지 않는다 — 끝나면 알림이 온다.
+2. **`claude -p`** (Paseo가 없을 때) — 기본 브랜치 기준 워크트리를 만들고 그 안에서 `claude -p "<아래 한 줄>" --model opus --effort medium --permission-mode auto`를 **백그라운드**로 띄운다. 출력 파일을 Monitor로 걸어 draft PR URL과 종료만 받는다. `opus`는 최신 Opus 별칭이라 버전이 바뀌어도 고치지 않는다. `acceptEdits`는 쓰지 않는다 — 2026-10-13 pholex에서 node·npm 명령이 승인 대기로 막혀 무인 세션이 첫 턴에 멈췄다.
 
 어느 쪽이든 넘기는 프롬프트는 **스펙 파일 경로 하나**다:
 
