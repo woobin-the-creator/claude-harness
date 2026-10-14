@@ -44,6 +44,7 @@ Claude Code 하네스(훅·스킬·CLAUDE.md·설정)를 토큰/컨텍스트 문
 | 36 | 09-02 | Codex 호환 레이어가 모든 것을 두 벌로 만들었고(매니페스트·훅 wiring·에이전트·모드 문서·bootstrap·검증·루트 지침), 한쪽만 고쳐 조용히 갈라지는 사고가 3회 났다 — 마지막은 R20이 요구하는 `disable-model-invocation: true`를 Codex validator가 거부해 검증이 상시 실패한 것 | Codex 자산 11개 파일·에이전트 6개를 삭제하고 별도 플러그인 레포로 분리. 스킬 21 → 20 | (신규 — 다음 5개 변경의 문서 드리프트 건수) |
 | 35 | 09-02 | 디자인 스킬이 처방("테이블 셀 기본 한 줄", "라벨은 굵기로")을 담고 있어 자기 권위 순서와 모순됐고, 근거 없는 형태만 남은 규칙이 맥락 다른 화면에 그대로 적용됐다 | lawsofux 23개를 21개 원칙으로 옮긴 `principles.md` 신설 + 처방 삭제·관찰 존치. 수치는 전부 버리고 기전만 | (신규 — 렌더 리뷰의 blocker 건수) |
 | 34 | 09-02 | R15(커밋·draft PR)가 규정돼 있는데 안 굴렀다 — 구현자 정의 3종이 `Do not commit`으로 **정면 모순**이었고, 킥오프에서 절차를 보여주는 경로가 없었다 | 정의에 `## Committing` 절 + `sdd-kickoff-guard.sh`가 R2와 같은 트리거로 R15 포인터 주입. 곁가지로 Codex에서 죽어 있던 R12 ack 게이트(마커 경로 불일치) 수정 | (신규 — 다음 5개 플랜의 미커밋·미ready 건수) |
+| 38 | 10-14 | Claude Code 2.1.299가 idle compaction을 내장 — #1의 50분 핸드오프·65분 복귀 가드와 같은 캐시를 두고 이중으로 돎 | idle 훅 2종 삭제, `/close-session` 가로채기만 `close-session-guard.sh`로 분리 (R6 폐기) | (신규 — 다음 token-waste-audit의 ttl1h 낭비가 #1 재측정치 $10.64 이하인지) |
 
 ---
 
@@ -249,7 +250,8 @@ superpowers를 끄면 아래 훅의 트리거가 영향을 받는다. **경로·
 | 훅 | 트리거 | superpowers 제거 후 |
 |---|---|---|
 | `sdd-orchestrator-edit-guard.sh` [A] | `<repo>/.superpowers/sdd/*/progress.md` 원장 | SDD 스킬을 안 쓰면 원장이 안 생겨 **[A]는 사실상 비활성**. [B]는 무관하게 동작 |
-| `subagent-model-default.sh` / `ctx-warn-statusline.sh` / idle 2종 / stale-branch 2종 | 무관 | 유지 |
+| `subagent-model-default.sh` / `ctx-warn-statusline.sh` / stale-branch 2종 | 무관 | 유지 (idle 2종은 2026-10-14 #38에서 삭제) |
+| `close-session-guard.sh` | 프롬프트 문자열 **`/close-session`** | 무관. 단 `close-session` 스킬 이름을 바꾸면 훅이 **조용히 안 걸리고** 스킬 fallback(토큰 비용)으로 떨어진다 |
 | `stale-branch-guard.sh` (draft PR 하향 분기) | **`gh` CLI + PR의 draft 상태** | 무관. 단 `gh`가 없거나 미인증이면 조용히 **기존(하향 전) 문구**로 돌아간다. 라벨 의존은 issue #3에서 제거했다 — 이제 신호가 draft 하나라 이름 취약점이 없고, ready 전환과 동시에 하향이 풀린다(의도) |
 
 2026-10-01(#37): 플랜 경로 전용 훅 3종(플랜 저장 경계 · 플랜 진입 경계 · 구현 킥오프 가드)과 모드 문서를 지워 이 표에서 뺐다.
@@ -1142,6 +1144,25 @@ frontmatter model·effort를 세도록 넓혔고, 문서 리뷰어 2종의 존�
   UserPromptSubmit·Stop 훅(R6·R13 핸드오프, kickoff-guard) 밖이라 컨텍스트 소진에 조용히 끊긴다. **C**가 경계의 절약과
   세션의 기능을 둘 다 갖는다.
 - **재측정** — 자동 스폰 구현 세션 vs `/clear` 직접 구현의 비용·품질 비교, **n=0**. workflow-spec §8 O23, R23 무효화 조건 (d)(e).
+
+## 38. 하네스가 하던 자리비움 대비를 Claude Code가 내장했다 (2026-10-14)
+
+**문제** — Claude Code 2.1.299 changelog: "a 200K+ token conversation left idle for about 54 minutes is compacted
+before its one-hour prompt cache expires". #1이 훅 2개로 막던 문제(자리비움 중 TTL 만료 → 복귀 첫 요청의 전체 재캐싱)를
+런타임이 직접 맡았다. 둘을 같이 두면 ① 50분 핸드오프 턴이 돈 뒤 내장 compaction이 또 돌 수 있고(같은 목적에 두 번 지불),
+② 65분 복귀 가드가 이미 compact된 세션에도 "재캐싱 비용이 든다"며 프롬프트를 막는다 — 사실과 다른 경고다.
+
+**수단** — `idle-handoff-stop.sh`·`idle-return-guard.sh` 삭제. 가드 안에 같이 살던 `/close-session` 가로채기(#14, 토큰 0 정리)는
+기능이 별개라 `close-session-guard.sh`로 떼어 남겼다. 그 분기를 가드 안에 두던 이유(#1 교훈: 같은 마커 파일을 쓰는 훅끼리
+순서 경쟁)는 마커가 사라져 함께 사라졌다 — `handoff-done` 마커와 `ctx-handoff-stop.sh`의 그 마커 검사도 지웠다.
+`~/.claude/idle-handoffs/` 경로는 R13과 `handoff` 스킬 기본값이 계속 쓰므로 이름을 유지했다.
+
+**대가** — 내장 기능은 200k 미만 대화를 compact하지 않는다(`CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS`로 조정). #1은 크기와 무관하게
+핸드오프 문서를 남겼으므로, 200k 미만 세션을 1시간 넘게 비우면 이제 재캐싱을 그대로 낸다. 작은 세션이라 절대액이 작다고 판단했다.
+또 핸드오프 **문서**(새 세션에서 읽는 자기완결 기록)가 compaction 요약으로 바뀐다 — 손실 여부는 미측정.
+
+**재측정** — 다음 `token-waste-audit`의 ttl1h 낭비를 #1 재측정치($10.64/주)와 비교. 크게 늘었으면 200k 미만 구간 때문인지
+먼저 보고, 그렇다면 훅을 되살리기보다 `CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS`를 낮춰라.
 
 ## 규율 (이 이력에서 반복 확인된 것)
 

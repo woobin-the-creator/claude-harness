@@ -6,7 +6,7 @@ Claude Code에서 **직접 만든 하네스만** 공유하는 레포. 새 머신
 
 ## 형태 — 왜 dotfiles 심링크가 아니라 플러그인인가
 
-스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 19개·에이전트 4개·훅 10개를 붙인다.
+스킬·훅·에이전트를 한 플러그인이 나른다. `/plugin install`이 스킬 19개·에이전트 4개·훅 9개를 붙인다.
 
 > Codex 지원은 2026-09-02에 이 레포에서 **분리했다.** 두 런타임을 한 레포에서 호환시키느라 매니페스트·훅 wiring·에이전트 형식·검증 스크립트가 전부 두 벌이 됐고, 한쪽만 고쳐 조용히 갈라지는 사고가 반복됐다(마지막이 `kick-off`의 `disable-model-invocation` — Claude에서 필수인 값을 Codex validator가 거부해 검증이 상시 실패). Codex 하네스는 별도 플러그인 레포에서 관리한다.
 
@@ -27,8 +27,8 @@ claude-harness/
 ├── .claude-plugin/marketplace.json   ← 이 레포를 마켓플레이스로 등록
 ├── woobin-harness/                   ← 플러그인 본체
 │   ├── .claude-plugin/plugin.json
-│   ├── hooks/claude-hooks.json       훅 wiring 10개
-│   ├── hooks/*.sh                    10개
+│   ├── hooks/claude-hooks.json       훅 wiring 9개
+│   ├── hooks/*.sh                    9개
 │   ├── lib/*.sh                      훅이 부르는 헬퍼 — wire 안 되므로 훅 개수에 안 센다
 │   ├── agents/*.md                   4개
 │   ├── skills/<name>/SKILL.md        19개
@@ -79,7 +79,7 @@ DRY_RUN=1 ./bootstrap.sh
 | `plugins/` (1.0G) | `settings.json`의 `enabledPlugins`·`extraKnownMarketplaces`가 재설치를 유도한다 |
 | `projects/` (557M) | 세션 트랜스크립트 |
 | `.credentials.json` · `.claude.json` | **절대 커밋 금지** |
-| `hooks/`의 wire 안 된 잔재 | `rtk-rewrite.sh`, `.bak-260804` 2개, 설계 메모 `.md` 2개.<br>`close-session-cleanup.sh`는 2026-08-12에 **잔재가 아니었음이 드러나** 플러그인으로 옮겼다 — `idle-return-guard.sh`가 절대경로로 부르고 있었고, 레포에 없어서 원본 머신 밖에서는 훅이 조용히 아무 일도 안 했다 |
+| `hooks/`의 wire 안 된 잔재 | `rtk-rewrite.sh`, `.bak-260804` 2개, 설계 메모 `.md` 2개.<br>`close-session-cleanup.sh`는 2026-08-12에 **잔재가 아니었음이 드러나** 플러그인으로 옮겼다 — `idle-return-guard.sh`가 절대경로로 부르고 있었고, 레포에 없어서 원본 머신 밖에서는 훅이 조용히 아무 일도 안 했다. 2026-10-14부터는 `close-session-guard.sh`가 부른다 |
 | `skills/_backup-mattpocock-260804` | 백업 사본 |
 | 외부 훅 3종 | `claude-buddy`(별도 레포) · `orca`(설치물) · `gptaku-update-check.cjs`(플러그인 부산물). `bootstrap.sh`가 체크리스트로 안내한다 |
 

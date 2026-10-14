@@ -5,9 +5,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-return-guard.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/close-session-guard.sh",
             "timeout": 10,
-            "statusMessage": "자리비움 복귀 점검 중..."
+            "statusMessage": "/close-session 점검 중..."
           }
         ]
       },
@@ -60,17 +60,6 @@
       }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-handoff-stop.sh",
-            "timeout": 3900,
-            "statusMessage": "자리비움 감시 대기 중...",
-            "asyncRewake": true
-          }
-        ]
-      },
       {
         "hooks": [
           {

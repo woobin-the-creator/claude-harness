@@ -9,15 +9,13 @@
 # 이 하네스에서 ✅ 로 재측정된 개입(#1 핸드오프, #2 위임)은 전부 경고가 아니라 **대체 경로를
 # 만들어 준** 형태였다. 그래서 여기서도 알리는 대신 문서를 만들게 한다.
 #
-# idle-handoff-stop.sh 와의 차이 — 복제할 때 이 세 줄을 같이 옮기지 말 것:
-#   1. asyncRewake·폴링 루프 없음. 판정 대상이 "지금 끝난 턴의 크기"라 대기할 이유가 없다.
-#   2. 재주입 방지가 mtime 신선도가 아니라 세션 1회 마커 + stop_hook_active 다.
-#      mtime 방식은 "유휴 국면"이라는 **반복되는** 상태를 판정하려고 도입한 것이고(#1의 무한루프 사고),
-#      여기서는 세션당 한 번뿐이라 마커가 더 단순하고 루프 위험이 없다.
-#   3. 트리거가 시간이 아니라 크기다. 그래서 자리비움과 무관하게 발화한다.
+# 이 훅은 원래 idle-handoff-stop.sh(R6, 2026-10-14 삭제)를 본떠 만들었다. 그 훅과 달리
+# asyncRewake·폴링 루프가 없고(판정 대상이 "지금 끝난 턴의 크기"라 대기할 이유가 없다),
+# 재주입 방지는 세션 1회 마커 + stop_hook_active 다. 트리거가 시간이 아니라 크기라
+# 내장 idle compaction(200k+ · 54분 idle)과 판정 축이 다르다.
 #
 # 문서 계약은 여기 쓰지 않고 handoff 스킬(woobin-harness/skills/handoff/SKILL.md)이 소유한다.
-# 훅 2개가 같은 문장을 각자 갖고 있으면 한쪽만 고쳐져 갈라진다 — #16 이 그 사고였다.
+# 훅과 스킬이 같은 문장을 각자 갖고 있으면 한쪽만 고쳐져 갈라진다 — #16 이 그 사고였다.
 
 set -u
 
@@ -36,9 +34,6 @@ sid=$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null)
 tp=$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)
 [ -n "$tp" ] || exit 0
 [ -f "$tp" ] || exit 0
-
-# /close-session 으로 닫힌 세션은 건드리지 않는다(마커 소유는 idle-return-guard.sh).
-[ -f "$HOME/.claude/idle-handoff/$sid.handoff-done" ] && exit 0
 
 # 세션 1회.
 marker_dir="${TMPDIR:-/tmp}/claude-ctx-handoff"

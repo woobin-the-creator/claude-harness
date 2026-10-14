@@ -63,7 +63,7 @@ claude plugin update woobin-harness@woobin-harness   # ⚠️ 짧은 이름은 "
 
 ```bash
 claude plugin validate ./woobin-harness   # YAML frontmatter 파싱 실패는 이 명령만 잡는다
-./scripts/test-hooks.sh                   # 훅 10개 결정론적 분기 fixture
+./scripts/test-hooks.sh                   # 훅 9개 결정론적 분기 fixture
 ./scripts/test-skills.sh                  # 스킬 자산 구문·참조·로컬 실행 fixture
 ./scripts/test-agents.sh                  # 에이전트 이름 ↔ frontmatter model·effort 일치
 DRY_RUN=1 ./bootstrap.sh                  # 새 머신 설치가 무엇을 건드리는지

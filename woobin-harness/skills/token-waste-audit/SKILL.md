@@ -37,7 +37,7 @@ python3 {skill_dir}/scripts/extract_excerpts.py --scan /tmp/token_waste_scan.jso
 
 - **모델 과대/과소 선택(w2/w3 후보)**: scan JSON의 후보 목록에서 첫 발화·턴 수·출력량을 보고 실제로 부적합했는지 판별. 후보가 자동으로 낭비인 것은 아니다.
 - **캐시 무효화 이벤트**: 같은 타임스탬프에 몰린 재캐싱은 병렬 요청의 정상 동작일 수 있다. 과대집계 가능성을 보고서에 명시.
-- **설치된 자동화 감지**: `~/.claude/settings.json`의 hooks·설정에서 낭비 대응 장치(idle-handoff, rtk-rewrite 등)를 확인한다. 해당 카테고리는 전회 audit 수치와 비교해 효과를 재측정한다.
+- **설치된 자동화 감지**: `~/.claude/settings.json`의 hooks·설정에서 낭비 대응 장치(ctx-handoff, rtk-rewrite, 내장 `idleCompaction` 등)를 확인한다. 해당 카테고리는 전회 audit 수치와 비교해 효과를 재측정한다.
 
 ### 3. 보고서 작성
 
