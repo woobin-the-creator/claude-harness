@@ -1,7 +1,7 @@
 #!/bin/bash
 # /close-session 워크트리·브랜치 정리 (bash 3.2 호환)
 #
-# 호출자: idle-return-guard.sh(UserPromptSubmit 훅, 정상 경로)와
+# 호출자: hooks/close-session-guard.sh(UserPromptSubmit 훅, 정상 경로)와
 #         skills/close-session/SKILL.md(훅이 안 걸렸을 때의 fallback).
 # 둘이 같은 규칙을 쓰게 하려고 스크립트 하나로 뺐다 — 훅 쪽에만 넣으면 fallback이,
 # 스킬 쪽에만 넣으면 정상 경로가 정리를 건너뛴다.

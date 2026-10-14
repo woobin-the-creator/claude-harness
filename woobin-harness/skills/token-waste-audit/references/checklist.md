@@ -5,9 +5,9 @@
 
 ## 해결책 사다리 (하네스 우선, 습관은 최후)
 
-해결책은 아래 순서로 검토한다. **습관 처방(3단계)은 1·2단계가 불가능할 때만** 낸다 — 습관 처방은 다음 audit에서 같은 항목이 그대로 재발하는 경향이 있다(2026-07 실측: "1시간 이상 비울 세션은 마무리하라" 처방이 2주간 15건 재발 → idle-handoff 훅 설치로 경로 자체를 종결).
+해결책은 아래 순서로 검토한다. **습관 처방(3단계)은 1·2단계가 불가능할 때만** 낸다 — 습관 처방은 다음 audit에서 같은 항목이 그대로 재발하는 경향이 있다(2026-07 실측: "1시간 이상 비울 세션은 마무리하라" 처방이 2주간 15건 재발 → idle-handoff 훅 설치로 경로 자체를 종결. 2026-10-14에 그 훅은 Claude Code 내장 idle compaction으로 대체됐다).
 
-1. **기존 설정·플래그로 해결**: settings.json(`autoCompactWindow`, `skillOverrides`, `skillListingBudgetFraction`, `model`, permissions deny/ask), CLI(`--idle-timeout`, `claude -p` 원샷). 이미 있는 스위치가 최선 — 유지보수 비용 0.
+1. **기존 설정·플래그로 해결**: settings.json(`autoCompactWindow`, `idleCompaction`, `skillOverrides`, `skillListingBudgetFraction`, `model`, permissions deny/ask), CLI(`--idle-timeout`, `claude -p` 원샷). 이미 있는 스위치가 최선 — 유지보수 비용 0.
 2. **하네스 구현**: 문제 유형에 따라 어울리는 수단이 다르다. 훅만 떠올리지 말고 전체 도구함에서 고른다.
 
    | 수단 | 어울리는 문제 유형 | 예 |
@@ -21,7 +21,7 @@
 
 3. **습관 변경**: 위 둘로 안 되는 것만. 처방문에 "왜 자동화가 불가한지" 한 줄을 반드시 붙인다.
 
-**설치된 자동화 감지**: 보고서 작성 전 `~/.claude/settings.json`의 hooks·설정에서 낭비 대응 장치(idle-handoff, rtk-rewrite 등)를 확인하고, 해당 카테고리 수치를 전회 audit과 비교해 효과를 재측정한다(전회 기록이 없으면 이번 수치를 baseline으로 명시).
+**설치된 자동화 감지**: 보고서 작성 전 `~/.claude/settings.json`의 hooks·설정에서 낭비 대응 장치(ctx-handoff, rtk-rewrite, 내장 `idleCompaction` 등)를 확인하고, 해당 카테고리 수치를 전회 audit과 비교해 효과를 재측정한다(전회 기록이 없으면 이번 수치를 baseline으로 명시).
 
 | # | 패턴 | scan JSON 키 | 해결책 (사다리 순) |
 |---|---|---|---|

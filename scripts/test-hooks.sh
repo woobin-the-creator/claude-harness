@@ -33,32 +33,15 @@ grep -q '컨텍스트 자동 핸드오프' "$ctx_err" || fail "ctx-handoff-stop:
 [ -f "$TEST_TMP/claude-ctx-handoff/ctx-session" ] || fail "ctx-handoff-stop: marker missing"
 pass "ctx-handoff-stop trigger"
 
-# idle-handoff-stop: a one-second idle window reaches the async wakeup branch.
-idle_transcript="$TEST_ROOT/idle.jsonl"
-printf '%s\n' '{}' >"$idle_transcript"
-idle_err="$TEST_ROOT/idle.err"
-set +e
-printf '%s' "{\"session_id\":\"idle-session\",\"transcript_path\":\"$idle_transcript\"}" \
-  | HOME="$TEST_HOME" IDLE_HANDOFF_DELAY=1 IDLE_HANDOFF_POLL=1 IDLE_HANDOFF_MAXGAP=999999 \
-      "$HOOKS/idle-handoff-stop.sh" >/dev/null 2>"$idle_err"
-idle_rc=$?
-set -e
-[ "$idle_rc" -eq 2 ] || fail "idle-handoff-stop: expected exit 2, got $idle_rc"
-grep -q '자리비움 자동 핸드오프' "$idle_err" || fail "idle-handoff-stop: missing wakeup reason"
-[ -f "$TEST_HOME/.claude/idle-handoff/idle-session.last-inject" ] || fail "idle-handoff-stop: inject marker missing"
-pass "idle-handoff-stop async trigger"
-
-# idle-return-guard: first stale prompt blocks, immediate retry passes, close marks done.
-idle_input="{\"session_id\":\"return-session\",\"transcript_path\":\"$idle_transcript\",\"cwd\":\"$TEST_ROOT\",\"prompt\":\"continue\"}"
-out=$(printf '%s' "$idle_input" | HOME="$TEST_HOME" IDLE_GUARD_THRESHOLD=-1 "$HOOKS/idle-return-guard.sh")
-assert_json "$out" '.decision == "block" and (.reason | contains("프롬프트 캐시"))' "idle-return-guard: stale prompt did not block"
-out=$(printf '%s' "$idle_input" | HOME="$TEST_HOME" IDLE_GUARD_THRESHOLD=-1 "$HOOKS/idle-return-guard.sh")
-assert_silent "$out" "idle-return-guard immediate retry"
-out=$(printf '%s' '{"session_id":"return-session","cwd":"/tmp","prompt":"/close-session"}' \
-  | HOME="$TEST_HOME" "$HOOKS/idle-return-guard.sh")
-assert_json "$out" '.decision == "block" and (.reason | contains("세션을 닫았습니다"))' "idle-return-guard: close-session did not block"
-[ -f "$TEST_HOME/.claude/idle-handoff/return-session.handoff-done" ] || fail "idle-return-guard: close marker missing"
-pass "idle-return-guard stale/retry/close branches"
+# close-session-guard: ordinary prompts pass, /close-session blocks with the close message.
+# DRY_RUN keeps the cleanup script from quitting apps or killing browsers on the test machine.
+out=$(printf '%s' '{"session_id":"close-session","cwd":"/tmp","prompt":"continue"}' \
+  | HOME="$TEST_HOME" "$HOOKS/close-session-guard.sh")
+assert_silent "$out" "close-session-guard ordinary prompt"
+out=$(printf '%s' '{"session_id":"close-session","cwd":"/tmp","prompt":"/close-session"}' \
+  | HOME="$TEST_HOME" CLOSE_SESSION_DRY_RUN=1 CLOSE_SESSION_NO_FETCH=1 "$HOOKS/close-session-guard.sh")
+assert_json "$out" '.decision == "block" and (.reason | contains("세션을 닫았습니다"))' "close-session-guard: close-session did not block"
+pass "close-session-guard pass/close branches"
 
 # sdd-orchestrator-edit-guard: SDD ledger causes a one-time deny for main-loop source edits.
 edit_root="$TEST_ROOT/edit-project"
@@ -222,4 +205,4 @@ out=$(printf '%s' '{"session_id":"kickoff-c","prompt":"이제 구현 시작해�
 assert_silent "$out" "kickoff-guard: inactive state must be silent"
 pass "kickoff-guard keyword/drift/once"
 
-printf 'All 10 shared hook scripts passed deterministic fixtures.\n'
+printf 'All 9 shared hook scripts passed deterministic fixtures.\n'
