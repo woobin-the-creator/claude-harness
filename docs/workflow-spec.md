@@ -76,7 +76,7 @@ R4·R5·R13이 **한꺼번에** 불필요해진다(2026-10-01 전에는 R1·R2·
    │        docs/woobin_plan/specs/YYYY-MM-DD-<slug>-design.md   (세 단계를 꿰는 유일한 산출물)
    │        └ .claude/kickoff.local.md 가 있으면 stage: impl
    │     woobin-harness:spec-reviewer (opus·medium) 1회 → findings 반영      ← 리뷰 ①
-   │     ── 세션 경계: 인터뷰 세션이 구현 세션을 연다(Paseo 또는 claude -p) ── 구현 세션은 스펙 파일 경로만 받는다
+   │     ── 세션 경계: 인터뷰 세션이 구현 세션을 연다(Paseo 또는 claude --bg) ── 구현 세션은 스펙 파일 경로만 받는다
    │     한 세션 구현
    │        첫 턴: 브랜치 + 스펙 파일 커밋 + push + draft PR (회복 진입점)
    │        논리 단위 커밋
@@ -848,7 +848,7 @@ Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hi
 반복해서 데인 "한쪽만 고쳐 조용히 갈라지는" 형태다(R22, HARNESS-LOG #28).
 
 **규칙** 구현할 작업의 기본 경로는
-`interview → 스펙 파일 → spec-reviewer → 구현 세션을 연다(인터뷰 세션이 Paseo/claude -p로) → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer → e2e 증명 → ready`다.
+`interview → 스펙 파일 → spec-reviewer → 구현 세션을 연다(인터뷰 세션이 Paseo/claude --bg로) → 한 세션 구현(첫 턴 draft PR 회복점) → code-reviewer → e2e 증명 → ready`다.
 - **스펙 파일이 세 단계를 꿰는 유일한 산출물이다.** 구현할 작업이면 조건 없이 **항상**
   `docs/woobin_plan/specs/YYYY-MM-DD-<slug>-design.md`로 저장한다(예전의 "요청·오래 삶·세션 인계" 3조건은 버렸다).
 - **리뷰는 2회다** — 구현 전 스펙 문서 리뷰 1회, 구현 후 코드 리뷰 1사이클. 둘 다 **전용 에이전트 프로필**이고
@@ -866,7 +866,7 @@ Von Restorff를 막고, `implementation-contracts.md`의 measured overflow는 Hi
 각각 `code-reviewer`·`spec-reviewer`로 개명·재작성했다. spec-reviewer 체크리스트는
 `woobin-harness/skills/interview/spec-reviewer-prompt.md`가 소유한다. `scripts/test-agents.sh`가 두 리뷰어의
 존재 · model=opus · effort=medium · 편집 툴 없음을 기계로 센다.
-- 세션을 여는 수단과 폴백(Paseo → `claude -p`), 그리고 '지켜볼게' 예외는 interview SKILL.md ③이 소유한다. 여기서 복제하지 않는다.
+- 세션을 여는 수단과 폴백(Paseo → `claude --bg`), 그리고 '지켜볼게' 예외는 interview SKILL.md ③이 소유한다. 여기서 복제하지 않는다.
 
 **근거** 이슈 #41 A/B 실측 2회. 서사는 `home/HARNESS-LOG.md` #37.
 - **1차(2026-09-28, Godot M1)** A 자유 구현 **$54 · 2h** vs B 계획 경로 **$95~100 · 4h20m**. 품질은 코드 구조를
@@ -887,7 +887,7 @@ spec-reviewer를 티어 1종으로 둔 건 #39의 medium/xhigh 티어링 근거�
 ② 리뷰가 지시문이라 **건너뛸 수 있다.** 훅 강제는 일부러 안 했다 — 플랜 훅을 `specs/` 경로로 재배선하는 안은
 훅 하드코딩 사본이 갈라진 사고 이력(#28) 때문에 기각했다. ③ code-reviewer effort를 medium으로 올린 것이
 비용 중립이라는 건 **미측정 가정**이다(§8 O20). ④ 스펙 파일을 항상 쓰므로 작은 기능에도 파일 하나가 는다.
-⑤ 자동으로 연 구현 세션은 사람이 바로 지켜보지 않는다 — 막히면 알림·Monitor로만 드러난다. 자동 스폰과 `/clear` 직접
+⑤ 자동으로 연 구현 세션은 사람이 바로 지켜보지 않는다 — 막히면 Paseo 알림이나 `claude agents` 목록으로만 드러난다. 자동 스폰과 `/clear` 직접
 구현의 비용·품질은 비교하지 않았다(§8 O23).
 
 **기각** (세션 경계의 주체, 2026-10-01)
@@ -900,7 +900,7 @@ spec-reviewer를 티어 1종으로 둔 건 #39의 medium/xhigh 티어링 근거�
   git 이력에서 복원하는 것을 검토한다
 - **(b)** 3번째 A/B에서 **계획 경로가 비용·품질 모두 우세**하다 → R23을 폐기한다
 - **(c)** spec-reviewer findings가 **3회 연속 0건**이다 → 스펙 리뷰 단계 제거를 검토한다
-- **(d)** 자동으로 연 구현 세션이 Paseo/`claude -p` 양쪽 모두에서 2회 연속 사람 개입 없이 끝나지 못한다 → `/clear` 수동 경계로 복귀
+- **(d)** 자동으로 연 구현 세션이 Paseo/`claude --bg` 양쪽 모두에서 2회 연속 사람 개입 없이 끝나지 못한다 → `/clear` 수동 경계로 복귀
 - **(e)** 서브에이전트가 Agent 툴·훅을 갖게 된다 → (B) 재검토
 
 ---
