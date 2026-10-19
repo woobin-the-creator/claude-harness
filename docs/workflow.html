@@ -183,7 +183,7 @@
   <li class="boundary">
     <div class="boundary-card">
       <h3>◆ 필수 세션 경계</h3>
-      <p>스펙 리뷰까지 끝나면 <b>인터뷰 세션이 구현 세션을 연다</b> — Paseo 워크트리 에이전트(claude/opus), 없으면 <code>claude --bg</code>(파일을 고치기 직전에 스스로 워크트리로 옮겨 간다). 새 세션에는 <b>스펙 파일 절대 경로만</b> 넘긴다. 설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구되는 걸 끊는 자리다. 훅은 없다 — 사람이 <code>/clear</code>를 칠 필요도 없다. 인터뷰 세션은 세션·워크트리·브랜치를 한 줄로 알리고 역할을 끝낸다. "지켜볼게"라고 하면 예외로 <code>/clear</code> 후 직접 구현한다.</p>
+      <p>스펙 리뷰까지 끝나면 <b>인터뷰 세션이 구현 세션을 연다</b> — Paseo 워크트리 에이전트(claude/opus), 없으면 인터뷰 세션이 최신 <code>origin/main</code>에서 워크트리를 직접 만들고 그 안에서 <code>claude --bg</code>. 커밋 전인 스펙 파일은 워크트리 안으로 <b>옮긴다</b>(복사하면 원본이 남아 머지 뒤 pull이 막힌다). 새 세션에는 <b>스펙 파일 경로만</b> 넘긴다. 설계 대화가 구현 구간의 매 요청에 캐시 리드로 재청구되는 걸 끊는 자리다. 훅은 없다 — 사람이 <code>/clear</code>를 칠 필요도 없다. 인터뷰 세션은 세션·워크트리·브랜치를 한 줄로 알리고 역할을 끝낸다. "지켜볼게"라고 하면 예외로 <code>/clear</code> 후 직접 구현한다.</p>
 <pre><code><span class="cmt"># 새 세션이 받는 첫 프롬프트 (한 줄)</span>
 docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 기준으로 구현해줘. 절차는 interview 스킬의 "구현 세션으로 넘기기" ③ 절차를 따른다.</code></pre>
     </div>
@@ -192,7 +192,7 @@ docs/woobin_plan/specs/&lt;date&gt;-&lt;slug&gt;-design.md 기준으로 구현�
   <li class="step">
     <div class="step-card">
       <h3>구현 시작 = 브랜치 + draft PR <span class="tag">회복 진입점</span></h3>
-      <p>첫 턴에 브랜치를 만들고 <b>스펙 파일을 커밋</b>해 push한 뒤 <b>draft PR</b>을 연다(제목·본문은 <code>explain</code>으로 "겪던 문제"부터 쓴다). 그 뒤로는 <b>논리 단위로 커밋</b>한다. draft는 "구현 중"이라는 뜻이고 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다). 절차 정본은 <code>interview</code> 스킬의 "구현 세션으로 넘기기" 절이다.</p>
+      <p>첫 턴에 인터뷰 세션이 옮겨 둔 <b>스펙 파일을 커밋</b>해 push한 뒤 <b>draft PR</b>을 연다(제목·본문은 <code>explain</code>으로 "겪던 문제"부터 쓴다). 그 뒤로는 <b>논리 단위로 커밋</b>한다. draft는 "구현 중"이라는 뜻이고 라벨은 쓰지 않는다(중복 상태를 손으로 맞추게 된다). 절차 정본은 <code>interview</code> 스킬의 "구현 세션으로 넘기기" 절이다.</p>
       <p class="why">겨누는 건 컨텍스트가 아니라 <b>사용량 하드 컷</b>이다. 그 순간엔 모델이 도구를 못 쓰니 방어가 미리 배치돼 있어야 한다. 하드 컷은 파일을 지우지 않는다 — 잃는 건 <b>"어디까지 했는지"라는 기록</b>이라 커밋은 보존이 아니라 <b>라벨링</b>이다. 핸드오프 문서는 세션 id로 저장돼 컷 뒤엔 못 찾지만, PR은 <code>gh pr list --state open --draft</code>로 찾힌다.</p>
     </div>
   </li>
