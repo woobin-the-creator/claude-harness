@@ -221,19 +221,19 @@ Acceptance criteria에는 사용자가 말하지 않아도 두 항목이 **기�
 여는 수단은 둘이고 순서대로 시도한다:
 
 1. **Paseo** (`create_workspace`·`create_agent` MCP 툴이 있을 때) — `paseo-handoff` 스킬의 절차를 따른다. 워크트리 격리(`isolation: "worktree"`, `mode: "branch-off"`, `baseBranch`는 기본 브랜치), provider는 `claude/opus`, effort는 `medium`, `initialPrompt`는 아래 한 줄, `notifyOnFinish: true`. 기다리거나 폴링하지 않는다 — 끝나면 알림이 온다.
-2. **`claude -p`** (Paseo가 없을 때) — 기본 브랜치 기준 워크트리를 만들고 그 안에서 `claude -p "<아래 한 줄>" --model opus --effort medium --permission-mode auto`를 **백그라운드**로 띄운다. 출력 파일을 Monitor로 걸어 draft PR URL과 종료만 받는다. `opus`는 최신 Opus 별칭이라 버전이 바뀌어도 고치지 않는다. `acceptEdits`는 쓰지 않는다 — 2026-10-13 pholex에서 node·npm 명령이 승인 대기로 막혀 무인 세션이 첫 턴에 멈췄다.
+2. **`claude --bg`** (Paseo가 없을 때) — 먼저 현재 브랜치가 기본 브랜치인지 확인하고, 아니면 기본 브랜치로 옮긴다. `--bg` 세션은 파일을 고치기 직전에 **지금 체크아웃된 HEAD**에서 `.claude/worktrees/<이름>`(브랜치 `worktree-<이름>`)을 스스로 만든다 — 직접 워크트리를 만들지 않는다. 레포 루트에서 `claude --bg "<아래 한 줄>" --model opus --effort medium --permission-mode auto`를 띄우고, 출력된 id를 사용자에게 알린다. Monitor·폴링은 걸지 않는다 — 진행은 사용자가 `claude agents`(목록)·`claude attach <id>`(들어가 보기)로 본다. 스크립트로 상태를 읽을 땐 `claude agents --json --all`의 `state`(`working`·`done`·`failed`)이고, `--all`이 없으면 끝난 세션이 빠진다. 정리는 머지 뒤 `claude rm <id>` — 커밋 안 된 변경이 있으면 거부한다. 그 워크트리는 세션이 살아 있는 동안 `locked`라 `close-session`도 건드리지 않는다. `claude -p`를 쓰지 않는 이유: 한 턴짜리라 사용자에게 물을 일이 생기면 그대로 끝난다. `--bg`는 실제 대화라 기다렸다가 attach로 답을 받는다. `opus`는 최신 Opus 별칭이라 버전이 바뀌어도 고치지 않는다. `acceptEdits`는 쓰지 않는다 — 2026-10-13 pholex에서 node·npm 명령이 승인 대기로 막혀 무인 세션이 첫 턴에 멈췄다.
 
-어느 쪽이든 넘기는 프롬프트는 **스펙 파일 경로 하나**다:
+어느 쪽이든 넘기는 프롬프트는 **스펙 파일 절대 경로 하나**다. 스펙은 아직 커밋 전이라 새 워크트리에는 없다 — 상대 경로를 넘기면 워크트리로 옮겨 간 세션이 못 찾는다:
 
 ```
-docs/woobin_plan/specs/<date>-<slug>-design.md 기준으로 구현해줘. 절차는 interview 스킬의 "구현 세션으로 넘기기" ③ 절차를 따른다.
+<레포 절대 경로>/docs/woobin_plan/specs/<date>-<slug>-design.md 기준으로 구현해줘. 절차는 interview 스킬의 "구현 세션으로 넘기기" ③ 절차를 따른다.
 ```
 
 연 뒤 인터뷰 세션은 사용자에게 세션·워크트리·브랜치 이름을 한 줄로 알리고 **역할을 끝낸다.** 구현 결과를 자기 컨텍스트에서 다시 처리하지 않는다(`home/HARNESS-LOG.md` #7 — 결과를 오케스트레이터가 직접 만지면 요청 수 3배). 사용자가 "지켜볼게"라고 하면 예외다 — 그때는 `/clear` 후 직접 구현으로 안내한다.
 
 구현 세션의 절차는 짧다:
 
-1. **첫 턴**: 브랜치를 만들고 스펙 파일을 첫 커밋으로 push한 뒤 **draft PR**을 연다. 이게 하드 컷·컨텍스트 소진 뒤의 회복 진입점이다. 제목·본문은 `explain` 스킬을 실제로 호출해 "겪던 문제 → 어떻게 풀었나" 서사로 쓴다. 본문은 스펙 파일 포인터 + 자동 확정 결정만.
+1. **첫 턴**: 넘겨받은 스펙 파일을 워크트리의 같은 상대 경로로 복사하고, 첫 커밋으로 push한 뒤 **draft PR**을 연다. 이게 하드 컷·컨텍스트 소진 뒤의 회복 진입점이다. 제목·본문은 `explain` 스킬을 실제로 호출해 "겪던 문제 → 어떻게 풀었나" 서사로 쓴다. 본문은 스펙 파일 포인터 + 자동 확정 결정만.
 2. 논리 단위마다 커밋한다. 레이어·구현자 분리는 없다 — 한 세션이 끝까지 만든다.
 3. 코드 조사는 `Explore`에, 화면 확인은 `screenshot-verifier`에 위임한다(R4·R5).
 4. 다 만들면 `woobin-harness:code-reviewer`에 **스펙 경로 + `origin/main..HEAD`** 를 넘긴다. diff를 붙여넣지 않는다. findings를 반영하고 PR 본문 `### 리뷰` 절에 건수와 처리 결과를 적는다.
